@@ -67,10 +67,8 @@ func Test_New_1_NoError(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i, err := api_instance.New(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	i := new(api_instance.APIInstance)
+	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -129,10 +127,8 @@ func Test_New_2_NilFoodcriticFailure(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i, err := api_instance.New(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	i := new(api_instance.APIInstance)
+	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -147,10 +143,8 @@ func Test_New_3_AverageRating(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i, err := api_instance.New(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	i := new(api_instance.APIInstance)
+	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -164,8 +158,9 @@ func Test_New_4_ConnError(t *testing.T) {
 	ts := start_http()
 	ts.Close()
 
-	i, err := api_instance.New(ts.URL)
-	_, err = New(i, "chef-dk")
+	i := new(api_instance.APIInstance)
+	i.Endpoint = ts.URL + "/api/v1"
+	_, err := New(i, "chef-dk")
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
@@ -175,18 +170,17 @@ func Test_New_5_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	i, err := api_instance.New(ts.URL)
-	_, err = New(i, "chef-dk")
+	i := new(api_instance.APIInstance)
+	i.Endpoint = ts.URL + "/api/v1"
+	_, err := New(i, "chef-dk")
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
 func Test_New_6_RealData(t *testing.T) {
-	i, err := api_instance.New("https://supermarket.getchef.com")
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	i := new(api_instance.APIInstance)
+	i.Endpoint = "https://supermarket.getchef.com/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
