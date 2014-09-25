@@ -169,7 +169,8 @@ func Test_New_4_ConnError(t *testing.T) {
 	ts := start_http()
 	ts.Close()
 
-	_, err := api_instance.New(ts.URL)
+	i, err := api_instance.New(ts.URL)
+	_, err = New(i, "chef-dk")
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
