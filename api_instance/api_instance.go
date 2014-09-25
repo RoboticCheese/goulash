@@ -20,7 +20,7 @@ Package goulash implements an API client for the Chef Supermarket.
 This file implements the goulash struct, which handles the main, overarching
 information about the Supermarket instace to which you're connecting
 */
-package goulash
+package api_instance
 
 import (
 	"errors"
@@ -29,16 +29,20 @@ import (
 )
 
 // Goulash implements a data structure for a Supermarket instance.
-type Goulash struct {
+type APIInstance struct {
 	common.Component
+	BaseURL string
+	Version string
 }
 
-// New initializes and returns a new Goulash struct based on a Supermarket
-// URL.
-func New(url string) (g *Goulash, err error) {
-	g = new(Goulash)
-	g.Endpoint = url
-	resp, err := http.Get(g.Endpoint + "/status")
+// New initializes and returns a new API instance based on a Supermarket URL.
+func New(url string) (i *APIInstance, err error) {
+	i = new(APIInstance)
+	i.BaseURL = url
+	// TODO: Make the version configurable somewhere...
+	i.Version = "1"
+	i.Endpoint = i.BaseURL + "/api/v" + i.Version
+	resp, err := http.Get(i.BaseURL + "/status")
 	if err != nil {
 		return
 	}
