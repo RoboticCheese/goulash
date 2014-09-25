@@ -165,7 +165,7 @@ func Test_New_3_AverageRating(t *testing.T) {
 	}
 }
 
-func Test_New_3_ConnError(t *testing.T) {
+func Test_New_4_ConnError(t *testing.T) {
 	ts := start_http()
 	ts.Close()
 
@@ -175,7 +175,7 @@ func Test_New_3_ConnError(t *testing.T) {
 	}
 }
 
-func Test_New_4_404Error(t *testing.T) {
+func Test_New_5_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
@@ -186,7 +186,7 @@ func Test_New_4_404Error(t *testing.T) {
 	}
 }
 
-func Test_New_5_RealData(t *testing.T) {
+func Test_New_6_RealData(t *testing.T) {
 	i, err := api_instance.New("https://supermarket.getchef.com")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
