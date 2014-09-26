@@ -1,5 +1,6 @@
-Chef-DK Cookbook
-================
+Goulash
+=======
+
 [![Build Status](http://img.shields.io/travis/RoboticCheese/goulash.svg)][travis]
 
 [travis]: http://travis-ci.org/RoboticCheese/goulash
