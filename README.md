@@ -43,7 +43,7 @@ That instance can then be used to examine cookbook data:
 
 And that cookbook can be used to examine cookbook version data:
 
-    cv := cookbook_version.new(cb, "0.1.0") // Or your cookbook and version string
+    cv := cookbook_version.New(cb, "0.1.0") // Or your cookbook and version string
     fmt.Print(cv.License)
     fmt.Print(cv.TarballFileSize)
     fmt.Print(cv.Version)
@@ -52,6 +52,15 @@ And that cookbook can be used to examine cookbook version data:
     fmt.Print(cv.File)
     fmt.Print(cv.Dependencies)
     fmt.Print(cv.Dependencies["chef"]) // Or your dependency cookbook name
+
+The instance can also be used to examine the Berkshelf-style `universe`
+endpoint:
+
+    u := universe.New(i)
+    fmt.Print(u["nginx"]["2.7.4"].LocationType)
+    fmt.Print(u["nginx"]["2.7.4"].LocationPath)
+    fmt.Print(u["nginx"]["2.7.4"].DownloadURL)
+    fmt.Print(u["nginx"]["2.7.4"].Dependencies["apt"])
 
 Contributing
 ============
