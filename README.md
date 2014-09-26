@@ -17,11 +17,11 @@ Usage
 
 To do anything, you first need to set up a connection to your API instance:
 
-    i := api_instance.New("https://supermarket.getchef.com") // Or your API server
+    i, err := api_instance.New("https://supermarket.getchef.com") // Or your API server
 
 That instance can then be used to examine cookbook data:
 
-    cb := cookbook.New(i, "nginx") // Or your API instance and cookbook name
+    cb, err := cookbook.New(i, "nginx") // Or your API instance and cookbook name
     fmt.Print(cb.Name)
     fmt.Print(cb.Maintainer)
     fmt.Print(cb.Description)
@@ -44,7 +44,7 @@ That instance can then be used to examine cookbook data:
 
 And that cookbook can be used to examine cookbook version data:
 
-    cv := cookbook_version.New(cb, "0.1.0") // Or your cookbook and version string
+    cv, err := cookbook_version.New(cb, "0.1.0") // Or your cookbook and version string
     fmt.Print(cv.License)
     fmt.Print(cv.TarballFileSize)
     fmt.Print(cv.Version)
@@ -57,7 +57,7 @@ And that cookbook can be used to examine cookbook version data:
 The instance can also be used to examine the Berkshelf-style `universe`
 endpoint:
 
-    u := universe.New(i)
+    u, err := universe.New(i)
     fmt.Print(u["nginx"]["2.7.4"].LocationType)
     fmt.Print(u["nginx"]["2.7.4"].LocationPath)
     fmt.Print(u["nginx"]["2.7.4"].DownloadURL)
