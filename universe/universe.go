@@ -101,6 +101,25 @@ func New(i *api_instance.APIInstance) (u *Universe, err error) {
 	return
 }
 
+// Equals implements an equality test for a Universe.
+func (u1 Universe) Equals(u2 Universe) (res bool, err error) {
+	res = false
+	if u1.Endpoint != u2.Endpoint {
+		return
+	}
+	if len(u1.Cookbooks) != len(u2.Cookbooks) {
+		return
+	}
+	for k, v := range u1.Cookbooks {
+		res, err = v.Equals(u2.Cookbooks[k])
+		if err != nil || res != true {
+			return
+		}
+	}
+	res = true
+	return
+}
+
 // decodeJSON accepts an IO reader and a Universe struct and populates that
 // struct with the JSON data, after doing some extra parsing to account for the
 // variant cookbook name and version number keys.
