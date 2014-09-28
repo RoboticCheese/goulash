@@ -71,6 +71,40 @@ func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
 	return
 }
 
+// Equals implements an equality test for a CookbookVersion.
+func (cv1 CookbookVersion) Equals(cv2 CookbookVersion) (res bool, err error) {
+	res = false
+	for _, i := range [][]string{
+		{cv1.Endpoint, cv2.Endpoint},
+		{cv1.License, cv2.License},
+		{cv1.Version, cv2.Version},
+		{cv1.Cookbook, cv2.Cookbook},
+		{cv1.File, cv2.File},
+	} {
+		if i[0] != i[1] {
+			return
+		}
+	}
+	for _, i := range [][]int{
+		{cv1.TarballFileSize, cv2.TarballFileSize},
+		{cv1.AverageRating, cv2.AverageRating},
+	} {
+		if i[0] != i[1] {
+			return
+		}
+	}
+	if len(cv1.Dependencies) != len(cv2.Dependencies) {
+		return
+	}
+	for k, v := range cv1.Dependencies {
+		if v != cv2.Dependencies[k] {
+			return
+		}
+	}
+	res = true
+	return
+}
+
 // decodeJSON accepts an IO reader and a CookbookVersion struct and populates
 // that struct with the JSON data.
 func decodeJSON(r io.Reader, cv *CookbookVersion) (err error) {

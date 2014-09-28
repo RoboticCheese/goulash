@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var test_data = map[string]string{
+var json_data = map[string]string{
 	"name":               "chef-dk",
 	"maintainer":         "roboticcheese",
 	"description":        "Installs/configures the Chef-DK",
@@ -36,19 +36,19 @@ var test_data = map[string]string{
 }
 
 func jsonified() (res string) {
-	res = `{"name": "` + test_data["name"] + `",` +
-		`"maintainer": "` + test_data["maintainer"] + `",` +
-		`"description": "` + test_data["description"] + `",` +
-		`"category": "` + test_data["category"] + `",` +
-		`"latest_version": "` + test_data["latest_version"] + `",` +
-		`"external_url": "` + test_data["external_url"] + `",` +
-		`"average_rating": ` + test_data["average_rating"] + `,` +
-		`"created_at": "` + test_data["created_at"] + `",` +
-		`"updated_at": "` + test_data["updated_at"] + `",` +
-		`"deprecated": ` + test_data["deprecated"] + `,` +
-		`"foodcritic_failure": ` + test_data["foodcritic_failure"] + `,` +
-		`"versions": ` + test_data["versions"] + `,` +
-		`"metrics": ` + test_data["metrics"] + `}`
+	res = `{"name": "` + json_data["name"] + `",` +
+		`"maintainer": "` + json_data["maintainer"] + `",` +
+		`"description": "` + json_data["description"] + `",` +
+		`"category": "` + json_data["category"] + `",` +
+		`"latest_version": "` + json_data["latest_version"] + `",` +
+		`"external_url": "` + json_data["external_url"] + `",` +
+		`"average_rating": ` + json_data["average_rating"] + `,` +
+		`"created_at": "` + json_data["created_at"] + `",` +
+		`"updated_at": "` + json_data["updated_at"] + `",` +
+		`"deprecated": ` + json_data["deprecated"] + `,` +
+		`"foodcritic_failure": ` + json_data["foodcritic_failure"] + `,` +
+		`"versions": ` + json_data["versions"] + `,` +
+		`"metrics": ` + json_data["metrics"] + `}`
 	return
 }
 
@@ -75,14 +75,14 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 	for k, v := range map[string]string{
 		c.Endpoint:      ts.URL + "/api/v1/cookbooks/chef-dk",
-		c.Name:          test_data["name"],
-		c.Maintainer:    test_data["maintainer"],
-		c.Description:   test_data["description"],
-		c.Category:      test_data["category"],
-		c.LatestVersion: test_data["latest_version"],
-		c.ExternalURL:   test_data["external_url"],
-		c.CreatedAt:     test_data["created_at"],
-		c.UpdatedAt:     test_data["updated_at"],
+		c.Name:          json_data["name"],
+		c.Maintainer:    json_data["maintainer"],
+		c.Description:   json_data["description"],
+		c.Category:      json_data["category"],
+		c.LatestVersion: json_data["latest_version"],
+		c.ExternalURL:   json_data["external_url"],
+		c.CreatedAt:     json_data["created_at"],
+		c.UpdatedAt:     json_data["updated_at"],
 	} {
 		if k != v {
 			t.Fatalf("Expected: %v, got: %v", v, k)
@@ -123,7 +123,7 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_NilFoodcriticFailure(t *testing.T) {
-	test_data["foodcritic_failure"] = "null"
+	json_data["foodcritic_failure"] = "null"
 	ts := start_http()
 	defer ts.Close()
 
@@ -139,7 +139,7 @@ func Test_New_2_NilFoodcriticFailure(t *testing.T) {
 }
 
 func Test_New_3_AverageRating(t *testing.T) {
-	test_data["average_rating"] = "20"
+	json_data["average_rating"] = "20"
 	ts := start_http()
 	defer ts.Close()
 

@@ -2,13 +2,46 @@ package cookbook_version
 
 import (
 	"fmt"
+	"github.com/RoboticCheese/goulash/common"
 	"github.com/RoboticCheese/goulash/cookbook"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-var test_data = map[string]string{
+func cvdata1() (data1 CookbookVersion) {
+	data1 = CookbookVersion{
+		Component:       common.Component{Endpoint: "https://example1.com"},
+		License:         "oss",
+		TarballFileSize: 123,
+		Version:         "1.2.3",
+		AverageRating:   0,
+		Cookbook:        "https://example1.com/cookbook1",
+		File:            "https://example1.com/cookbook1/file",
+		Dependencies: map[string]string{
+			"thing1": ">= 0.0.0",
+		},
+	}
+	return
+}
+
+func cvdata2() (data2 CookbookVersion) {
+	data2 = CookbookVersion{
+		Component:       common.Component{Endpoint: "https://example1.com"},
+		License:         "oss",
+		TarballFileSize: 123,
+		Version:         "1.2.3",
+		AverageRating:   0,
+		Cookbook:        "https://example1.com/cookbook1",
+		File:            "https://example1.com/cookbook1/file",
+		Dependencies: map[string]string{
+			"thing1": ">= 0.0.0",
+		},
+	}
+	return
+}
+
+var json_data = map[string]string{
 	"license":           "Apache v2.0",
 	"tarball_file_size": "5913",
 	"version":           "2.0.0",
@@ -19,13 +52,13 @@ var test_data = map[string]string{
 }
 
 func jsonified() (res string) {
-	res = `{"license": "` + test_data["license"] + `",` +
-		`"tarball_file_size": ` + test_data["tarball_file_size"] + `,` +
-		`"version": "` + test_data["version"] + `",` +
-		`"average_rating": ` + test_data["average_rating"] + `,` +
-		`"cookbook": "` + test_data["cookbook"] + `",` +
-		`"file": "` + test_data["file"] + `",` +
-		`"dependencies": ` + test_data["dependencies"] + `}`
+	res = `{"license": "` + json_data["license"] + `",` +
+		`"tarball_file_size": ` + json_data["tarball_file_size"] + `,` +
+		`"version": "` + json_data["version"] + `",` +
+		`"average_rating": ` + json_data["average_rating"] + `,` +
+		`"cookbook": "` + json_data["cookbook"] + `",` +
+		`"file": "` + json_data["file"] + `",` +
+		`"dependencies": ` + json_data["dependencies"] + `}`
 	return
 }
 
@@ -40,6 +73,105 @@ func start_http() (ts *httptest.Server) {
 	return
 }
 
+func Test_Equals_1_Equal(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_Equals_2_DifferentEndpoints(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	data2.Endpoint = "https://somewhereelse.com"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Equals_3_DifferentLicense(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	data2.License = "closedsource"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Equals_4_DifferentFileSize(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	data2.TarballFileSize = 1
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Equals_5_DifferentDependencies(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	data2.Dependencies["thing2"] = ">= 0.0.0"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no errors, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
 func Test_New_1_NoError(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
@@ -52,10 +184,10 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 	for k, v := range map[string]string{
 		cv.Endpoint: ts.URL + "/api/v1/cookbooks/chef-dk/versions/2.0.0",
-		cv.License:  test_data["license"],
-		cv.Version:  test_data["version"],
-		cv.Cookbook: test_data["cookbook"],
-		cv.File:     test_data["file"],
+		cv.License:  json_data["license"],
+		cv.Version:  json_data["version"],
+		cv.Cookbook: json_data["cookbook"],
+		cv.File:     json_data["file"],
 	} {
 		if k != v {
 			t.Fatalf("Expected: %v, got: %v", v, k)
@@ -76,7 +208,7 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_AverageRating(t *testing.T) {
-	test_data["average_rating"] = "20"
+	json_data["average_rating"] = "20"
 	ts := start_http()
 	defer ts.Close()
 
