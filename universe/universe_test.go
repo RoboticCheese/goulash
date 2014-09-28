@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"github.com/RoboticCheese/goulash/api_instance"
 	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/universe"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func data1() (data1 universe.Universe) {
-	data1 = universe.Universe{
+func udata1() (data1 Universe) {
+	data1 = Universe{
 		Component: common.Component{Endpoint: "https://example1.com"},
-		Cookbooks: map[string]universe.Cookbook{
+		Cookbooks: map[string]Cookbook{
 			"test1": {
-				"0.1.0": universe.CookbookVersion{
+				"0.1.0": CookbookVersion{
 					LocationType: "opscode",
 					LocationPath: "https://example1.com",
 					DownloadURL:  "https://example1.com/1",
@@ -30,12 +29,12 @@ func data1() (data1 universe.Universe) {
 	return
 }
 
-func data2() (data2 universe.Universe) {
-	data2 = universe.Universe{
+func udata2() (data2 Universe) {
+	data2 = Universe{
 		Component: common.Component{Endpoint: "https://example1.com"},
-		Cookbooks: map[string]universe.Cookbook{
+		Cookbooks: map[string]Cookbook{
 			"test1": {
-				"0.1.0": universe.CookbookVersion{
+				"0.1.0": CookbookVersion{
 					LocationType: "opscode",
 					LocationPath: "https://example1.com",
 					DownloadURL:  "https://example1.com/1",
@@ -285,7 +284,7 @@ func Test_New_1_NoError(t *testing.T) {
 
 	i := new(api_instance.APIInstance)
 	i.BaseURL = ts.URL
-	u, err := universe.New(i)
+	u, err := New(i)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -327,7 +326,7 @@ func Test_New_2_ConnError(t *testing.T) {
 
 	i := new(api_instance.APIInstance)
 	i.BaseURL = ts.URL
-	_, err := universe.New(i)
+	_, err := New(i)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
@@ -339,7 +338,7 @@ func Test_New_3_404Error(t *testing.T) {
 
 	i := new(api_instance.APIInstance)
 	i.BaseURL = ts.URL
-	_, err := universe.New(i)
+	_, err := New(i)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
@@ -348,7 +347,7 @@ func Test_New_3_404Error(t *testing.T) {
 func Test_New_4_RealData(t *testing.T) {
 	i := new(api_instance.APIInstance)
 	i.BaseURL = "https://supermarket.getchef.com"
-	u, err := universe.New(i)
+	u, err := New(i)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -365,8 +364,8 @@ func Test_New_4_RealData(t *testing.T) {
 }
 
 func Test_Equals_1_Equal(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+	data1 := udata1()
+	data2 := udata2()
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -384,8 +383,8 @@ func Test_Equals_1_Equal(t *testing.T) {
 }
 
 func Test_Equals_2_DifferentEndpoints(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+	data1 := udata1()
+	data2 := udata2()
 	data2.Endpoint = "otherexample.com"
 	res, err := data1.Equals(data2)
 	if err != nil {
@@ -404,9 +403,9 @@ func Test_Equals_2_DifferentEndpoints(t *testing.T) {
 }
 
 func Test_Equals_2_MoreCookbooks(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2.Cookbooks["test2"] = universe.Cookbook{}
+	data1 := udata1()
+	data2 := udata2()
+	data2.Cookbooks["test2"] = Cookbook{}
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -424,9 +423,9 @@ func Test_Equals_2_MoreCookbooks(t *testing.T) {
 }
 
 func Test_Equals_3_FewerCookbooks(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2.Cookbooks = map[string]universe.Cookbook{}
+	data1 := udata1()
+	data2 := udata2()
+	data2.Cookbooks = map[string]Cookbook{}
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -444,9 +443,9 @@ func Test_Equals_3_FewerCookbooks(t *testing.T) {
 }
 
 func Test_Equals_4_DifferentCookbooks(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2.Cookbooks["test1"]["0.1.0"] = universe.CookbookVersion{
+	data1 := udata1()
+	data2 := udata2()
+	data2.Cookbooks["test1"]["0.1.0"] = CookbookVersion{
 		LocationType: "other",
 		LocationPath: "https://example1.com",
 		DownloadURL:  "https://example1.com/1",

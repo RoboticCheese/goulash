@@ -1,12 +1,11 @@
 package universe
 
 import (
-	"github.com/RoboticCheese/goulash/universe"
 	"testing"
 )
 
-func data1() universe.CookbookVersion {
-	data1 = universe.CookbookVersion{
+func cvdata1() (data1 CookbookVersion) {
+	data1 = CookbookVersion{
 		LocationType: "opscode",
 		LocationPath: "https://example1.com",
 		DownloadURL:  "https://example1.com/dl1",
@@ -17,8 +16,8 @@ func data1() universe.CookbookVersion {
 	return
 }
 
-func data2() universe.CookbookVersion {
-	data2 = universe.CookbookVersion{
+func cvdata2() (data2 CookbookVersion) {
+	data2 = CookbookVersion{
 		LocationType: "opscode",
 		LocationPath: "https://example1.com",
 		DownloadURL:  "https://example1.com/dl1",
@@ -29,9 +28,9 @@ func data2() universe.CookbookVersion {
 	return
 }
 
-func Test_Equals_1_Equal(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_1_Equal(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -48,9 +47,9 @@ func Test_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Equals_2_DifferentLocationType(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_2_DifferentLocationType(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	data2.LocationType = "copsode"
 	res, err := data1.Equals(data2)
 	if err != nil {
@@ -68,9 +67,9 @@ func Test_Equals_2_DifferentLocationType(t *testing.T) {
 	}
 }
 
-func Test_Equals_3_DifferentLocationPath(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_3_DifferentLocationPath(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	data2.LocationPath = "https://example2.com"
 	res, err := data1.Equals(data2)
 	if err != nil {
@@ -88,9 +87,9 @@ func Test_Equals_3_DifferentLocationPath(t *testing.T) {
 	}
 }
 
-func Test_Equals_4_DifferentDownloadURL(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_4_DifferentDownloadURL(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	data2.DownloadURL = "https://example2.com/dl2"
 	res, err := data1.Equals(data2)
 	if err != nil {
@@ -108,9 +107,9 @@ func Test_Equals_4_DifferentDownloadURL(t *testing.T) {
 	}
 }
 
-func Test_Equals_5_DifferentDependenciesKeys(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_5_DifferentDependenciesKeys(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	data2.Dependencies["thing2"] = ">= 0.0.0"
 	res, err := data1.Equals(data2)
 	if err != nil {
@@ -128,9 +127,9 @@ func Test_Equals_5_DifferentDependenciesKeys(t *testing.T) {
 	}
 }
 
-func Test_Equals_6_DifferentDependenciesValues(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CVEquals_6_DifferentDependenciesValues(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
 	data2.Dependencies["thing1"] = "~> 1.0.0"
 	res, err := data1.Equals(data2)
 	if err != nil {

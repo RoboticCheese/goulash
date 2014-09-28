@@ -1,13 +1,12 @@
 package universe
 
 import (
-	"github.com/RoboticCheese/goulash/universe"
 	"testing"
 )
 
-func data1() (data1 universe.Cookbook) {
-	data1 = universe.Cookbook{
-		"0.1.0": universe.CookbookVersion{
+func cdata1() (data1 Cookbook) {
+	data1 = Cookbook{
+		"0.1.0": CookbookVersion{
 			LocationType: "opscode",
 			LocationPath: "https://example1.com",
 			DownloadURL:  "https://example1.com/dl1",
@@ -19,9 +18,9 @@ func data1() (data1 universe.Cookbook) {
 	return
 }
 
-func data2() (data2 universe.Universe) {
-	data2 = universe.Cookbook{
-		"0.1.0": universe.CookbookVersion{
+func cdata2() (data2 Cookbook) {
+	data2 = Cookbook{
+		"0.1.0": CookbookVersion{
 			LocationType: "opscode",
 			LocationPath: "https://example1.com",
 			DownloadURL:  "https://example1.com/dl1",
@@ -33,9 +32,9 @@ func data2() (data2 universe.Universe) {
 	return
 }
 
-func Test_Equals_1_Equal(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
+func Test_CEquals_1_Equal(t *testing.T) {
+	data1 := cdata1()
+	data2 := cdata2()
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -52,10 +51,10 @@ func Test_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Equals_2_MoreVersions(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2["0.2.0"] = universe.CookbookVersion{}
+func Test_CEquals_2_MoreVersions(t *testing.T) {
+	data1 := cdata1()
+	data2 := cdata2()
+	data2["0.2.0"] = CookbookVersion{}
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -72,10 +71,10 @@ func Test_Equals_2_MoreVersions(t *testing.T) {
 	}
 }
 
-func Test_Equals_3_FewerVersions(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2 = universe.Cookbook{}
+func Test_CEquals_3_FewerVersions(t *testing.T) {
+	data1 := cdata1()
+	data2 := cdata2()
+	data2 = Cookbook{}
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -92,10 +91,10 @@ func Test_Equals_3_FewerVersions(t *testing.T) {
 	}
 }
 
-func Test_Equals_4_DifferentVersions(t *testing.T) {
-	data1 := data1()
-	data2 := data2()
-	data2["0.1.0"] = universe.CookbookVersion{}
+func Test_CEquals_4_DifferentVersions(t *testing.T) {
+	data1 := cdata1()
+	data2 := cdata2()
+	data2["0.1.0"] = CookbookVersion{}
 	res, err := data1.Equals(data2)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
