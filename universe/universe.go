@@ -80,9 +80,6 @@ import (
 	"net/http"
 )
 
-// Cookbook is just a map of version strings to Version structs
-type Cookbook map[string]CookbookVersion
-
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
 type Universe struct {
 	common.Component
