@@ -76,6 +76,167 @@ func start_http() (ts *httptest.Server) {
 	return
 }
 
+//func Test_Diff_1_AddRemoveCookbooks(t *testing.T) {
+//	data1 := new(Universe)
+//	data1.Endpoint = "https://example1.com"
+//	data1.Cookbooks["chef"] = Cookbook{}
+//	data1.Cookbooks["chef"]["0.1.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example1.com",
+//		"https://example1.com/1",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//	data2 := new(Universe)
+//	data2.Endpoint = "https://example2.com"
+//	data2.Cookbooks["puppet"] = Cookbook{}
+//	data2.Cookbooks["puppet"]["0.0.1"] = CookbookVersion{
+//		"opscode",
+//		"https://example2.com",
+//		"https://example2.com/2",
+//		map[string]string{"thing2": ">= 0.0.0"},
+//	}
+//	pos_diff, neg_diff, err := Diff(data1, data2)
+//	if err != nil {
+//		t.Fatalf("Expected no error, got %v", err)
+//	}
+//	for k, v := range map[int]int{
+//		len(pos_diff.Cookbooks):           1,
+//		len(neg_diff.Cookbooks):           1,
+//		len(pos_diff.Cookbooks["puppet"]): 1,
+//		len(neg_diff.Cookbooks["chef"]):   1,
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got: %v", v, k)
+//		}
+//	}
+//	for k, v := range map[string]string{
+//		pos_diff.Endpoint:                                  "https://example2.com",
+//		neg_diff.Endpoint:                                  "",
+//		pos_diff.Cookbooks["puppet"]["0.0.1"].LocationPath: "https://example2.com",
+//		neg_diff.Cookbooks["chef"]["0.1.0"].LocationPath:   "https://example1.com",
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got %v", v, k)
+//		}
+//	}
+//}
+//
+//func Test_Diff_2_AddRemoveVersions(t *testing.T) {
+//	data1 := new(Universe)
+//	data1.Endpoint = "https://example1.com"
+//	data1.Cookbooks["chef"] = Cookbook{}
+//	data1.Cookbooks["chef"]["0.1.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example1.com",
+//		"https://example1.com/1",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//	data1.Cookbooks["chef"]["0.2.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example1.com",
+//		"https://example1.com/1",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//	data1.Cookbooks["puppet"] = Cookbook{}
+//	data1.Cookbooks["puppet"]["0.0.1"] = CookbookVersion{
+//		"opscode",
+//		"https://example2.com",
+//		"https://example2.com/2",
+//		map[string]string{"thing2": ">= 0.0.0"},
+//	}
+//	data2 := new(Universe)
+//	data2.Endpoint = "https://example2.com"
+//	data2.Cookbooks["chef"] = Cookbook{}
+//	data2.Cookbooks["chef"]["0.1.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example1.com",
+//		"https://example1.com/1",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//	data2.Cookbooks["puppet"] = Cookbook{}
+//	data2.Cookbooks["puppet"]["0.0.1"] = CookbookVersion{
+//		"opscode",
+//		"https://example2.com",
+//		"https://example2.com/2",
+//		map[string]string{"thing2": ">= 0.0.0"},
+//	}
+//	data2.Cookbooks["puppet"]["0.1.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example2.com",
+//		"https://example2.com/2",
+//		map[string]string{"thing2": ">= 0.0.0"},
+//	}
+//
+//	pos_diff, neg_diff, err := Diff(data1, data2)
+//	if err != nil {
+//		t.Fatalf("Expected no error, got %v", err)
+//	}
+//	for k, v := range map[int]int{
+//		len(pos_diff.Cookbooks):           1,
+//		len(neg_diff.Cookbooks):           1,
+//		len(pos_diff.Cookbooks["puppet"]): 1,
+//		len(neg_diff.Cookbooks["chef"]):   1,
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got: %v", v, k)
+//		}
+//	}
+//	for k, v := range map[string]string{
+//		pos_diff.Endpoint:                                  "https://example2.com",
+//		neg_diff.Endpoint:                                  "",
+//		pos_diff.Cookbooks["puppet"]["0.1.0"].LocationPath: "https://example2.com",
+//		neg_diff.Cookbooks["chef"]["0.2.0"].LocationPath:   "https://example1.com",
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got %v", v, k)
+//		}
+//	}
+//}
+//
+//func Test_Diff_3_AlterAttributes(t *testing.T) {
+//	data1 := new(Universe)
+//	data1.Endpoint = "https://example1.com"
+//	data1.Cookbooks["chef"] = Cookbook{}
+//	data1.Cookbooks["chef"]["0.1.0"] = CookbookVersion{
+//		"opscode",
+//		"https://example1.com",
+//		"https://example1.com/1",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//	data2 := new(Universe)
+//	data2.Endpoint = "https://example2.com"
+//	data2.Cookbooks["chef"] = Cookbook{}
+//	data2.Cookbooks["chef"]["0.1.0"] = CookbookVersion{
+//		"opscode2",
+//		"https://example2.com",
+//		"https://example2.com/2",
+//		map[string]string{"thing1": ">= 0.0.0"},
+//	}
+//
+//	pos_diff, neg_diff, err := Diff(data1, data2)
+//	if err != nil {
+//		t.Fatalf("Expected no error, got %v", err)
+//	}
+//	for k, v := range map[int]int{
+//		len(pos_diff.Cookbooks):         1,
+//		len(neg_diff.Cookbooks):         0,
+//		len(neg_diff.Cookbooks["chef"]): 1,
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got: %v", v, k)
+//		}
+//	}
+//	for k, v := range map[string]string{
+//		pos_diff.Endpoint:                                "https://example2.com",
+//		neg_diff.Endpoint:                                "",
+//		neg_diff.Cookbooks["chef"]["0.1.0"].LocationPath: "https://example2.com",
+//	} {
+//		if k != v {
+//			t.Fatalf("Expected: %v, got %v", v, k)
+//		}
+//	}
+//}
+
 func Test_New_1_NoError(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()

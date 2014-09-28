@@ -80,15 +80,6 @@ import (
 	"net/http"
 )
 
-// CookbookVersion implements a struct for each cookbook version underneath a
-// Universe.
-type CookbookVersion struct {
-	LocationType string            `json:"location_type"`
-	LocationPath string            `json:"location_path"`
-	DownloadURL  string            `json:"download_url"`
-	Dependencies map[string]string `json:"dependencies"`
-}
-
 // Cookbook is just a map of version strings to Version structs
 type Cookbook map[string]CookbookVersion
 
