@@ -52,12 +52,12 @@ type CookbookVersion struct {
 // Equas implements an equality test for a CookbookVersion struct
 func (cv1 CookbookVersion) Equals(cv2 CookbookVersion) (res bool, err error) {
 	res = false
-	for k, v := range map[string]string{
-		cv1.LocationType: cv2.LocationType,
-		cv1.LocationPath: cv2.LocationPath,
-		cv1.DownloadURL:  cv2.DownloadURL,
+	for _, i := range [][]string{
+		{cv1.LocationType, cv2.LocationType},
+		{cv1.LocationPath, cv2.LocationPath},
+		{cv1.DownloadURL, cv2.DownloadURL},
 	} {
-		if k != v {
+		if i[0] != i[1] {
 			return
 		}
 	}
