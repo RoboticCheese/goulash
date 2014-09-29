@@ -72,6 +72,18 @@ import (
 	"net/http"
 )
 
+// Downloads represents the Downloads section of the metrics data.
+type Downloads struct {
+	Total    int            `json:"total"`
+	Versions map[string]int `json:"versions"`
+}
+
+// Metrics represents the metrics section of the cookbook data.
+type Metrics struct {
+	Downloads Downloads `json:"downloads"`
+	Followers int
+}
+
 // Cookbook implements a data structure for a single Chef cookbook.
 type Cookbook struct {
 	common.Component
@@ -87,13 +99,7 @@ type Cookbook struct {
 	Deprecated        bool     `json:"deprecated"`
 	FoodcriticFailure bool     `json:"foodcritic_failure"` // TODO: How to distinguish nil and false?
 	Versions          []string `json:"versions"`
-	Metrics           struct {
-		Downloads struct {
-			Total    int            `json:"total"`
-			Versions map[string]int `json:"versions"`
-		} `json:"downloads"`
-		Followers int `json:"followers"`
-	} `json:"metrics"`
+	Metrics           Metrics  `json:"metrics"`
 }
 
 // New initializes and returns a new Cookbook struct based on a Supermarket
@@ -109,6 +115,51 @@ func New(i *api_instance.APIInstance, name string) (c *Cookbook, err error) {
 	defer resp.Body.Close()
 
 	err = decodeJSON(resp.Body, c)
+	return
+}
+
+// Equals implements an equality test for a Cookbook.
+func (c1 Cookbook) Equals(c2 Cookbook) (res bool, err error) {
+	res = false
+	for _, i := range [][]string{
+		{c1.Endpoint, c2.Endpoint},
+		{c1.Name, c2.Name},
+		{c1.Maintainer, c2.Maintainer},
+		{c1.Description, c2.Description},
+		{c1.Category, c2.Category},
+		{c1.LatestVersion, c2.LatestVersion},
+		{c1.ExternalURL, c2.ExternalURL},
+		{c1.CreatedAt, c2.CreatedAt},
+		{c1.UpdatedAt, c2.UpdatedAt},
+	} {
+		if i[0] != i[1] {
+			return
+		}
+	}
+	for _, i := range [][]int{
+		{c1.AverageRating, c2.AverageRating},
+		{len(c1.Versions), len(c2.Versions)},
+		{c1.Metrics.Downloads.Total, c2.Metrics.Downloads.Total},
+		{c1.Metrics.Followers, c2.Metrics.Followers},
+	} {
+		if i[0] != i[1] {
+			return
+		}
+	}
+	if c1.Deprecated != c2.Deprecated || c1.FoodcriticFailure != c2.FoodcriticFailure {
+		return
+	}
+	for k, v := range c1.Versions {
+		if v != c2.Versions[k] {
+			return
+		}
+	}
+	for k, v := range c1.Metrics.Downloads.Versions {
+		if v != c2.Metrics.Downloads.Versions[k] {
+			return
+		}
+	}
+	res = true
 	return
 }
 

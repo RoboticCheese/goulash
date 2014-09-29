@@ -3,10 +3,41 @@ package cookbook
 import (
 	"fmt"
 	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/common"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
+
+func cdata() (data Cookbook) {
+	data = Cookbook{
+		Component:         common.Component{Endpoint: "https://example1.com"},
+		Name:              "test1",
+		Maintainer:        "someuser",
+		Description:       "A cookbook",
+		Category:          "Other",
+		LatestVersion:     "1.2.3",
+		ExternalURL:       "https://extexample1.com",
+		AverageRating:     0,
+		CreatedAt:         "2014-09-01T01:01:01.123Z",
+		UpdatedAt:         "2014-09-02T01:01:01.123Z",
+		Deprecated:        false,
+		FoodcriticFailure: false,
+		Versions:          []string{"1.2.3", "1.2.0", "1.1.0"},
+		Metrics: Metrics{
+			Downloads: Downloads{
+				Total: 99,
+				Versions: map[string]int{
+					"1.2.3": 32,
+					"1.2.0": 33,
+					"1.1.0": 34,
+				},
+			},
+			Followers: 123,
+		},
+	}
+	return
+}
 
 var json_data = map[string]string{
 	"name":               "chef-dk",
@@ -61,6 +92,125 @@ func start_http() (ts *httptest.Server) {
 		),
 	)
 	return
+}
+
+func Test_Equals_1_Equal(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != true {
+		t.Fatalf("Expected: true, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != true {
+		t.Fatalf("Expected: true, got: %v", res)
+	}
+}
+
+func Test_Equals_2_DifferentEndpoints(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	data2.Endpoint = "https://somewherelse.com"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+}
+
+func Test_Equals_3_DifferentName(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	data2.Name = "ansible"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+}
+
+func Test_Equals_4_DifferentLatestVersion(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	data2.LatestVersion = "9.9.9"
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+}
+
+func Test_Equals_5_DifferentVersions(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	data2.Versions = append(data2.Versions, "9.9.9")
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+}
+
+func Test_Equals_6_DifferentMetrics(t *testing.T) {
+	data1 := cdata()
+	data2 := cdata()
+	data2.Metrics.Downloads.Versions["1.2.3"] = 999
+	res, err := data1.Equals(data2)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
+	res, err = data2.Equals(data1)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if res != false {
+		t.Fatalf("Expected: false, got: %v", res)
+	}
 }
 
 func Test_New_1_NoError(t *testing.T) {
