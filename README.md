@@ -63,6 +63,14 @@ endpoint:
     fmt.Print(u["nginx"]["2.7.4"].DownloadURL)
     fmt.Print(u["nginx"]["2.7.4"].Dependencies["apt"])
 
+Each data structure has an equality test that will return true only if all
+of the two structs' member attributes are equal:
+
+    boolean_res, err := cookbook1.Equals(cookbook2)
+    boolean_res, err := cookbook_version1.Equals(cookbook_version2)
+    boolean_res, err := universe1.Equals(universe2)
+    boolean_res, err := universe1["nginx"].Equals(universe2["nginx"])
+
 Contributing
 ============
 
