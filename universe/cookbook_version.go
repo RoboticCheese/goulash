@@ -49,8 +49,19 @@ type CookbookVersion struct {
 	Dependencies map[string]string `json:"dependencies"`
 }
 
-// Equas implements an equality test for a CookbookVersion struct
-func (cv1 CookbookVersion) Equals(cv2 CookbookVersion) (res bool, err error) {
+// Diff returns any attributes that have been changed from one CookbookVersion
+// struct to another.
+func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
+	if cv1.Equals(cv2) {
+		return
+	}
+	pos = cv1.positiveDiff(cv2)
+	neg = cv1.negativeDiff(cv2)
+	return
+}
+
+// Equals implements an equality test for a CookbookVersion struct
+func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = false
 	for _, i := range [][]string{
 		{cv1.LocationType, cv2.LocationType},
@@ -70,5 +81,59 @@ func (cv1 CookbookVersion) Equals(cv2 CookbookVersion) (res bool, err error) {
 		}
 	}
 	res = true
+	return
+}
+
+// positiveDiff returns any attributes that have been added or changed from one
+// CookbookVersion struct to another.
+func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVersion) {
+	if cv1.Equals(cv2) {
+		return
+	}
+	pos = new(CookbookVersion)
+	if cv1.LocationType != cv2.LocationType && cv2.LocationType != "" {
+		pos.LocationType = cv2.LocationType
+	}
+	if cv1.LocationPath != cv2.LocationPath && cv2.LocationPath != "" {
+		pos.LocationPath = cv2.LocationPath
+	}
+	if cv1.DownloadURL != cv2.DownloadURL && cv2.DownloadURL != "" {
+		pos.DownloadURL = cv2.DownloadURL
+	}
+	for k, v := range cv2.Dependencies {
+		if v != cv1.Dependencies[k] {
+			if pos.Dependencies == nil {
+				pos.Dependencies = map[string]string{}
+			}
+			pos.Dependencies[k] = v
+		}
+	}
+	return
+}
+
+// negativeDiff returns any attributes that have been deleted from one
+// CookbookVersion struct to another.
+func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVersion) {
+	if cv1.Equals(cv2) {
+		return
+	}
+	neg = new(CookbookVersion)
+	if cv1.LocationType != cv2.LocationType && cv2.LocationType == "" {
+		neg.LocationType = cv1.LocationType
+	}
+	if cv1.LocationPath != cv2.LocationPath && cv2.LocationPath == "" {
+		neg.LocationPath = cv1.LocationPath
+	}
+	if cv1.DownloadURL != cv2.DownloadURL && cv2.DownloadURL == "" {
+		neg.DownloadURL = cv1.DownloadURL
+	}
+	for k, v := range cv1.Dependencies {
+		if cv2.Dependencies[k] == "" {
+			if neg.Dependencies == nil {
+				neg.Dependencies = map[string]string{}
+			}
+			neg.Dependencies[k] = v
+		}
+	}
 	return
 }
