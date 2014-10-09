@@ -43,6 +43,7 @@ package universe
 // CookbookVersion implements a struct for each cookbook version underneath a
 // Universe.
 type CookbookVersion struct {
+	Version      string
 	LocationType string            `json:"location_type"`
 	LocationPath string            `json:"location_path"`
 	DownloadURL  string            `json:"download_url"`
@@ -64,6 +65,7 @@ func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersio
 func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = false
 	for _, i := range [][]string{
+		{cv1.Version, cv2.Version},
 		{cv1.LocationType, cv2.LocationType},
 		{cv1.LocationPath, cv2.LocationPath},
 		{cv1.DownloadURL, cv2.DownloadURL},
@@ -91,6 +93,9 @@ func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVer
 		return
 	}
 	pos = new(CookbookVersion)
+	if cv1.Version != cv2.Version && cv2.Version != "" {
+		pos.Version = cv2.Version
+	}
 	if cv1.LocationType != cv2.LocationType && cv2.LocationType != "" {
 		pos.LocationType = cv2.LocationType
 	}
@@ -118,6 +123,9 @@ func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVer
 		return
 	}
 	neg = new(CookbookVersion)
+	if cv1.Version != cv2.Version && cv2.Version == "" {
+		neg.Version = cv1.Version
+	}
 	if cv1.LocationType != cv2.LocationType && cv2.LocationType == "" {
 		neg.LocationType = cv1.LocationType
 	}
