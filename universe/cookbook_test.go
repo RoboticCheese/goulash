@@ -32,6 +32,50 @@ func Test_NewCookbook_1(t *testing.T) {
 	}
 }
 
+func Test_CEmpty_1_Empty(t *testing.T) {
+	c := new(Cookbook)
+	res := c.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_CEmpty_2_StillEmpty(t *testing.T) {
+	c := NewCookbook()
+	res := c.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_CEmpty_3_HasName(t *testing.T) {
+	c := NewCookbook()
+	c.Name = "thing"
+	res := c.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_CEmpty_3_HasEmptyVersions(t *testing.T) {
+	c := NewCookbook()
+	c.Versions["0.1.0"] = NewCookbookVersion()
+	res := c.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_CEmpty_3_HasNonEmptyVersions(t *testing.T) {
+	c := NewCookbook()
+	c.Versions["0.1.0"] = NewCookbookVersion()
+	c.Versions["0.1.0"].LocationType = "opscode"
+	res := c.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
 func Test_CEquals_1_Equal(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()

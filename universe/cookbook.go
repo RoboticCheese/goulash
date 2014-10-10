@@ -63,6 +63,26 @@ func NewCookbook() (c *Cookbook) {
 	return
 }
 
+// Empty checks whether a Cookbook struct has been populated with anything or
+// still holds all the base defaults.
+func (c *Cookbook) Empty() (empty bool) {
+	empty = true
+	if c.Name != "" {
+		empty = false
+		return
+	}
+	if len(c.Versions) == 0 {
+		return
+	}
+	for _, v := range c.Versions {
+		if !v.Empty() {
+			empty = false
+			return
+		}
+	}
+	return
+}
+
 // Equals implements an equality test for a Cookbook.
 func (c1 *Cookbook) Equals(c2 *Cookbook) (res bool) {
 	res = true
