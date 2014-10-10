@@ -57,17 +57,6 @@ func NewCookbookVersion() (cv *CookbookVersion) {
 	return
 }
 
-// Diff returns any attributes that have been changed from one CookbookVersion
-// struct to another.
-func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
-	if cv1.Equals(cv2) {
-		return
-	}
-	pos = cv1.positiveDiff(cv2)
-	neg = cv1.negativeDiff(cv2)
-	return
-}
-
 // Equals implements an equality test for a CookbookVersion struct
 func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = false
@@ -90,6 +79,17 @@ func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 		}
 	}
 	res = true
+	return
+}
+
+// Diff returns any attributes that have been changed from one CookbookVersion
+// struct to another.
+func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
+	if cv1.Equals(cv2) {
+		return
+	}
+	pos = cv1.positiveDiff(cv2)
+	neg = cv1.negativeDiff(cv2)
 	return
 }
 
