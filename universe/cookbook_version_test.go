@@ -35,6 +35,49 @@ func Test_NewCookbookVersion_1(t *testing.T) {
 	}
 }
 
+func Test_CVEmpty_1_Empty(t *testing.T) {
+	data := new(CookbookVersion)
+	res := data.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_CVEmpty_2_StillEmpty(t *testing.T) {
+	data := NewCookbookVersion()
+	res := data.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_CVEmpty_3_HasVersionStr(t *testing.T) {
+	data := NewCookbookVersion()
+	data.Version = "0.1.0"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_CVEmpty_4_HasDownloadURL(t *testing.T) {
+	data := NewCookbookVersion()
+	data.DownloadURL = "http://example.com"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_CVEmpty_5_HasDependencies(t *testing.T) {
+	data := NewCookbookVersion()
+	data.Dependencies["thing1"] = ">= 0.0.0"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
 func Test_CVEquals_1_Equal(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()

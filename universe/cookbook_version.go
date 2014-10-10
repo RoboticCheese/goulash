@@ -57,6 +57,28 @@ func NewCookbookVersion() (cv *CookbookVersion) {
 	return
 }
 
+// Empty checks whether a CookbookVersion struct has been populated with
+// anything or still holds all the base defaults.
+func (cv *CookbookVersion) Empty() (empty bool) {
+	empty = true
+	for _, i := range []string{
+		cv.Version,
+		cv.LocationType,
+		cv.LocationPath,
+		cv.DownloadURL,
+	} {
+		if i != "" {
+			empty = false
+			return
+		}
+	}
+	if len(cv.Dependencies) != 0 {
+		empty = false
+		return
+	}
+	return
+}
+
 // Equals implements an equality test for a CookbookVersion struct
 func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = false
