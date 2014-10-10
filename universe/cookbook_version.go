@@ -50,6 +50,13 @@ type CookbookVersion struct {
 	Dependencies map[string]string `json:"dependencies"`
 }
 
+// NewCookbookVersion generates an empty CookbookVersion struct.
+func NewCookbookVersion() (cv *CookbookVersion) {
+	cv = new(CookbookVersion)
+	cv.Dependencies = map[string]string{}
+	return
+}
+
 // Diff returns any attributes that have been changed from one CookbookVersion
 // struct to another.
 func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
@@ -92,7 +99,7 @@ func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVer
 	if cv1.Equals(cv2) {
 		return
 	}
-	pos = new(CookbookVersion)
+	pos = NewCookbookVersion()
 	if cv1.Version != cv2.Version && cv2.Version != "" {
 		pos.Version = cv2.Version
 	}
@@ -107,9 +114,6 @@ func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVer
 	}
 	for k, v := range cv2.Dependencies {
 		if v != cv1.Dependencies[k] {
-			if pos.Dependencies == nil {
-				pos.Dependencies = map[string]string{}
-			}
 			pos.Dependencies[k] = v
 		}
 	}
@@ -122,7 +126,7 @@ func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVer
 	if cv1.Equals(cv2) {
 		return
 	}
-	neg = new(CookbookVersion)
+	neg = NewCookbookVersion()
 	if cv1.Version != cv2.Version && cv2.Version == "" {
 		neg.Version = cv1.Version
 	}
@@ -137,9 +141,6 @@ func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVer
 	}
 	for k, v := range cv1.Dependencies {
 		if cv2.Dependencies[k] == "" {
-			if neg.Dependencies == nil {
-				neg.Dependencies = map[string]string{}
-			}
 			neg.Dependencies[k] = v
 		}
 	}
