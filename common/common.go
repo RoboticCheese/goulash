@@ -21,10 +21,33 @@ This file defines a set of common interfaces and structs.
 */
 package common
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // Supermarketer implements an interface shared by all the Goulash structs.
 // type Supermarketer interface{}
 
 // Component defines variables to be shared by all the Goulash structs.
 type Component struct {
 	Endpoint string
+	ETag     string
+}
+
+func New(endpoint string) (c Component, err error) {
+	fmt.Println("I AM HERE")
+	c = Component{}
+	c.Endpoint = endpoint
+	c.ETag, err = getETag(c.Endpoint)
+	return
+}
+
+func getETag(url string) (etag string, err error) {
+	resp, err := http.Head(url)
+	if err != nil {
+		return
+	}
+	etag = resp.Header.Get("etag")
+	return
 }
