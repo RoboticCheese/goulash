@@ -181,6 +181,16 @@ func (u1 *Universe) Equals(u2 *Universe) (res bool) {
 // Update refreshes a Universe struct and returns the diff of the original
 // Universe and the updated one.
 func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
+	// Try to use the HTTP ETag header first; don't download the entire
+	// universe JSON if we don't need to.
+	if u.ETag != "" {
+		// Fall through to the regular compare if there's an error
+		tmp, _ := common.New(u.Endpoint)
+		if tmp.ETag != "" && tmp.ETag == u.ETag {
+			return
+		}
+	}
+
 	cur_u, err := New(u.APIInstance)
 	if err != nil {
 		return

@@ -34,38 +34,46 @@ func udata() (data *Universe) {
 	return
 }
 
-var json_data = map[string]map[string]map[string]string{
-	"chef": {
-		"0.12.0": {
-			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
-			"dependencies":  `{"runit": ">= 0.0.0","couchdb": ">= 0.0.0"}`,
+func json_data() (json_data map[string]map[string]map[string]string) {
+	json_data = map[string]map[string]map[string]string{
+		"chef": {
+			"0.12.0": {
+				"location_type": "opscode",
+				"location_path": "https://supermarket.getchef.com/api/v1",
+				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+				"dependencies":  `{"runit": ">= 0.0.0","couchdb": ">= 0.0.0"}`,
+			},
+			"0.20.0": {
+				"location_type": "opscode",
+				"location_path": "https://supermarket.getchef.com/api/v1",
+				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
+				"dependencies":  `{"zlib": ">= 0.0.0","xml": ">= 0.0.0"}`,
+			},
 		},
-		"0.20.0": {
-			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
-			"dependencies":  `{"zlib": ">= 0.0.0","xml": ">= 0.0.0"}`,
+		"djbdns": {
+			"0.7.0": {
+				"location_type": "opscode",
+				"location_path": "https://supermarket.getchef.com/api/v1",
+				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
+				"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
+			},
+			"0.8.2": {
+				"location_type": "opscode",
+				"location_path": "https://supermarket.getchef.com/api/v1",
+				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
+				"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
+			},
 		},
-	},
-	"djbdns": {
-		"0.7.0": {
-			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
-			"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
-		},
-		"0.8.2": {
-			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
-			"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
-		},
-	},
+	}
+	return
 }
 
-func jsonified() (res string) {
+func http_headers() (res map[string]string) {
+	res = map[string]string{}
+	return
+}
+
+func http_body(json_data map[string]map[string]map[string]string) (res string) {
 	res = `
 		{"chef": {"0.12.0": {` +
 		`"location_type": "` + json_data["chef"]["0.12.0"]["location_type"] + `",` +
@@ -91,11 +99,14 @@ func jsonified() (res string) {
 	return
 }
 
-func start_http() (ts *httptest.Server) {
+func start_http(http_headers func() map[string]string, json_data func() map[string]map[string]map[string]string) (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprint(w, jsonified())
+				for k, v := range http_headers() {
+					w.Header().Set(k, v)
+				}
+				fmt.Fprint(w, http_body(json_data()))
 			},
 		),
 	)
@@ -103,7 +114,7 @@ func start_http() (ts *httptest.Server) {
 }
 
 func Test_New_1_NoError(t *testing.T) {
-	ts := start_http()
+	ts := start_http(http_headers, json_data)
 	defer ts.Close()
 
 	i := new(api_instance.APIInstance)
@@ -115,6 +126,7 @@ func Test_New_1_NoError(t *testing.T) {
 	if len(u.Cookbooks) != 2 {
 		t.Fatalf("Expected 2 cookbooks, got: %v", len(u.Cookbooks))
 	}
+	json_data := json_data()
 	for k, v := range map[string]string{
 		u.Endpoint:                                                              ts.URL + "/universe",
 		u.Cookbooks["chef"].Name:                                                "chef",
@@ -151,7 +163,7 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_ConnError(t *testing.T) {
-	ts := start_http()
+	ts := start_http(http_headers, json_data)
 	ts.Close()
 
 	i := new(api_instance.APIInstance)
@@ -320,6 +332,170 @@ func Test_Equals_4_DifferentCookbooks(t *testing.T) {
 	}
 }
 
+func Test_Update_1_NoChanges(t *testing.T) {
+	ts := start_http(http_headers, json_data)
+	defer ts.Close()
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	pos, neg, err := u.Update()
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
+	}
+}
+
+func Test_Update_2_SomeChanges(t *testing.T) {
+	json := json_data()
+	json_data := func() map[string]map[string]map[string]string {
+		return json
+	}
+
+	ts := start_http(http_headers, json_data)
+	defer ts.Close()
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+
+	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
+	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+
+	pos, neg, err := u.Update()
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
+	}
+	chk := pos.Cookbooks["chef"].Versions["0.12.0"]
+	if chk.LocationType != "elsewhere" {
+		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
+}
+
+func Test_Update_3_ETagSomeChanges(t *testing.T) {
+	headers := http_headers()
+	headers["ETag"] = "tag1"
+	http_headers := func() map[string]string {
+		return headers
+	}
+	json := json_data()
+	json_data := func() map[string]map[string]map[string]string {
+		return json
+	}
+
+	ts := start_http(http_headers, json_data)
+	defer ts.Close()
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+
+	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
+	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+	headers["ETag"] = "tag2"
+
+	pos, neg, err := u.Update()
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
+	}
+	chk := pos.Cookbooks["chef"].Versions["0.12.0"]
+	if chk.LocationType != "elsewhere" {
+		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
+}
+
+func Test_Update_4_ETagNoChanges(t *testing.T) {
+	headers := http_headers()
+	headers["ETag"] = "tag1"
+	http_headers := func() map[string]string {
+		return headers
+	}
+	json := json_data()
+	json_data := func() map[string]map[string]map[string]string {
+		return json
+	}
+
+	ts := start_http(http_headers, json_data)
+	defer ts.Close()
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+
+	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
+	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+
+	pos, neg, err := u.Update()
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
+	}
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
+}
+
+func Test_Update_5_Error(t *testing.T) {
+	ts := start_http(http_headers, json_data)
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+
+	ts.Close()
+
+	_, _, err = u.Update()
+	if err == nil {
+		t.Fatalf("Expected non-nil, got: %v", err)
+	}
+}
+
 func Test_Diff_1_Equal(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
@@ -484,7 +660,7 @@ func Test_negativeDiff_3_DeletedCookbookVersion(t *testing.T) {
 }
 
 func Test_decodeJSON_1(t *testing.T) {
-	ts := start_http()
+	ts := start_http(http_headers, json_data)
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL)
