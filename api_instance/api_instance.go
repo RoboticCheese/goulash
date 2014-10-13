@@ -39,6 +39,10 @@ type APIInstance struct {
 func New(url string) (i *APIInstance, err error) {
 	i = new(APIInstance)
 	i.BaseURL = url
+	i.Component, err = common.New(i.BaseURL)
+	if err != nil {
+		return
+	}
 	// TODO: Make the version configurable somewhere...
 	i.Version = "1"
 	i.Endpoint = i.BaseURL + "/api/v" + i.Version

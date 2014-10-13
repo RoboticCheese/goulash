@@ -60,6 +60,10 @@ type CookbookVersion struct {
 func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
 	cv = new(CookbookVersion)
 	cv.Endpoint = cb.Endpoint + "/versions/" + v
+	cv.Component, err = common.New(cv.Endpoint)
+	if err != nil {
+		return
+	}
 
 	resp, err := http.Get(cv.Endpoint)
 	if err != nil {

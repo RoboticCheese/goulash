@@ -107,6 +107,10 @@ type Cookbook struct {
 func New(i *api_instance.APIInstance, name string) (c *Cookbook, err error) {
 	c = new(Cookbook)
 	c.Endpoint = i.Endpoint + "/cookbooks/" + name
+	c.Component, err = common.New(c.Endpoint)
+	if err != nil {
+		return
+	}
 
 	resp, err := http.Get(c.Endpoint)
 	if err != nil {
