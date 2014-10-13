@@ -92,7 +92,10 @@ type Universe struct {
 func New(i *api_instance.APIInstance) (u *Universe, err error) {
 	u = NewUniverse()
 	u.APIInstance = i
-	u.Endpoint = u.APIInstance.BaseURL + "/universe"
+	u.Component, err = common.New(u.APIInstance.BaseURL + "/universe")
+	if err != nil {
+		return
+	}
 
 	resp, err := http.Get(u.Endpoint)
 	if err != nil {

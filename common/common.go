@@ -22,7 +22,6 @@ This file defines a set of common interfaces and structs.
 package common
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -36,7 +35,6 @@ type Component struct {
 }
 
 func New(endpoint string) (c Component, err error) {
-	fmt.Println("I AM HERE")
 	c = Component{}
 	c.Endpoint = endpoint
 	c.ETag, err = getETag(c.Endpoint)
