@@ -1,6 +1,7 @@
 package universe
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/RoboticCheese/goulash/api_instance"
 	"github.com/RoboticCheese/goulash/common"
@@ -34,34 +35,34 @@ func udata() (data *Universe) {
 	return
 }
 
-func json_data() (json_data map[string]map[string]map[string]string) {
-	json_data = map[string]map[string]map[string]string{
+func json_data() (json_data map[string]map[string]*CookbookVersion) {
+	json_data = map[string]map[string]*CookbookVersion{
 		"chef": {
-			"0.12.0": {
-				"location_type": "opscode",
-				"location_path": "https://supermarket.getchef.com/api/v1",
-				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
-				"dependencies":  `{"runit": ">= 0.0.0","couchdb": ">= 0.0.0"}`,
+			"0.12.0": &CookbookVersion{
+				LocationType: "opscode",
+				LocationPath: "https://supermarket.getchef.com/api/v1",
+				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+				Dependencies: map[string]string{"runit": ">= 0.0.0", "couchdb": ">= 0.0.0"},
 			},
-			"0.20.0": {
-				"location_type": "opscode",
-				"location_path": "https://supermarket.getchef.com/api/v1",
-				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
-				"dependencies":  `{"zlib": ">= 0.0.0","xml": ">= 0.0.0"}`,
+			"0.20.0": &CookbookVersion{
+				LocationType: "opscode",
+				LocationPath: "https://supermarket.getchef.com/api/v1",
+				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
+				Dependencies: map[string]string{"zlib": ">= 0.0.0", "xml": ">= 0.0.0"},
 			},
 		},
 		"djbdns": {
-			"0.7.0": {
-				"location_type": "opscode",
-				"location_path": "https://supermarket.getchef.com/api/v1",
-				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
-				"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
+			"0.7.0": &CookbookVersion{
+				LocationType: "opscode",
+				LocationPath: "https://supermarket.getchef.com/api/v1",
+				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
+				Dependencies: map[string]string{"runit": ">= 0.0.0", "build-essential": ">= 0.0.0"},
 			},
-			"0.8.2": {
-				"location_type": "opscode",
-				"location_path": "https://supermarket.getchef.com/api/v1",
-				"download_url":  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
-				"dependencies":  `{"runit": ">= 0.0.0","build-essential": ">= 0.0.0"}`,
+			"0.8.2": &CookbookVersion{
+				LocationType: "opscode",
+				LocationPath: "https://supermarket.getchef.com/api/v1",
+				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
+				Dependencies: map[string]string{"runit": ">= 0.0.0", "build-essential": ">= 0.0.0"},
 			},
 		},
 	}
@@ -73,33 +74,13 @@ func http_headers() (res map[string]string) {
 	return
 }
 
-func http_body(json_data map[string]map[string]map[string]string) (res string) {
-	res = `
-		{"chef": {"0.12.0": {` +
-		`"location_type": "` + json_data["chef"]["0.12.0"]["location_type"] + `",` +
-		`"location_path": "` + json_data["chef"]["0.12.0"]["location_path"] + `",` +
-		`"download_url": "` + json_data["chef"]["0.12.0"]["download_url"] + `",` +
-		`"dependencies": ` + json_data["chef"]["0.12.0"]["dependencies"] +
-		`}, "0.20.0": {` +
-		`"location_type": "` + json_data["chef"]["0.20.0"]["location_type"] + `",` +
-		`"location_path": "` + json_data["chef"]["0.20.0"]["location_path"] + `",` +
-		`"download_url": "` + json_data["chef"]["0.20.0"]["download_url"] + `",` +
-		`"dependencies": ` + json_data["chef"]["0.20.0"]["dependencies"] +
-		`}}, "djbdns": {"0.7.0": {` +
-		`"location_type": "` + json_data["djbdns"]["0.7.0"]["location_type"] + `",` +
-		`"location_path": "` + json_data["djbdns"]["0.7.0"]["location_path"] + `",` +
-		`"download_url": "` + json_data["djbdns"]["0.7.0"]["download_url"] + `",` +
-		`"dependencies": ` + json_data["djbdns"]["0.7.0"]["dependencies"] +
-		`}, "0.8.2": {` +
-		`"location_type": "` + json_data["djbdns"]["0.8.2"]["location_type"] + `",` +
-		`"location_path": "` + json_data["djbdns"]["0.8.2"]["location_path"] + `",` +
-		`"download_url": "` + json_data["djbdns"]["0.8.2"]["download_url"] + `",` +
-		`"dependencies": ` + json_data["djbdns"]["0.8.2"]["dependencies"] +
-		`}}}`
+func http_body(json_data map[string]map[string]*CookbookVersion) (res string) {
+	bres, _ := json.Marshal(json_data)
+	res = string(bres)
 	return
 }
 
-func start_http(http_headers func() map[string]string, json_data func() map[string]map[string]map[string]string) (ts *httptest.Server) {
+func start_http(http_headers func() map[string]string, json_data func() map[string]map[string]*CookbookVersion) (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -126,33 +107,32 @@ func Test_New_1_NoError(t *testing.T) {
 	if len(u.Cookbooks) != 2 {
 		t.Fatalf("Expected 2 cookbooks, got: %v", len(u.Cookbooks))
 	}
-	json_data := json_data()
 	for k, v := range map[string]string{
 		u.Endpoint:                                                              ts.URL + "/universe",
 		u.Cookbooks["chef"].Name:                                                "chef",
 		u.Cookbooks["chef"].Versions["0.12.0"].Version:                          "0.12.0",
-		u.Cookbooks["chef"].Versions["0.12.0"].LocationType:                     json_data["chef"]["0.12.0"]["location_type"],
-		u.Cookbooks["chef"].Versions["0.12.0"].LocationPath:                     json_data["chef"]["0.12.0"]["location_path"],
-		u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL:                      json_data["chef"]["0.12.0"]["download_url"],
+		u.Cookbooks["chef"].Versions["0.12.0"].LocationType:                     "opscode",
+		u.Cookbooks["chef"].Versions["0.12.0"].LocationPath:                     "https://supermarket.getchf.com/api/v1",
+		u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL:                      "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
 		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["runit"]:            ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["couchdb"]:          ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.20.0"].Version:                          "0.20.0",
-		u.Cookbooks["chef"].Versions["0.20.0"].LocationType:                     json_data["chef"]["0.20.0"]["location_type"],
-		u.Cookbooks["chef"].Versions["0.20.0"].LocationPath:                     json_data["chef"]["0.20.0"]["location_path"],
-		u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL:                      json_data["chef"]["0.20.0"]["download_url"],
+		u.Cookbooks["chef"].Versions["0.20.0"].LocationType:                     "opscode",
+		u.Cookbooks["chef"].Versions["0.20.0"].LocationPath:                     "https://supermarket.getchef.com/api/v1",
+		u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL:                      "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
 		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["zlib"]:             ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["xml"]:              ">= 0.0.0",
 		u.Cookbooks["djbdns"].Name:                                              "djbdns",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Version:                         "0.7.0",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationType:                    json_data["djbdns"]["0.7.0"]["location_type"],
-		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath:                    json_data["djbdns"]["0.7.0"]["location_path"],
-		u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL:                     json_data["djbdns"]["0.7.0"]["download_url"],
+		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationType:                    "opscode",
+		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath:                    "https://supermarket.getchef.com/api/v1",
+		u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL:                     "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["runit"]:           ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["build-essential"]: ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Version:                         "0.8.2",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationType:                    json_data["djbdns"]["0.8.2"]["location_type"],
-		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath:                    json_data["djbdns"]["0.8.2"]["location_path"],
-		u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL:                     json_data["djbdns"]["0.8.2"]["download_url"],
+		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationType:                    "opscode",
+		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath:                    "https://supermarket.getchef.com/api/v1",
+		u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL:                     "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["runit"]:           ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["build-essential"]: ">= 0.0.0",
 	} {
@@ -358,7 +338,7 @@ func Test_Update_1_NoChanges(t *testing.T) {
 
 func Test_Update_2_SomeChanges(t *testing.T) {
 	json := json_data()
-	json_data := func() map[string]map[string]map[string]string {
+	json_data := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
@@ -374,8 +354,8 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
-	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+	json["chef"]["0.12.0"].LocationType = "elsewhere"
+	json["chef"]["0.12.0"].LocationPath = "https://example.com"
 
 	pos, neg, err := u.Update()
 	if err != nil {
@@ -392,16 +372,19 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 		t.Fatalf("Expected 'https://example.com', got: %v",
 			chk.LocationPath)
 	}
+	chk = u.Cookbooks["chef"].Versions["0.12.0"]
+	if chk.LocationType != "elsewhere" {
+		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
 }
 
-func Test_Update_3_ETagSomeChanges(t *testing.T) {
-	headers := http_headers()
-	headers["ETag"] = "tag1"
-	http_headers := func() map[string]string {
-		return headers
-	}
+func Test_Update_3_NewVersionReleased(t *testing.T) {
 	json := json_data()
-	json_data := func() map[string]map[string]map[string]string {
+	json_data := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
@@ -417,8 +400,72 @@ func Test_Update_3_ETagSomeChanges(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
-	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+	json["chef"]["9.9.9"] = &CookbookVersion{
+		LocationType: "opsplode",
+		LocationPath: "https://example.com",
+		DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/9.9.9/download",
+		Dependencies: map[string]string{"otherthing": ">= 0.0.0"},
+	}
+
+	pos, neg, err := u.Update()
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
+	}
+	if len(pos.Cookbooks) != 1 {
+		t.Fatalf("Expected 1 cookbook, got: %v", len(pos.Cookbooks))
+	}
+	chk := pos.Cookbooks["chef"].Versions["9.9.9"]
+	if chk == nil {
+		t.Fatalf("Expected non-nil, got: %v", chk)
+	}
+	if chk.LocationType != "opsplode" {
+		t.Fatalf("Expected 'opsplode', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
+	chk = u.Cookbooks["chef"].Versions["9.9.9"]
+	if chk == nil {
+		t.Fatalf("Expected non-nil, got: %v", chk)
+	}
+	if chk.LocationType != "opsplode" {
+		t.Fatalf("Expected 'opsplode', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
+}
+
+func Test_Update_4_ETagSomeChanges(t *testing.T) {
+	headers := http_headers()
+	headers["ETag"] = "tag1"
+	http_headers := func() map[string]string {
+		return headers
+	}
+	json := json_data()
+	json_data := func() map[string]map[string]*CookbookVersion {
+		return json
+	}
+
+	ts := start_http(http_headers, json_data)
+	defer ts.Close()
+
+	a, err := api_instance.New(ts.URL)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+	u, err := New(a)
+	if err != nil {
+		t.Fatalf("Expected no err, got: %v", err)
+	}
+
+	json["chef"]["0.12.0"].LocationType = "elsewhere"
+	json["chef"]["0.12.0"].LocationPath = "https://example.com"
 	headers["ETag"] = "tag2"
 
 	pos, neg, err := u.Update()
@@ -436,16 +483,24 @@ func Test_Update_3_ETagSomeChanges(t *testing.T) {
 		t.Fatalf("Expected 'https://example.com', got: %v",
 			chk.LocationPath)
 	}
+	chk = u.Cookbooks["chef"].Versions["0.12.0"]
+	if chk.LocationType != "elsewhere" {
+		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
+	}
+	if chk.LocationPath != "https://example.com" {
+		t.Fatalf("Expected 'https://example.com', got: %v",
+			chk.LocationPath)
+	}
 }
 
-func Test_Update_4_ETagNoChanges(t *testing.T) {
+func Test_Update_5_ETagNoChanges(t *testing.T) {
 	headers := http_headers()
 	headers["ETag"] = "tag1"
 	http_headers := func() map[string]string {
 		return headers
 	}
 	json := json_data()
-	json_data := func() map[string]map[string]map[string]string {
+	json_data := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
@@ -461,8 +516,8 @@ func Test_Update_4_ETagNoChanges(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["0.12.0"]["location_type"] = "elsewhere"
-	json["chef"]["0.12.0"]["location_path"] = "https://example.com"
+	json["chef"]["0.12.0"].LocationType = "elsewhere"
+	json["chef"]["0.12.0"].LocationPath = "https://example.com"
 
 	pos, neg, err := u.Update()
 	if err != nil {
@@ -474,9 +529,13 @@ func Test_Update_4_ETagNoChanges(t *testing.T) {
 	if pos != nil {
 		t.Fatalf("Expected nil, got: %v", pos)
 	}
+	chk := u.Cookbooks["chef"].Versions["0.12.0"].LocationType
+	if chk != "opscode" {
+		t.Fatalf("Expected 'opscode', got: %v", chk)
+	}
 }
 
-func Test_Update_5_Error(t *testing.T) {
+func Test_Update_6_Error(t *testing.T) {
 	ts := start_http(http_headers, json_data)
 
 	a, err := api_instance.New(ts.URL)

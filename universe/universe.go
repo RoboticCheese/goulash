@@ -196,7 +196,7 @@ func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
 		return
 	}
 	pos_diff, neg_diff = u.Diff(cur_u)
-	u = cur_u
+	*u = *cur_u
 	return
 }
 
