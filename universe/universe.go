@@ -203,8 +203,6 @@ func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
 // Diff returns any attributes that have changed from one Universe struct to
 // another.
 func (u1 *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
-	// TODO: Check whether a Cookbooks is empty (or nil) when calculating
-	// diffs (setting it to nil causes one to still be counted in len().
 	if u1.Equals(u2) {
 		return
 	}
