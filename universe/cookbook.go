@@ -50,6 +50,10 @@ https://supermarket.getchef.com/universe =>
 */
 package universe
 
+import (
+	"reflect"
+)
+
 // Cookbook is just a map of version strings to Version structs
 type Cookbook struct {
 	Name     string
@@ -85,25 +89,7 @@ func (c *Cookbook) Empty() (empty bool) {
 
 // Equals implements an equality test for a Cookbook.
 func (c1 *Cookbook) Equals(c2 *Cookbook) (res bool) {
-	res = true
-	if c1.Name != c2.Name {
-		res = false
-		return
-	}
-	if len(c1.Versions) != len(c2.Versions) {
-		res = false
-		return
-	}
-	for k, v := range c1.Versions {
-		if c2.Versions[k] == nil {
-			res = false
-			return
-		}
-		if !v.Equals(c2.Versions[k]) {
-			res = false
-			return
-		}
-	}
+	res = reflect.DeepEqual(c1, c2)
 	return
 }
 
