@@ -40,6 +40,10 @@ https://supermarket.getchef.com/universe =>
 */
 package universe
 
+import (
+	"reflect"
+)
+
 // CookbookVersion implements a struct for each cookbook version underneath a
 // Universe.
 type CookbookVersion struct {
@@ -81,26 +85,7 @@ func (cv *CookbookVersion) Empty() (empty bool) {
 
 // Equals implements an equality test for a CookbookVersion struct
 func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
-	res = false
-	for _, i := range [][]string{
-		{cv1.Version, cv2.Version},
-		{cv1.LocationType, cv2.LocationType},
-		{cv1.LocationPath, cv2.LocationPath},
-		{cv1.DownloadURL, cv2.DownloadURL},
-	} {
-		if i[0] != i[1] {
-			return
-		}
-	}
-	if len(cv1.Dependencies) != len(cv2.Dependencies) {
-		return
-	}
-	for k, v := range cv1.Dependencies {
-		if v != cv2.Dependencies[k] {
-			return
-		}
-	}
-	res = true
+	res = reflect.DeepEqual(cv1, cv2)
 	return
 }
 
@@ -122,22 +107,29 @@ func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVer
 		return
 	}
 	pos = NewCookbookVersion()
-	if cv1.Version != cv2.Version && cv2.Version != "" {
-		pos.Version = cv2.Version
-	}
-	if cv1.LocationType != cv2.LocationType && cv2.LocationType != "" {
-		pos.LocationType = cv2.LocationType
-	}
-	if cv1.LocationPath != cv2.LocationPath && cv2.LocationPath != "" {
-		pos.LocationPath = cv2.LocationPath
-	}
-	if cv1.DownloadURL != cv2.DownloadURL && cv2.DownloadURL != "" {
-		pos.DownloadURL = cv2.DownloadURL
-	}
-	for k, v := range cv2.Dependencies {
-		if v != cv1.Dependencies[k] {
-			pos.Dependencies[k] = v
+
+	r1 := reflect.ValueOf(cv1).Elem()
+	r2 := reflect.ValueOf(cv2).Elem()
+	rres := reflect.ValueOf(pos).Elem()
+	for i := 0; i < r1.NumField(); i++ {
+		f1 := r1.Field(i)
+		f2 := r2.Field(i)
+
+		switch f1.Kind() {
+		case reflect.String:
+			if f1.String() != f2.String() && f2.String() != "" {
+				rres.Field(i).Set(f2)
+			}
+		case reflect.Map:
+			for _, k := range f2.MapKeys() {
+				if f1.MapIndex(k).Kind() == reflect.Invalid || f1.MapIndex(k).String() != f2.MapIndex(k).String() {
+					rres.Field(i).SetMapIndex(k, f2.MapIndex(k))
+				}
+			}
 		}
+	}
+	if pos.Empty() {
+		pos = nil
 	}
 	return
 }
@@ -149,22 +141,29 @@ func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVer
 		return
 	}
 	neg = NewCookbookVersion()
-	if cv1.Version != cv2.Version && cv2.Version == "" {
-		neg.Version = cv1.Version
-	}
-	if cv1.LocationType != cv2.LocationType && cv2.LocationType == "" {
-		neg.LocationType = cv1.LocationType
-	}
-	if cv1.LocationPath != cv2.LocationPath && cv2.LocationPath == "" {
-		neg.LocationPath = cv1.LocationPath
-	}
-	if cv1.DownloadURL != cv2.DownloadURL && cv2.DownloadURL == "" {
-		neg.DownloadURL = cv1.DownloadURL
-	}
-	for k, v := range cv1.Dependencies {
-		if cv2.Dependencies[k] == "" {
-			neg.Dependencies[k] = v
+
+	r1 := reflect.ValueOf(cv1).Elem()
+	r2 := reflect.ValueOf(cv2).Elem()
+	rres := reflect.ValueOf(neg).Elem()
+	for i := 0; i < r1.NumField(); i++ {
+		f1 := r1.Field(i)
+		f2 := r2.Field(i)
+
+		switch f1.Kind() {
+		case reflect.String:
+			if f2.String() == "" && f1.String() != "" {
+				rres.Field(i).Set(f1)
+			}
+		case reflect.Map:
+			for _, k := range f1.MapKeys() {
+				if f2.MapIndex(k).Kind() == reflect.Invalid || f2.MapIndex(k).String() == "" {
+					rres.Field(i).SetMapIndex(k, f1.MapIndex(k))
+				}
+			}
 		}
+	}
+	if neg.Empty() {
+		neg = nil
 	}
 	return
 }
