@@ -78,6 +78,7 @@ import (
 	"github.com/RoboticCheese/goulash/common"
 	"io"
 	"net/http"
+	"reflect"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
@@ -159,22 +160,7 @@ func (u *Universe) Empty() (empty bool) {
 
 // Equals implements an equality test for a Universe.
 func (u1 *Universe) Equals(u2 *Universe) (res bool) {
-	res = true
-	// TODO: Should an endpoint difference matter?
-	//if u1.Endpoint != u2.Endpoint {
-	//	return
-	//}
-	// What about different API instances?
-	if len(u1.Cookbooks) != len(u2.Cookbooks) {
-		res = false
-		return
-	}
-	for k, v := range u1.Cookbooks {
-		if !v.Equals(u2.Cookbooks[k]) {
-			res = false
-			return
-		}
-	}
+	res = reflect.DeepEqual(u1, u2)
 	return
 }
 
