@@ -95,72 +95,45 @@ func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersio
 	if cv1.Equals(cv2) {
 		return
 	}
-	pos = cv1.positiveDiff(cv2)
-	neg = cv1.negativeDiff(cv2)
-	return
-}
+	pos = NewCookbookVersion()
+	neg = NewCookbookVersion()
 
-// positiveDiff returns any attributes that have been added or changed from one
-// CookbookVersion struct to another.
-func (cv1 *CookbookVersion) positiveDiff(cv2 *CookbookVersion) (pos *CookbookVersion) {
 	if cv1.Equals(cv2) {
 		return
 	}
-	pos = NewCookbookVersion()
 
 	r1 := reflect.ValueOf(cv1).Elem()
 	r2 := reflect.ValueOf(cv2).Elem()
-	rres := reflect.ValueOf(pos).Elem()
+	rpos := reflect.ValueOf(pos).Elem()
+	rneg := reflect.ValueOf(neg).Elem()
 	for i := 0; i < r1.NumField(); i++ {
 		f1 := r1.Field(i)
 		f2 := r2.Field(i)
 
 		switch f1.Kind() {
 		case reflect.String:
-			if f1.String() != f2.String() && f2.String() != "" {
-				rres.Field(i).Set(f2)
+			if f1.String() != f2.String() {
+				rpos.Field(i).Set(f2)
+				rneg.Field(i).Set(f1)
 			}
 		case reflect.Map:
+			for _, k := range f1.MapKeys() {
+				if f2.MapIndex(k).Kind() == reflect.Invalid {
+					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
+				} else if f1.MapIndex(k).String() != f2.MapIndex(k).String() {
+					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
+					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
+				}
+			}
 			for _, k := range f2.MapKeys() {
-				if f1.MapIndex(k).Kind() == reflect.Invalid || f1.MapIndex(k).String() != f2.MapIndex(k).String() {
-					rres.Field(i).SetMapIndex(k, f2.MapIndex(k))
+				if f1.MapIndex(k).Kind() == reflect.Invalid {
+					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
 				}
 			}
 		}
 	}
 	if pos.Empty() {
 		pos = nil
-	}
-	return
-}
-
-// negativeDiff returns any attributes that have been deleted from one
-// CookbookVersion struct to another.
-func (cv1 *CookbookVersion) negativeDiff(cv2 *CookbookVersion) (neg *CookbookVersion) {
-	if cv1.Equals(cv2) {
-		return
-	}
-	neg = NewCookbookVersion()
-
-	r1 := reflect.ValueOf(cv1).Elem()
-	r2 := reflect.ValueOf(cv2).Elem()
-	rres := reflect.ValueOf(neg).Elem()
-	for i := 0; i < r1.NumField(); i++ {
-		f1 := r1.Field(i)
-		f2 := r2.Field(i)
-
-		switch f1.Kind() {
-		case reflect.String:
-			if f2.String() == "" && f1.String() != "" {
-				rres.Field(i).Set(f1)
-			}
-		case reflect.Map:
-			for _, k := range f1.MapKeys() {
-				if f2.MapIndex(k).Kind() == reflect.Invalid || f2.MapIndex(k).String() == "" {
-					rres.Field(i).SetMapIndex(k, f1.MapIndex(k))
-				}
-			}
-		}
 	}
 	if neg.Empty() {
 		neg = nil

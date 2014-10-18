@@ -203,7 +203,7 @@ func Test_CVDiff_2_DataAddedAndDeleted(t *testing.T) {
 		{pos.LocationType, "souschef"},
 		{pos.LocationPath, ""},
 		{pos.DownloadURL, ""},
-		{neg.LocationType, ""},
+		{neg.LocationType, "opscode"},
 		{neg.LocationPath, "https://example1.com"},
 		{neg.DownloadURL, ""},
 	} {
@@ -213,112 +213,139 @@ func Test_CVDiff_2_DataAddedAndDeleted(t *testing.T) {
 	}
 }
 
-func Test_CVpositiveDiff_1_Equal(t *testing.T) {
-	data1 := cvdata()
-	data2 := cvdata()
-	res := data1.positiveDiff(data2)
-	if res != nil {
-		t.Fatalf("Expected nil, got: %v", res)
-	}
-}
-
-func Test_CVpositiveDiff_2_ChangedVersion(t *testing.T) {
+func Test_CVDiff_3_ChangedVersion(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Version = "9.9.9"
-	res := data1.positiveDiff(data2)
+	pos, neg := data1.Diff(data2)
 	for _, v := range [][]string{
-		{res.Version, "9.9.9"},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
+		{pos.Version, "9.9.9"},
+		{pos.LocationType, ""},
+		{pos.LocationPath, ""},
+		{pos.DownloadURL, ""},
+		{neg.Version, "0.1.0"},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(pos.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(pos.Dependencies))
+	}
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVpositiveDiff_3_ChangedLocationPath(t *testing.T) {
+func Test_CVDiff_4_ChangedLocationPath(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.LocationPath = "https://exam.ple"
-	res := data1.positiveDiff(data2)
+	pos, neg := data1.Diff(data2)
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, "https://exam.ple"},
-		{res.DownloadURL, ""},
+		{pos.Version, ""},
+		{pos.LocationType, ""},
+		{pos.LocationPath, "https://exam.ple"},
+		{pos.DownloadURL, ""},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, "https://example1.com"},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(pos.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(pos.Dependencies))
+	}
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVpositiveDiff_4_ChangedLocationType(t *testing.T) {
+func Test_CVDiff_5_ChangedLocationType(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.LocationType = "souschef"
-	res := data1.positiveDiff(data2)
+	pos, neg := data1.Diff(data2)
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, "souschef"},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
+		{pos.Version, ""},
+		{pos.LocationType, "souschef"},
+		{pos.LocationPath, ""},
+		{pos.DownloadURL, ""},
+		{neg.Version, ""},
+		{neg.LocationType, "opscode"},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(pos.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(pos.Dependencies))
+	}
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVpositiveDiff_5_ChangedDownloadURL(t *testing.T) {
+func Test_CVDiff_6_ChangedDownloadURL(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.DownloadURL = "https://thing.co"
-	res := data1.positiveDiff(data2)
+	pos, neg := data1.Diff(data2)
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, "https://thing.co"},
+		{pos.Version, ""},
+		{pos.LocationType, ""},
+		{pos.LocationPath, ""},
+		{pos.DownloadURL, "https://thing.co"},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, "https://example1.com/dl1"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(pos.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(pos.Dependencies))
+	}
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVpositiveDiff_6_ChangedOneDependency(t *testing.T) {
+func Test_CVDiff_7_ChangedOneDependency(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Dependencies = map[string]string{
 		"thing1": ">= 0.0.0",
 		"thing2": "~> 0.0.1",
 	}
-	res := data1.positiveDiff(data2)
-	if len(res.Dependencies) != 1 {
-		t.Fatalf("Expected 1 dep, got: %v", len(res.Dependencies))
+	pos, neg := data1.Diff(data2)
+	if len(pos.Dependencies) != 1 {
+		t.Fatalf("Expected 1 dep, got: %v", len(pos.Dependencies))
+	}
+	if len(neg.Dependencies) != 1 {
+		t.Fatalf("Expected 1 dep, got: %v", len(neg.Dependencies))
 	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
-		{res.Dependencies["thing2"], "~> 0.0.1"},
+		{pos.Version, ""},
+		{pos.LocationType, ""},
+		{pos.LocationPath, ""},
+		{pos.DownloadURL, ""},
+		{pos.Dependencies["thing2"], "~> 0.0.1"},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
+		{neg.Dependencies["thing2"], ">= 0.0.0"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
@@ -326,132 +353,141 @@ func Test_CVpositiveDiff_6_ChangedOneDependency(t *testing.T) {
 	}
 }
 
-func Test_CVpositiveDiff_7_AddedNewDepndency(t *testing.T) {
+func Test_CVDiff_8_AddedNewDepndency(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Dependencies["thing3"] = ">= 0.0.0"
-	res := data1.positiveDiff(data2)
-	if len(res.Dependencies) != 1 {
-		t.Fatalf("Expected 1 dep, got: %v", len(res.Dependencies))
+	pos, neg := data1.Diff(data2)
+	if len(pos.Dependencies) != 1 {
+		t.Fatalf("Expected 1 dep, got: %v", len(pos.Dependencies))
 	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
-		{res.Dependencies["thing3"], ">= 0.0.0"},
+		{pos.Version, ""},
+		{pos.LocationType, ""},
+		{pos.LocationPath, ""},
+		{pos.DownloadURL, ""},
+		{pos.Dependencies["thing3"], ">= 0.0.0"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-}
-
-func Test_CVnegativeDiff_1_Equal(t *testing.T) {
-	data1 := cvdata()
-	data2 := cvdata()
-	res := data1.negativeDiff(data2)
-	if res != nil {
-		t.Fatalf("Expected nil, got: %v", res)
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
 	}
 }
 
-func Test_CVnegativeDiff_2_RemovedVersion(t *testing.T) {
+func Test_CVDiff_9_RemovedVersion(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Version = ""
-	res := data1.negativeDiff(data2)
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
 	for _, v := range [][]string{
-		{res.Version, "0.1.0"},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
+		{neg.Version, "0.1.0"},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVnegativeDiff_3_RemovedLocationPath(t *testing.T) {
+func Test_CVDiff_10_RemovedLocationPath(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.LocationPath = ""
-	res := data1.negativeDiff(data2)
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, "https://example1.com"},
-		{res.DownloadURL, ""},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, "https://example1.com"},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVnegativeDiff_4_RemovedLocationType(t *testing.T) {
+func Test_CVDiff_11_RemovedLocationType(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.LocationType = ""
-	res := data1.negativeDiff(data2)
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, "opscode"},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
+		{neg.Version, ""},
+		{neg.LocationType, "opscode"},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVnegativeDiff_5_RemovedDownloadURL(t *testing.T) {
+func Test_CVDiff_12_RemovedDownloadURL(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.DownloadURL = ""
-	res := data1.negativeDiff(data2)
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, "https://example1.com/dl1"},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, "https://example1.com/dl1"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
 		}
 	}
-	if len(res.Dependencies) != 0 {
-		t.Fatalf("Expected 0 deps, got: %v", len(res.Dependencies))
+	if len(neg.Dependencies) != 0 {
+		t.Fatalf("Expected 0 deps, got: %v", len(neg.Dependencies))
 	}
 }
 
-func Test_CVnegativeDiff_6_RemovedOneDependency(t *testing.T) {
+func Test_CVDiff_13_RemovedOneDependency(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Dependencies = map[string]string{
 		"thing1": ">= 0.0.0",
 	}
-	res := data1.negativeDiff(data2)
-	if len(res.Dependencies) != 1 {
-		t.Fatalf("Expected 1 dep, got: %v", len(res.Dependencies))
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
+	if len(neg.Dependencies) != 1 {
+		t.Fatalf("Expected 1 dep, got: %v", len(neg.Dependencies))
 	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
-		{res.Dependencies["thing2"], ">= 0.0.0"},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
+		{neg.Dependencies["thing2"], ">= 0.0.0"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
@@ -459,21 +495,24 @@ func Test_CVnegativeDiff_6_RemovedOneDependency(t *testing.T) {
 	}
 }
 
-func Test_CVnegativeDiff_7_RemovedAllDepndencies(t *testing.T) {
+func Test_CVDiff_14_RemovedAllDepndencies(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Dependencies = map[string]string{}
-	res := data1.negativeDiff(data2)
-	if len(res.Dependencies) != 2 {
-		t.Fatalf("Expected 2 deps, got: %v", len(res.Dependencies))
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
+	}
+	if len(neg.Dependencies) != 2 {
+		t.Fatalf("Expected 2 deps, got: %v", len(neg.Dependencies))
 	}
 	for _, v := range [][]string{
-		{res.Version, ""},
-		{res.LocationType, ""},
-		{res.LocationPath, ""},
-		{res.DownloadURL, ""},
-		{res.Dependencies["thing1"], ">= 0.0.0"},
-		{res.Dependencies["thing2"], ">= 0.0.0"},
+		{neg.Version, ""},
+		{neg.LocationType, ""},
+		{neg.LocationPath, ""},
+		{neg.DownloadURL, ""},
+		{neg.Dependencies["thing1"], ">= 0.0.0"},
+		{neg.Dependencies["thing2"], ">= 0.0.0"},
 	} {
 		if v[0] != v[1] {
 			t.Fatalf("Expected: %v, got: %v", v[1], v[0])
