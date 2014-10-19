@@ -160,9 +160,8 @@ func Test_CDiff_1_Equal(t *testing.T) {
 func Test_CDiff_2_DataAddedAndDeleted(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
-	data2.Versions = map[string]*CookbookVersion{
-		"9.9.9": &CookbookVersion{},
-	}
+	delete(data2.Versions, "0.1.0")
+	data2.Versions["9.9.9"] = &CookbookVersion{Version: "9.9.9"}
 	pos, neg := data1.Diff(data2)
 	for _, res := range []int{
 		len(pos.Versions),
@@ -174,110 +173,90 @@ func Test_CDiff_2_DataAddedAndDeleted(t *testing.T) {
 	}
 }
 
-func Test_CpositiveDiff_1_Equal(t *testing.T) {
-	data1 := cdata()
-	data2 := cdata()
-	res := data1.positiveDiff(data2)
-	if res != nil {
-		t.Fatalf("Expected nil, got: %v", res)
-	}
-}
-
-func Test_CpositiveDiff_2_ChangedName(t *testing.T) {
+func Test_CDiff_3_ChangedName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "somethingelse"
-	res := data1.positiveDiff(data2)
-	if res.Name != "somethingelse" {
-		t.Fatalf("Expected changed name, got: %v", res.Name)
+	pos, neg := data1.Diff(data2)
+	for _, i := range [][]string{
+		{pos.Name, "somethingelse"},
+		{neg.Name, "something"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
-	if len(res.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(res.Versions))
+	if len(pos.Versions) != 0 {
+		t.Fatalf("Expected 0 versions, got: %v", len(pos.Versions))
+	}
+	if len(neg.Versions) != 0 {
+		t.Fatalf("Expected 0 versions, got: %v", len(neg.Versions))
 	}
 }
 
-func Test_CpositiveDiff_3_NewVersions(t *testing.T) {
+func Test_CDiff_4_NewVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["9.9.9"] = &CookbookVersion{Version: "9.9.9"}
-	res := data1.positiveDiff(data2)
-	if res.Name != "" {
-		t.Fatalf("Expected unchanged name, got: %v", res.Name)
+	pos, neg := data1.Diff(data2)
+	if neg != nil {
+		t.Fatalf("Expected nil, got: %v", neg)
 	}
-	if len(res.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(res.Versions))
+	for _, i := range [][]string{
+		{pos.Name, ""},
+		{pos.Versions["9.9.9"].Version, "9.9.9"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
-	if res.Versions["9.9.9"].Version != "9.9.9" {
-		t.Fatalf("Expected ver 9.9.9, got: %v", res.Versions["9.9.9"])
+	if len(pos.Versions) != 1 {
+		t.Fatalf("Expected 1 versions, got: %v", len(pos.Versions))
 	}
 }
 
-func Test_CpositiveDiff_4_ChangedVersion(t *testing.T) {
+func Test_CDiff_5_ChangedVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["0.1.0"].LocationType = "elsewhere"
-	res := data1.positiveDiff(data2)
-	if res.Name != "" {
-		t.Fatalf("Expected unchanged name, got: %v", res.Name)
+	pos, neg := data1.Diff(data2)
+	for _, i := range [][]string{
+		{pos.Name, ""},
+		{pos.Versions["0.1.0"].LocationType, "elsewhere"},
+		{pos.Versions["0.1.0"].LocationPath, ""},
+		{neg.Name, ""},
+		{neg.Versions["0.1.0"].LocationType, "opscode"},
+		{neg.Versions["0.1.0"].LocationPath, ""},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
-	if len(res.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(res.Versions))
+	if len(pos.Versions) != 1 {
+		t.Fatalf("Expected 1 versions, got: %v", len(pos.Versions))
 	}
-	if res.Versions["0.1.0"].LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v",
-			res.Versions["0.1.0"].LocationType)
-	}
-	if res.Versions["0.1.0"].LocationPath != "" {
-		t.Fatalf("Expected empty string, got: %v",
-			res.Versions["0.1.0"].LocationPath)
-	}
-}
-
-func Test_CnegativeDiff_1_Equal(t *testing.T) {
-	data1 := cdata()
-	data2 := cdata()
-	res := data1.negativeDiff(data2)
-	if res != nil {
-		t.Fatalf("Expected nil, got: %v", res)
+	if len(neg.Versions) != 1 {
+		t.Fatalf("Expected 1 versions, got: %v", len(neg.Versions))
 	}
 }
 
-func Test_CnegativeDiff_2_ChangedName(t *testing.T) {
-	data1 := cdata()
-	data2 := cdata()
-	data2.Name = "somethingelse"
-	res := data1.negativeDiff(data2)
-	if len(res.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(res.Versions))
-	}
-}
-
-func Test_CnegativeDiff_3_RemovedVersions(t *testing.T) {
+func Test_CDiff_6_RemovedVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := &Cookbook{Name: "something"}
-	res := data1.negativeDiff(data2)
-	if res.Name != "" {
-		t.Fatalf("Expected unchanged name, got: %v", res.Name)
+	pos, neg := data1.Diff(data2)
+	if pos != nil {
+		t.Fatalf("Expected nil, got: %v", pos)
 	}
-	if len(res.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(res.Versions))
+	for _, i := range [][]string{
+		{neg.Name, ""},
+		{neg.Versions["0.1.0"].LocationType, "opscode"},
+		{neg.Versions["0.1.0"].LocationPath, "https://example1.com"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
-	if res.Versions["0.1.0"].LocationType != "opscode" {
-		t.Fatalf("Expected 'opscode', got: %v",
-			res.Versions["0.1.0"].LocationType)
-	}
-	if res.Versions["0.1.0"].LocationPath != "https://example1.com" {
-		t.Fatalf("Expected 'https://example1.com', got: %v",
-			res.Versions["0.1.0"].LocationPath)
-	}
-}
-
-func Test_CnegativeDiff_4_ChangedVersion(t *testing.T) {
-	data1 := cdata()
-	data2 := cdata()
-	data2.Versions["0.1.0"].LocationType = "elsewhere"
-	res := data1.negativeDiff(data2)
-	if len(res.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(res.Versions))
+	if len(neg.Versions) != 1 {
+		t.Fatalf("Expected 1 versions, got: %v", len(neg.Versions))
 	}
 }

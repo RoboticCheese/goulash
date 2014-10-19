@@ -167,6 +167,27 @@ func (c1 Cookbook) Equals(c2 Cookbook) (res bool, err error) {
 	return
 }
 
+// Diff returns any attributes added/changed/removed from one Cookbook struct
+// to another
+func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
+	if c1.Equals(c2) {
+		return
+	}
+	pos = c1.positiveDiff(c2)
+	neg = c1.negativeDiff(c2)
+	return
+}
+
+// positiveDiff returns any attributes that have been added or modified (a
+// positive diff) from one Cookbook struct to another.
+func (c1 *Cookbook) positiveDiff(c2 *Cookbook) (diff *Cookbook) {
+}
+
+// negativeDiff returns any attributes that have been removed (a negative diff)
+// from one Cookbook struct to another.
+func (c1 *Cookbook) negativeDiff(c2 *Cookbook) (diff *Cookbook) {
+}
+
 // decodeJSON accepts an IO reader and a Cookbook struct and populates that
 // struct with the JSON data.
 func decodeJSON(r io.Reader, c *Cookbook) (err error) {

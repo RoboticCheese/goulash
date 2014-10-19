@@ -361,24 +361,17 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	if neg != nil {
-		t.Fatalf("Expected nil, got: %v", neg)
-	}
-	chk := pos.Cookbooks["chef"].Versions["0.12.0"]
-	if chk.LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
-	}
-	chk = u.Cookbooks["chef"].Versions["0.12.0"]
-	if chk.LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
+	for _, i := range [][]string{
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
+		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
+		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationType, "opscode"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.getchef.com/api/v1"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -472,24 +465,18 @@ func Test_Update_4_ETagSomeChanges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	if neg != nil {
-		t.Fatalf("Expected nil, got: %v", neg)
-	}
-	chk := pos.Cookbooks["chef"].Versions["0.12.0"]
-	if chk.LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
-	}
-	chk = u.Cookbooks["chef"].Versions["0.12.0"]
-	if chk.LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
+
+	for _, i := range [][]string{
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
+		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
+		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationType, "opscode"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.getchef.com/api/v1"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -620,12 +607,16 @@ func Test_Diff_4_UpdatedCookbook(t *testing.T) {
 	if len(pos.Cookbooks) != 1 {
 		t.Fatalf("Expected 1 cookbook, got: %v", len(pos.Cookbooks))
 	}
-	if pos.Cookbooks["test1"].Versions["0.1.0"].LocationType != "elsewhere" {
-		t.Fatalf("Expected 'elsewhere', got: %v",
-			pos.Cookbooks["test1"].Versions["0.1.0"].LocationType)
+	if len(neg.Cookbooks) != 1 {
+		t.Fatalf("Expected 1 cookbook, got: %v", len(neg.Cookbooks))
 	}
-	if neg != nil {
-		t.Fatalf("Expected nil, got: %v", neg)
+	for _, i := range [][]string{
+		{pos.Cookbooks["test1"].Versions["0.1.0"].LocationType, "elsewhere"},
+		{neg.Cookbooks["test1"].Versions["0.1.0"].LocationType, "opscode"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
 	}
 }
 

@@ -65,6 +65,9 @@ func NewCookbookVersion() (cv *CookbookVersion) {
 // anything or still holds all the base defaults.
 func (cv *CookbookVersion) Empty() (empty bool) {
 	empty = true
+	if cv == nil {
+		return
+	}
 	for _, i := range []string{
 		cv.Version,
 		cv.LocationType,
@@ -95,15 +98,20 @@ func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersio
 	if cv1.Equals(cv2) {
 		return
 	}
-	pos = NewCookbookVersion()
-	neg = NewCookbookVersion()
+	r1 := reflect.ValueOf(cv1).Elem()
+	r2 := reflect.ValueOf(cv2).Elem()
 
-	if cv1.Equals(cv2) {
+	if !r1.IsValid() {
+		pos = cv2
+		return
+	}
+	if !r2.IsValid() {
+		neg = cv1
 		return
 	}
 
-	r1 := reflect.ValueOf(cv1).Elem()
-	r2 := reflect.ValueOf(cv2).Elem()
+	pos = NewCookbookVersion()
+	neg = NewCookbookVersion()
 	rpos := reflect.ValueOf(pos).Elem()
 	rneg := reflect.ValueOf(neg).Elem()
 	for i := 0; i < r1.NumField(); i++ {

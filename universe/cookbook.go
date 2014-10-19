@@ -71,6 +71,9 @@ func NewCookbook() (c *Cookbook) {
 // still holds all the base defaults.
 func (c *Cookbook) Empty() (empty bool) {
 	empty = true
+	if c == nil {
+		return
+	}
 	if c.Name != "" {
 		empty = false
 		return
@@ -99,47 +102,30 @@ func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 	if c1.Equals(c2) {
 		return
 	}
-	pos = c1.positiveDiff(c2)
-	neg = c1.negativeDiff(c2)
-	return
-}
-
-// positiveDiff returns any attributes that have been added or changed from one
-// Cookbook struct to another.
-func (c1 *Cookbook) positiveDiff(c2 *Cookbook) (pos *Cookbook) {
-	if c1.Equals(c2) {
-		return
-	}
 	pos = NewCookbook()
-	if c1.Name != c2.Name && c2.Name != "" {
-		pos.Name = c2.Name
-	}
-	for k, v := range c2.Versions {
-		if c1.Versions[k] == nil {
-			pos.Versions[k] = v
-		} else if !c1.Versions[k].Equals(v) {
-			pos.Versions[k], _ = c1.Versions[k].Diff(v)
-		}
-	}
-	return
-}
-
-// negativeDiff returns any attributes that have been removed from one Cookbook
-// struct to another.
-func (c1 *Cookbook) negativeDiff(c2 *Cookbook) (neg *Cookbook) {
-	if c1.Equals(c2) {
-		return
-	}
 	neg = NewCookbook()
-	if c1.Name != c2.Name && c2.Name == "" {
+
+	if c1.Name != c2.Name {
+		pos.Name = c2.Name
 		neg.Name = c1.Name
 	}
-	for k, v := range c1.Versions {
+	for k, _ := range c1.Versions {
 		if c2.Versions[k] == nil {
-			neg.Versions[k] = v
-		} else if !c1.Versions[k].Equals(v) {
-			_, neg.Versions[k] = c1.Versions[k].Diff(v)
+			neg.Versions[k] = c1.Versions[k]
+		} else if !c1.Versions[k].Equals(c2.Versions[k]) {
+			pos.Versions[k], neg.Versions[k] = c1.Versions[k].Diff(c2.Versions[k])
 		}
+	}
+	for k, _ := range c2.Versions {
+		if c1.Versions[k] == nil {
+			pos.Versions[k] = c2.Versions[k]
+		}
+	}
+	if pos.Empty() {
+		pos = nil
+	}
+	if neg.Empty() {
+		neg = nil
 	}
 	return
 }
