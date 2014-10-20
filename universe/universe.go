@@ -192,44 +192,23 @@ func (u1 *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
 	if u1.Equals(u2) {
 		return
 	}
-	pos = u1.positiveDiff(u2)
-	neg = u1.negativeDiff(u2)
-	return
-}
-
-// positiveDiff returns any attributes that have been added or modified (a
-// positive diff) from one Universe struct to another.
-func (u1 *Universe) positiveDiff(u2 *Universe) (pos *Universe) {
-	if u1.Equals(u2) {
-		return
-	}
 	pos = NewUniverse()
-	for k, v := range u2.Cookbooks {
-		if u1.Cookbooks[k] == nil || u1.Cookbooks[k].Empty() {
-			pos.Cookbooks[k] = v
-		} else if !u1.Cookbooks[k].Equals(v) {
-			pos.Cookbooks[k], _ = u1.Cookbooks[k].Diff(v)
+	neg = NewUniverse()
+
+	for k, _ := range u1.Cookbooks {
+		if u2.Cookbooks[k] == nil {
+			neg.Cookbooks[k] = u1.Cookbooks[k]
+		} else if !u1.Cookbooks[k].Equals(u2.Cookbooks[k]) {
+			pos.Cookbooks[k], neg.Cookbooks[k] = u1.Cookbooks[k].Diff(u2.Cookbooks[k])
+		}
+	}
+	for k, _ := range u2.Cookbooks {
+		if u1.Cookbooks[k] == nil {
+			pos.Cookbooks[k] = u2.Cookbooks[k]
 		}
 	}
 	if pos.Empty() {
 		pos = nil
-	}
-	return
-}
-
-// negativeDiff returns any attributes that have been removed (a negative diff)
-// from one Universe struct to another.
-func (u1 *Universe) negativeDiff(u2 *Universe) (neg *Universe) {
-	if u1.Equals(u2) {
-		return
-	}
-	neg = NewUniverse()
-	for k, v := range u1.Cookbooks {
-		if u2.Cookbooks[k] == nil || u2.Cookbooks[k].Empty() {
-			neg.Cookbooks[k] = v
-		} else if !v.Equals(u2.Cookbooks[k]) {
-			_, neg.Cookbooks[k] = v.Diff(u2.Cookbooks[k])
-		}
 	}
 	if neg.Empty() {
 		neg = nil
