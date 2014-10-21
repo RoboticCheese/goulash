@@ -68,20 +68,23 @@ func (cv *CookbookVersion) Empty() (empty bool) {
 	if cv == nil {
 		return
 	}
-	for _, i := range []string{
-		cv.Version,
-		cv.LocationType,
-		cv.LocationPath,
-		cv.DownloadURL,
-	} {
-		if i != "" {
-			empty = false
-			return
+	r := reflect.ValueOf(cv).Elem()
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		switch f.Kind() {
+		case reflect.String:
+			if f.String() != "" {
+				empty = false
+				return
+			}
+		case reflect.Map:
+			for _, k := range f.MapKeys() {
+				if f.MapIndex(k).String() != "" {
+					empty = false
+					return
+				}
+			}
 		}
-	}
-	if len(cv.Dependencies) != 0 {
-		empty = false
-		return
 	}
 	return
 }
