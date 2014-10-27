@@ -74,17 +74,23 @@ func (c *Cookbook) Empty() (empty bool) {
 	if c == nil {
 		return
 	}
-	if c.Name != "" {
-		empty = false
-		return
-	}
-	if len(c.Versions) == 0 {
-		return
-	}
-	for _, v := range c.Versions {
-		if !v.Empty() {
-			empty = false
-			return
+	r := reflect.ValueOf(c).Elem()
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		switch f.Kind() {
+		case reflect.String:
+			if f.String() != "" {
+				empty = false
+				break
+			}
+		case reflect.Map:
+			for _, k := range f.MapKeys() {
+				method := f.MapIndex(k).MethodByName("Empty")
+				if !method.Call([]reflect.Value{})[0].Bool() {
+					empty = false
+					return
+				}
+			}
 		}
 	}
 	return
