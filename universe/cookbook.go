@@ -108,23 +108,53 @@ func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 	if c1.Equals(c2) {
 		return
 	}
+	r1 := reflect.ValueOf(c1).Elem()
+	r2 := reflect.ValueOf(c2).Elem()
+
+	if !r1.IsValid() {
+		pos = c2
+		return
+	}
+	if !r2.IsValid() {
+		neg = c1
+		return
+	}
+
 	pos = NewCookbook()
 	neg = NewCookbook()
+	rpos := reflect.ValueOf(pos).Elem()
+	rneg := reflect.ValueOf(neg).Elem()
+	for i := 0; i < r1.NumField(); i++ {
+		f1 := r1.Field(i)
+		f2 := r2.Field(i)
 
-	if c1.Name != c2.Name {
-		pos.Name = c2.Name
-		neg.Name = c1.Name
-	}
-	for k, _ := range c1.Versions {
-		if c2.Versions[k] == nil {
-			neg.Versions[k] = c1.Versions[k]
-		} else if !c1.Versions[k].Equals(c2.Versions[k]) {
-			pos.Versions[k], neg.Versions[k] = c1.Versions[k].Diff(c2.Versions[k])
-		}
-	}
-	for k, _ := range c2.Versions {
-		if c1.Versions[k] == nil {
-			pos.Versions[k] = c2.Versions[k]
+		switch f1.Kind() {
+		case reflect.String:
+			if f1.String() != f2.String() {
+				rpos.Field(i).Set(f2)
+				rneg.Field(i).Set(f1)
+			}
+		case reflect.Map:
+			for _, k := range f1.MapKeys() {
+				if f2.MapIndex(k).Kind() == reflect.Invalid {
+					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
+				} else {
+					meth := f1.MapIndex(k).MethodByName("Equals")
+					arg := []reflect.Value{f2.MapIndex(k)}
+					if !meth.Call(arg)[0].Bool() {
+						meth := f1.MapIndex(k).MethodByName("Diff")
+						arg := []reflect.Value{f2.MapIndex(k)}
+						diffs := meth.Call(arg)
+						rpos.Field(i).SetMapIndex(k, diffs[0])
+						rneg.Field(i).SetMapIndex(k, diffs[1])
+					}
+				}
+			}
+			for _, k := range f2.MapKeys() {
+				if f1.MapIndex(k).Kind() == reflect.Invalid {
+					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
+				}
+			}
 		}
 	}
 	if pos.Empty() {
