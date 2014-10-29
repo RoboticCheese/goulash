@@ -23,6 +23,7 @@ package common
 
 import (
 	"net/http"
+	"reflect"
 )
 
 // Supermarketer implements an interface shared by all the Goulash structs.
@@ -38,6 +39,25 @@ func New(endpoint string) (c Component, err error) {
 	c = Component{}
 	c.Endpoint = endpoint
 	c.ETag, err = getETag(c.Endpoint)
+	return
+}
+
+func (c *Component) Empty() (empty bool) {
+	empty = true
+	if c == nil {
+		return
+	}
+	r := reflect.ValueOf(c).Elem()
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		switch f.Kind() {
+		case reflect.String:
+			if f.String() != "" {
+				empty = false
+				break
+			}
+		}
+	}
 	return
 }
 

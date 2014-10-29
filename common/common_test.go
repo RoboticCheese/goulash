@@ -79,3 +79,29 @@ func Test_New_2_ETag(t *testing.T) {
 		t.Fatalf("Expected 'hellothere', got: %v", c.ETag)
 	}
 }
+
+func Test_Empty_1_Empty(t *testing.T) {
+	c := new(Component)
+	res := c.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_Empty_2_HasEndpoint(t *testing.T) {
+	c := new(Component)
+	c.Endpoint = "https://example.com"
+	res := c.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_3_HasETag(t *testing.T) {
+	c := new(Component)
+	c.ETag = "thing"
+	res := c.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
