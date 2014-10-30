@@ -224,6 +224,7 @@ func Test_Empty_4_HasEndpoint(t *testing.T) {
 func Test_Empty_5_HasAPIInstance(t *testing.T) {
 	u := NewUniverse()
 	i := new(api_instance.APIInstance)
+	i.BaseURL = "https://example.com"
 	u.APIInstance = i
 	res := u.Empty()
 	if res != false {

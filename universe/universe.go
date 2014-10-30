@@ -138,21 +138,35 @@ func (u *Universe) Empty() (empty bool) {
 	if u == nil {
 		return
 	}
-	if u.Endpoint != "" {
-		empty = false
-		return
-	}
-	if u.APIInstance != nil {
-		empty = false
-		return
-	}
-	if len(u.Cookbooks) == 0 {
-		return
-	}
-	for _, c := range u.Cookbooks {
-		if !c.Empty() {
-			empty = false
-			return
+	r := reflect.ValueOf(u).Elem()
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		switch f.Kind() {
+		case reflect.String:
+			if f.String() != "" {
+				empty = false
+				break
+			}
+		case reflect.Struct:
+			method := f.Addr().MethodByName("Empty")
+			if !method.Call([]reflect.Value{})[0].Bool() {
+				empty = false
+				break
+			}
+		case reflect.Ptr:
+			method := f.MethodByName("Empty")
+			if !method.Call([]reflect.Value{})[0].Bool() {
+				empty = false
+				break
+			}
+		case reflect.Map:
+			for _, k := range f.MapKeys() {
+				method := f.MapIndex(k).MethodByName("Empty")
+				if !method.Call([]reflect.Value{})[0].Bool() {
+					empty = false
+					break
+				}
+			}
 		}
 	}
 	return
