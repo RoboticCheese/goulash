@@ -64,3 +64,38 @@ func Test_New_4_RealData(t *testing.T) {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 }
+
+func Test_Empty_1_Empty(t *testing.T) {
+	a := new(APIInstance)
+	res := a.Empty()
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_Empty_2_HasEndpoint(t *testing.T) {
+	a := new(APIInstance)
+	a.Endpoint = "https://example.com"
+	res := a.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_3_HasBaseURL(t *testing.T) {
+	a := new(APIInstance)
+	a.BaseURL = "https://example.com"
+	res := a.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_4_HasVersion(t *testing.T) {
+	a := new(APIInstance)
+	a.Version = "1"
+	res := a.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
