@@ -400,7 +400,6 @@ func Test_Update_3_NewVersionReleased(t *testing.T) {
 		DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/9.9.9/download",
 		Dependencies: map[string]string{"otherthing": ">= 0.0.0"},
 	}
-
 	pos, neg, err := u.Update()
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)

@@ -134,41 +134,7 @@ func NewUniverse() (u *Universe) {
 // Empty checks whether a Universe struct has been populated with anything or
 // still holds all the base defaults.
 func (u *Universe) Empty() (empty bool) {
-	empty = true
-	if u == nil {
-		return
-	}
-	r := reflect.ValueOf(u).Elem()
-	for i := 0; i < r.NumField(); i++ {
-		f := r.Field(i)
-		switch f.Kind() {
-		case reflect.String:
-			if f.String() != "" {
-				empty = false
-				break
-			}
-		case reflect.Struct:
-			method := f.Addr().MethodByName("Empty")
-			if !method.Call([]reflect.Value{})[0].Bool() {
-				empty = false
-				break
-			}
-		case reflect.Ptr:
-			method := f.MethodByName("Empty")
-			if !method.Call([]reflect.Value{})[0].Bool() {
-				empty = false
-				break
-			}
-		case reflect.Map:
-			for _, k := range f.MapKeys() {
-				method := f.MapIndex(k).MethodByName("Empty")
-				if !method.Call([]reflect.Value{})[0].Bool() {
-					empty = false
-					break
-				}
-			}
-		}
-	}
+	empty = common.Empty(u)
 	return
 }
 

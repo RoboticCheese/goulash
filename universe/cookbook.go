@@ -51,6 +51,7 @@ https://supermarket.getchef.com/universe =>
 package universe
 
 import (
+	"github.com/RoboticCheese/goulash/common"
 	"reflect"
 )
 
@@ -70,29 +71,7 @@ func NewCookbook() (c *Cookbook) {
 // Empty checks whether a Cookbook struct has been populated with anything or
 // still holds all the base defaults.
 func (c *Cookbook) Empty() (empty bool) {
-	empty = true
-	if c == nil {
-		return
-	}
-	r := reflect.ValueOf(c).Elem()
-	for i := 0; i < r.NumField(); i++ {
-		f := r.Field(i)
-		switch f.Kind() {
-		case reflect.String:
-			if f.String() != "" {
-				empty = false
-				break
-			}
-		case reflect.Map:
-			for _, k := range f.MapKeys() {
-				method := f.MapIndex(k).MethodByName("Empty")
-				if !method.Call([]reflect.Value{})[0].Bool() {
-					empty = false
-					return
-				}
-			}
-		}
-	}
+	empty = common.Empty(c)
 	return
 }
 
