@@ -105,3 +105,17 @@ func Test_Empty_3_HasETag(t *testing.T) {
 		t.Fatalf("Expected false, got: %v", res)
 	}
 }
+
+//func Test_emptyString_1_Empty(t *testing.T) {
+//	res := emptyString("")
+//	if res != true {
+//		t.Fatalf("Expected true, got: %v", res)
+//	}
+//}
+//
+//func Test_emptyString_2_NotEmpty(t *testing.T) {
+//	res := emptyString("abc")
+//	if res != false {
+//		t.Fatalf("Expected false, got: %v", res)
+//	}
+//}

@@ -27,7 +27,55 @@ import (
 )
 
 // Supermarketer implements an interface shared by all the Goulash structs.
-// type Supermarketer interface{}
+type Supermarketer interface {
+	Empty() bool
+	//	Equals(*Supermarketer) bool
+	//	Diff(*Supermarketer) (*Supermarketer, *Supermarketer)
+}
+
+func Empty(s Supermarketer) (empty bool) {
+	empty = true
+	r := reflect.ValueOf(s).Elem()
+	if s == nil || !r.IsValid() {
+		return
+	}
+	for i := 0; i < r.NumField(); i++ {
+		f := r.Field(i)
+		if !emptyValue(f) {
+			empty = false
+			break
+		}
+	}
+	return
+}
+
+func emptyValue(v reflect.Value) (empty bool) {
+	empty = true
+	switch v.Kind() {
+	case reflect.String:
+		if v.String() != "" {
+			empty = false
+		}
+	case reflect.Struct:
+		method := v.Addr().MethodByName("Empty")
+		if !method.Call([]reflect.Value{})[0].Bool() {
+			empty = false
+		}
+	case reflect.Ptr:
+		method := v.MethodByName("Empty")
+		if !method.Call([]reflect.Value{})[0].Bool() {
+			empty = false
+		}
+	case reflect.Map:
+		for _, k := range v.MapKeys() {
+			if !emptyValue(v.MapIndex(k)) {
+				empty = false
+				break
+			}
+		}
+	}
+	return
+}
 
 // Component defines variables to be shared by all the Goulash structs.
 type Component struct {
@@ -42,22 +90,10 @@ func New(endpoint string) (c Component, err error) {
 	return
 }
 
+// Empty checks whether a Component struct has been populated with anything
+// or still holds all the base defaults.
 func (c *Component) Empty() (empty bool) {
-	empty = true
-	if c == nil {
-		return
-	}
-	r := reflect.ValueOf(c).Elem()
-	for i := 0; i < r.NumField(); i++ {
-		f := r.Field(i)
-		switch f.Kind() {
-		case reflect.String:
-			if f.String() != "" {
-				empty = false
-				break
-			}
-		}
-	}
+	empty = Empty(c)
 	return
 }
 
