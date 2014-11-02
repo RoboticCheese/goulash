@@ -33,6 +33,9 @@ type Supermarketer interface {
 	//	Diff(*Supermarketer) (*Supermarketer, *Supermarketer)
 }
 
+// Empty can be passed any implementer of the Supermarketer interface and
+// determines whether it's been populated with anything or still holds all the
+// base defaults.
 func Empty(s Supermarketer) (empty bool) {
 	empty = true
 	r := reflect.ValueOf(s).Elem()
@@ -49,6 +52,7 @@ func Empty(s Supermarketer) (empty bool) {
 	return
 }
 
+// emptyValue implements an emptiness check for a reflect.Value.
 func emptyValue(v reflect.Value) (empty bool) {
 	empty = true
 	switch v.Kind() {
