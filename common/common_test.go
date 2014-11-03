@@ -29,6 +29,24 @@ func Test_Supermarketer_1(t *testing.T) {
 	// Doesn't do anything just yet
 }
 
+func Test_Equals_1_Equal(t *testing.T) {
+	c1 := Component{Endpoint: "somewhere"}
+	c2 := Component{Endpoint: "somewhere"}
+	res := Equals(&c1, &c2)
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+}
+
+func Test_Equals_2_NotEqual(t *testing.T) {
+	c1 := Component{Endpoint: "somewhere"}
+	c2 := Component{Endpoint: "elsewhere"}
+	res := Equals(&c1, &c2)
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
 func Test_emptyValue_1_EmptyString(t *testing.T) {
 	res := emptyValue(reflect.ValueOf(""))
 	if res != true {

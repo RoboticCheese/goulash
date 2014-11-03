@@ -70,8 +70,8 @@ func (cv *CookbookVersion) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a CookbookVersion struct
-func (cv1 *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
-	res = reflect.DeepEqual(cv1, cv2)
+func (cv1 *CookbookVersion) Equals(cv2 common.Supermarketer) (res bool) {
+	res = common.Equals(cv1, cv2)
 	return
 }
 

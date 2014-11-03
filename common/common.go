@@ -29,7 +29,7 @@ import (
 // Supermarketer implements an interface shared by all the Goulash structs.
 type Supermarketer interface {
 	Empty() bool
-	//	Equals(*Supermarketer) bool
+	Equals(Supermarketer) bool
 	//	Diff(*Supermarketer) (*Supermarketer, *Supermarketer)
 }
 
@@ -49,6 +49,13 @@ func Empty(s Supermarketer) (empty bool) {
 			break
 		}
 	}
+	return
+}
+
+// Equals does a deep comparison on two implementers of the Supermarketer
+// interface to determine whether they're equal or not.
+func Equals(s1 Supermarketer, s2 Supermarketer) (equal bool) {
+	equal = reflect.DeepEqual(s1, s2)
 	return
 }
 
@@ -98,6 +105,12 @@ func New(endpoint string) (c Component, err error) {
 // or still holds all the base defaults.
 func (c *Component) Empty() (empty bool) {
 	empty = Empty(c)
+	return
+}
+
+// Equals checks whether one Component struct is equal to another.
+func (c1 *Component) Equals(c2 Supermarketer) (equal bool) {
+	equal = Equals(c1, c2)
 	return
 }
 

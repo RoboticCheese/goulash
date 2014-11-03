@@ -78,7 +78,6 @@ import (
 	"github.com/RoboticCheese/goulash/common"
 	"io"
 	"net/http"
-	"reflect"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
@@ -139,8 +138,8 @@ func (u *Universe) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a Universe.
-func (u1 *Universe) Equals(u2 *Universe) (res bool) {
-	res = reflect.DeepEqual(u1, u2)
+func (u1 *Universe) Equals(u2 common.Supermarketer) (res bool) {
+	res = common.Equals(u1, u2)
 	return
 }
 

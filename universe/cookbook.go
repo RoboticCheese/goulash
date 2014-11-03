@@ -76,8 +76,8 @@ func (c *Cookbook) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a Cookbook.
-func (c1 *Cookbook) Equals(c2 *Cookbook) (res bool) {
-	res = reflect.DeepEqual(c1, c2)
+func (c1 *Cookbook) Equals(c2 common.Supermarketer) (res bool) {
+	res = common.Equals(c1, c2)
 	return
 }
 
