@@ -73,20 +73,94 @@ func start_http() (ts *httptest.Server) {
 	return
 }
 
-func Test_Equals_1_Equal(t *testing.T) {
-	data1 := cvdata1()
-	data2 := cvdata2()
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+func Test_Empty_1_Empty(t *testing.T) {
+	data := new(CookbookVersion)
+	res := data.Empty()
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
+}
+
+func Test_Empty_2_HasEndpoint(t *testing.T) {
+	data := new(CookbookVersion)
+	data.Endpoint = "something"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
 	}
+}
+
+func Test_Empty_3_HasLicense(t *testing.T) {
+	data := new(CookbookVersion)
+	data.License = "something"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_4_HasTarballFileSize(t *testing.T) {
+	data := new(CookbookVersion)
+	data.TarballFileSize = 21
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_5_HasVersion(t *testing.T) {
+	data := new(CookbookVersion)
+	data.Version = "1.2.3"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_6_HasAverageRating(t *testing.T) {
+	data := new(CookbookVersion)
+	data.AverageRating = 1
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_7_HasCookbook(t *testing.T) {
+	data := new(CookbookVersion)
+	data.Cookbook = "something"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_8_HasFile(t *testing.T) {
+	data := new(CookbookVersion)
+	data.File = "something"
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Empty_8_HasDependencies(t *testing.T) {
+	data := new(CookbookVersion)
+	data.Dependencies = map[string]string{"thing1": "1.2.3"}
+	res := data.Empty()
+	if res != false {
+		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_Equals_1_Equal(t *testing.T) {
+	data1 := cvdata1()
+	data2 := cvdata2()
+	res := data1.Equals(data2)
+	if res != true {
+		t.Fatalf("Expected true, got: %v", res)
+	}
+	res = data2.Equals(data1)
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
@@ -96,17 +170,11 @@ func Test_Equals_2_DifferentEndpoints(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.Endpoint = "https://somewhereelse.com"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res := data1.Equals(data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res = data2.Equals(data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -116,17 +184,11 @@ func Test_Equals_3_DifferentLicense(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.License = "closedsource"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res := data1.Equals(data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res = data2.Equals(data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -136,17 +198,11 @@ func Test_Equals_4_DifferentFileSize(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.TarballFileSize = 1
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res := data1.Equals(data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res = data2.Equals(data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -156,17 +212,11 @@ func Test_Equals_5_DifferentDependencies(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.Dependencies["thing2"] = ">= 0.0.0"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res := data1.Equals(data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no errors, got: %v", err)
-	}
+	res = data2.Equals(data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
