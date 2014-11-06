@@ -47,6 +47,55 @@ func Test_Equals_2_NotEqual(t *testing.T) {
 	}
 }
 
+func Test_Diff_1_Equal(t *testing.T) {
+	c1 := Component{Endpoint: "abc", ETag: "def"}
+	c2 := Component{Endpoint: "abc", ETag: "def"}
+	pos1, neg1 := Diff(&c1, &c2, &Component{}, &Component{})
+	pos2, neg2 := Diff(&c2, &c1, &Component{}, &Component{})
+	for _, i := range []Supermarketer{pos1, neg1, pos2, neg2} {
+		if i != nil {
+			t.Fatalf("Expected nil, got: %v", i)
+		}
+	}
+}
+
+func Test_Diff_2_AddedAndDeletedData(t *testing.T) {
+	c1 := Component{}
+	c2 := Component{Endpoint: "abc", ETag: "def"}
+	pos1, neg1 := Diff(&c1, &c2, &Component{}, &Component{})
+	pos2, neg2 := Diff(&c2, &c1, &Component{}, &Component{})
+	for _, i := range []Supermarketer{neg1, pos2} {
+		if i != nil {
+			t.Fatalf("Expected nil, got: %v", i)
+		}
+	}
+	for _, k := range [][]Supermarketer{
+		{pos1, &Component{Endpoint: "abc", ETag: "def"}},
+		{neg2, &Component{Endpoint: "abc", ETag: "def"}},
+	} {
+		if !Equals(k[0], k[1]) {
+			t.Fatalf("Expected %v, got: %v", k[1], k[0])
+		}
+	}
+}
+
+func Test_Diff_3_ChangedData(t *testing.T) {
+	c1 := Component{Endpoint: "abc", ETag: "def"}
+	c2 := Component{Endpoint: "uvw", ETag: "xyz"}
+	pos1, neg1 := Diff(&c1, &c2, &Component{}, &Component{})
+	pos2, neg2 := Diff(&c2, &c1, &Component{}, &Component{})
+	for _, k := range [][]Supermarketer{
+		{pos1, &Component{Endpoint: "uvw", ETag: "xyz"}},
+		{neg1, &Component{Endpoint: "abc", ETag: "def"}},
+		{pos2, &Component{Endpoint: "abc", ETag: "def"}},
+		{neg2, &Component{Endpoint: "uvw", ETag: "xyz"}},
+	} {
+		if !Equals(k[0], k[1]) {
+			t.Fatalf("Expected %v, got: %v", k[1], k[0])
+		}
+	}
+}
+
 func Test_emptyValue_1_EmptyString(t *testing.T) {
 	res := emptyValue(reflect.ValueOf(""))
 	if res != true {
@@ -167,6 +216,55 @@ func Test_CEmpty_3_HasETag(t *testing.T) {
 	res := c.Empty()
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
+	}
+}
+
+func Test_CDiff_1_Equal(t *testing.T) {
+	c1 := Component{Endpoint: "abc", ETag: "def"}
+	c2 := Component{Endpoint: "abc", ETag: "def"}
+	pos1, neg1 := c1.Diff(&c2)
+	pos2, neg2 := c2.Diff(&c1)
+	for _, i := range []Supermarketer{pos1, neg1, pos2, neg2} {
+		if i != nil {
+			t.Fatalf("Expected nil, got: %v", i)
+		}
+	}
+}
+
+func Test_CDiff_2_AddedAndDeletedData(t *testing.T) {
+	c1 := Component{}
+	c2 := Component{Endpoint: "abc", ETag: "def"}
+	pos1, neg1 := c1.Diff(&c2)
+	pos2, neg2 := c2.Diff(&c1)
+	for _, i := range []Supermarketer{neg1, pos2} {
+		if i != nil {
+			t.Fatalf("Expected nil, got: %v", i)
+		}
+	}
+	for _, k := range [][]Supermarketer{
+		{pos1, &Component{Endpoint: "abc", ETag: "def"}},
+		{neg2, &Component{Endpoint: "abc", ETag: "def"}},
+	} {
+		if !Equals(k[0], k[1]) {
+			t.Fatalf("Expected %v, got: %v", k[1], k[0])
+		}
+	}
+}
+
+func Test_CDiff_3_ChangedData(t *testing.T) {
+	c1 := Component{Endpoint: "abc", ETag: "def"}
+	c2 := Component{Endpoint: "uvw", ETag: "xyz"}
+	pos1, neg1 := c1.Diff(&c2)
+	pos2, neg2 := c2.Diff(&c1)
+	for _, k := range [][]Supermarketer{
+		{pos1, &Component{Endpoint: "uvw", ETag: "xyz"}},
+		{neg1, &Component{Endpoint: "abc", ETag: "def"}},
+		{pos2, &Component{Endpoint: "abc", ETag: "def"}},
+		{neg2, &Component{Endpoint: "uvw", ETag: "xyz"}},
+	} {
+		if !Equals(k[0], k[1]) {
+			t.Fatalf("Expected %v, got: %v", k[1], k[0])
+		}
 	}
 }
 
