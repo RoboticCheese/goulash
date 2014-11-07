@@ -70,6 +70,7 @@ import (
 	"github.com/RoboticCheese/goulash/common"
 	"io"
 	"net/http"
+	"reflect"
 )
 
 // Downloads represents the Downloads section of the metrics data.
@@ -105,7 +106,7 @@ type Cookbook struct {
 // New initializes and returns a new Cookbook struct based on a Supermarket
 // struct and cookbook name.
 func New(i *api_instance.APIInstance, name string) (c *Cookbook, err error) {
-	c = new(Cookbook)
+	c = NewCookbook()
 	c.Endpoint = i.Endpoint + "/cookbooks/" + name
 	c.Component, err = common.New(c.Endpoint)
 	if err != nil {
@@ -122,48 +123,23 @@ func New(i *api_instance.APIInstance, name string) (c *Cookbook, err error) {
 	return
 }
 
+// NewCookbook generates an empty Cookbook struct.
+func NewCookbook() (c *Cookbook) {
+	c = new(Cookbook)
+	c.Versions = []string{}
+	c.Metrics = Metrics{Downloads: Downloads{}}
+	return
+}
+
+// Empty checks whether a Cookbook struct has been populated with anything or
+// still holds all the base defaults.
+func (c Cookbook) Empty() (empty bool) {
+	empty = common.Empty(c)
+}
+
 // Equals implements an equality test for a Cookbook.
-func (c1 Cookbook) Equals(c2 Cookbook) (res bool, err error) {
-	res = false
-	for _, i := range [][]string{
-		{c1.Endpoint, c2.Endpoint},
-		{c1.Name, c2.Name},
-		{c1.Maintainer, c2.Maintainer},
-		{c1.Description, c2.Description},
-		{c1.Category, c2.Category},
-		{c1.LatestVersion, c2.LatestVersion},
-		{c1.ExternalURL, c2.ExternalURL},
-		{c1.CreatedAt, c2.CreatedAt},
-		{c1.UpdatedAt, c2.UpdatedAt},
-	} {
-		if i[0] != i[1] {
-			return
-		}
-	}
-	for _, i := range [][]int{
-		{c1.AverageRating, c2.AverageRating},
-		{len(c1.Versions), len(c2.Versions)},
-		{c1.Metrics.Downloads.Total, c2.Metrics.Downloads.Total},
-		{c1.Metrics.Followers, c2.Metrics.Followers},
-	} {
-		if i[0] != i[1] {
-			return
-		}
-	}
-	if c1.Deprecated != c2.Deprecated || c1.FoodcriticFailure != c2.FoodcriticFailure {
-		return
-	}
-	for k, v := range c1.Versions {
-		if v != c2.Versions[k] {
-			return
-		}
-	}
-	for k, v := range c1.Metrics.Downloads.Versions {
-		if v != c2.Metrics.Downloads.Versions[k] {
-			return
-		}
-	}
-	res = true
+func (c1 Cookbook) Equals(c2 common.Supermarketer) (res bool) {
+	res = common.Equals(c1, c2)
 	return
 }
 
@@ -173,19 +149,77 @@ func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 	if c1.Equals(c2) {
 		return
 	}
-	pos = c1.positiveDiff(c2)
-	neg = c1.negativeDiff(c2)
+	r1 := reflect.ValueOf(c1).Elem()
+	r2 := reflect.ValueOf(c2).Elem()
+
+	if !r1.IsValid() {
+		pos = c2
+		return
+	}
+	if !r2.IsValid() {
+		neg = c1
+		return
+	}
+
+	pos = NewCookbook()
+	neg = NewCookbook()
+	rpos := reflect.ValueOf(pos).Elem()
+	rneg := reflect.ValueOf(neg).Elem()
+	for i := 0; i < r1.NumField(); i++ {
+		f1 := r1.Field(i)
+		f2 := r2.Field(i)
+
+		switch f1.Kind() {
+		case reflect.String:
+			if f1.String() != f2.String() {
+				rpos.Field(i).Set(f2)
+				rneg.Field(i).Set(f1)
+			}
+		case reflect.Int:
+			if f1.Int() != f2.Int() {
+				rpos.Field(i).Set(f2)
+				rneg.Field(i).Set(f1)
+			}
+		case reflect.Bool:
+			if f1.Bool() != f2.Bool() {
+				rpos.Field(i).Set(f2)
+				rneg.Field(i).Set(f1)
+			}
+		case reflect.Slice:
+			for j := 0; j < f1.Len(); j++ {
+				found := false
+				for k := 0; k < f2.Len(); k++ {
+					if f2.Index(k) == f1.Index(j) {
+						found = true
+						break
+					}
+				}
+				if found == false {
+					rneg.Field(i).Set(reflect.Append(rneg.Field(i), f1.Index(j)))
+				}
+			}
+			for j := 0; j < f2.Len(); j++ {
+				found := false
+				for k := 0; k < f1.Len(); k++ {
+					if f1.Index(k) == f2.Index(j) {
+						found = true
+						break
+					}
+				}
+				if found == false {
+					rpos.Field(i).Set(reflect.Append(rpos.Field(i), f2.Index(j)))
+				}
+			}
+		case reflect.Struct:
+		}
+	}
+	if pos.Empty() {
+		pos = nil
+	}
+	if neg.Empty() {
+		neg = nil
+	}
 	return
-}
-
-// positiveDiff returns any attributes that have been added or modified (a
-// positive diff) from one Cookbook struct to another.
-func (c1 *Cookbook) positiveDiff(c2 *Cookbook) (diff *Cookbook) {
-}
-
-// negativeDiff returns any attributes that have been removed (a negative diff)
-// from one Cookbook struct to another.
-func (c1 *Cookbook) negativeDiff(c2 *Cookbook) (diff *Cookbook) {
 }
 
 // decodeJSON accepts an IO reader and a Cookbook struct and populates that
