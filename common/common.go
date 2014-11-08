@@ -87,27 +87,12 @@ func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarket
 		f1 := r1.Field(i)
 		f2 := r2.Field(i)
 
-		switch f1.Kind() {
-		case reflect.String:
-			if f1.String() != f2.String() {
-				rpos.Field(i).Set(f2)
-				rneg.Field(i).Set(f1)
-			}
-		case reflect.Map:
-			for _, k := range f1.MapKeys() {
-				if f2.MapIndex(k).Kind() == reflect.Invalid {
-					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
-					// TODO: Needs to support more than map[string]string k:v
-				} else if f1.MapIndex(k).String() != f2.MapIndex(k).String() {
-					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
-					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
-				}
-			}
-			for _, k := range f2.MapKeys() {
-				if f1.MapIndex(k).Kind() == reflect.Invalid {
-					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
-				}
-			}
+		pos_diff, neg_diff := diffValue(f1, f2)
+		if pos_diff.IsValid() {
+			rpos.Field(i).Set(pos_diff)
+		}
+		if neg_diff.IsValid() {
+			rneg.Field(i).Set(neg_diff)
 		}
 	}
 	if pos.Empty() {
@@ -119,7 +104,57 @@ func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarket
 	return pos, neg
 }
 
-// emptyValue implements an emptiness check for a reflect.Value.
+// diffValue implements a diff check on two reflect.Values so the check can be
+// iterable.
+func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg reflect.Value) {
+	if !v1.IsValid() {
+		vpos = v1
+		return
+	}
+	if !v2.IsValid() {
+		vneg = v2
+		return
+	}
+	vpos = reflect.New(v1.Type()).Elem()
+	vneg = reflect.New(v1.Type()).Elem()
+	switch v1.Kind() {
+	case reflect.String:
+		if v1.String() != v2.String() {
+			vpos.Set(v2)
+			vneg.Set(v1)
+		}
+	case reflect.Struct:
+		method := v1.Addr().MethodByName("Equals")
+		arg := []reflect.Value{v2}
+		if !method.Call(arg)[0].Bool() {
+			method := v1.Addr().MethodByName("Diff")
+			arg := []reflect.Value{v2}
+			diffs := method.Call(arg)
+			vpos.Set(diffs[0])
+			vneg.Set(diffs[1])
+		}
+	case reflect.Ptr:
+		method := v1.MethodByName("Equals")
+		arg := []reflect.Value{v2}
+		if !method.Call(arg)[0].Bool() {
+			method := v1.MethodByName("Diff")
+			arg := []reflect.Value{v2}
+			diffs := method.Call(arg)
+			vpos.Set(diffs[0])
+			vneg.Set(diffs[1])
+		}
+	case reflect.Map:
+		for _, k := range v1.MapKeys() {
+			sub_pos, sub_neg := diffValue(v1.MapIndex(k), v2.MapIndex(k))
+			vpos.SetMapIndex(k, sub_pos)
+			vneg.SetMapIndex(k, sub_neg)
+		}
+	}
+	return
+}
+
+// emptyValue implements an emptiness check for a reflect.Value so the check
+// can be iterable.
 func emptyValue(v reflect.Value) (empty bool) {
 	empty = true
 	switch v.Kind() {
