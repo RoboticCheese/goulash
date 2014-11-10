@@ -29,19 +29,21 @@ import (
 // Supermarketer implements an interface shared by all the Goulash structs.
 type Supermarketer interface {
 	Empty() bool
-	Equals(Supermarketer) bool
-	Diff(Supermarketer) (Supermarketer, Supermarketer)
+	// Lack of "covariant return types" for interfaces makes these args
+	// and return types too non-sensical.
+	// Equals(Supermarketer) bool
+	// Diff(Supermarketer) (Supermarketer, Supermarketer)
 }
 
-// Empty can be passed any implementer of the Supermarketer interface and
-// determines whether it's been populated with anything or still holds all the
-// base defaults.
+// Empty can be passed any reflect.Value and determines whether it's been
+// populated with anything or still holds all the base defaults.
 func Empty(s Supermarketer) (empty bool) {
 	empty = true
-	r := reflect.ValueOf(s).Elem()
-	if s == nil || !r.IsValid() {
+	v := reflect.ValueOf(s)
+	if !v.IsValid() {
 		return
 	}
+	r := v.Elem()
 	for i := 0; i < r.NumField(); i++ {
 		f := r.Field(i)
 		if !emptyValue(f) {
@@ -52,53 +54,57 @@ func Empty(s Supermarketer) (empty bool) {
 	return
 }
 
-// Equals does a deep comparison on two implementers of the Supermarketer
-// interface to determine whether they're equal or not.
+// Equals does a deep comparison on two reflect.Values.
 func Equals(s1 Supermarketer, s2 Supermarketer) (equal bool) {
 	equal = reflect.DeepEqual(s1, s2)
 	return
 }
 
-// Diff returns any attributes that have been changed from one implementer of
-// the Supermarketer interface to another by filling in two empty structs for
-// a positive and negative diff.
+// Diff returns any attributes that have been changed from one reflect.Value
+// to another.
 func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarketer) (Supermarketer, Supermarketer) {
-	if s1.Equals(s2) {
+	// TODO: Return an error if v1 and v2 are different types?
+	v1 := reflect.ValueOf(s1).Elem()
+	v2 := reflect.ValueOf(s2).Elem()
+	vpos := reflect.ValueOf(pos).Elem()
+	vneg := reflect.ValueOf(neg).Elem()
+	if v1.Type() != v2.Type() {
+		pos = s2
+		neg = s1
+		return pos, neg
+	}
+	if Equals(s1, s2) {
 		pos = nil
 		neg = nil
 		return pos, neg
 	}
-	r1 := reflect.Indirect(reflect.ValueOf(s1))
-	r2 := reflect.Indirect(reflect.ValueOf(s2))
-	if !r1.IsValid() {
+	if !v1.IsValid() {
 		pos = s2
 		neg = nil
 		return pos, neg
 	}
-	if !r2.IsValid() {
+	if !v2.IsValid() {
 		pos = nil
 		neg = s1
 		return pos, neg
 	}
 
-	rpos := reflect.ValueOf(pos).Elem()
-	rneg := reflect.ValueOf(neg).Elem()
-	for i := 0; i < r1.NumField(); i++ {
-		f1 := r1.Field(i)
-		f2 := r2.Field(i)
+	for i := 0; i < v1.NumField(); i++ {
+		f1 := v1.Field(i)
+		f2 := v2.Field(i)
 
 		pos_diff, neg_diff := diffValue(f1, f2)
 		if pos_diff.IsValid() {
-			rpos.Field(i).Set(pos_diff)
+			vpos.Field(i).Set(pos_diff)
 		}
 		if neg_diff.IsValid() {
-			rneg.Field(i).Set(neg_diff)
+			vneg.Field(i).Set(neg_diff)
 		}
 	}
-	if pos.Empty() {
+	if Empty(pos) {
 		pos = nil
 	}
-	if neg.Empty() {
+	if Empty(neg) {
 		neg = nil
 	}
 	return pos, neg
@@ -153,8 +159,7 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 	return
 }
 
-// emptyValue implements an emptiness check for a reflect.Value so the check
-// can be iterable.
+// emptyValue splits out the iterable portion of an emptiness check.
 func emptyValue(v reflect.Value) (empty bool) {
 	empty = true
 	switch v.Kind() {
@@ -180,39 +185,6 @@ func emptyValue(v reflect.Value) (empty bool) {
 			}
 		}
 	}
-	return
-}
-
-// Component defines variables to be shared by all the Goulash structs.
-type Component struct {
-	Endpoint string
-	ETag     string
-}
-
-func New(endpoint string) (c Component, err error) {
-	c = Component{}
-	c.Endpoint = endpoint
-	c.ETag, err = getETag(c.Endpoint)
-	return
-}
-
-// Empty checks whether a Component struct has been populated with anything
-// or still holds all the base defaults.
-func (c *Component) Empty() (empty bool) {
-	empty = Empty(c)
-	return
-}
-
-// Equals checks whether one Component struct is equal to another.
-func (c1 *Component) Equals(c2 Supermarketer) (equal bool) {
-	equal = Equals(c1, c2)
-	return
-}
-
-// Diff returns any attributes that have been changed from one Component struct
-// to another.
-func (c1 *Component) Diff(c2 Supermarketer) (pos, neg Supermarketer) {
-	pos, neg = Diff(c1, c2, &Component{}, &Component{})
 	return
 }
 
