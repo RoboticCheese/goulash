@@ -43,7 +43,10 @@ func Empty(s Supermarketer) (empty bool) {
 	if !v.IsValid() {
 		return
 	}
-	r := v.Elem()
+	r := v
+	if v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr {
+		r = v.Elem()
+	}
 	for i := 0; i < r.NumField(); i++ {
 		f := r.Field(i)
 		if !emptyValue(f) {
@@ -64,10 +67,22 @@ func Equals(s1 Supermarketer, s2 Supermarketer) (equal bool) {
 // to another.
 func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarketer) (Supermarketer, Supermarketer) {
 	// TODO: Return an error if v1 and v2 are different types?
-	v1 := reflect.ValueOf(s1).Elem()
-	v2 := reflect.ValueOf(s2).Elem()
-	vpos := reflect.ValueOf(pos).Elem()
-	vneg := reflect.ValueOf(neg).Elem()
+	v1 := reflect.ValueOf(s1)
+	if v1.Kind() == reflect.Interface || v1.Kind() == reflect.Ptr {
+		v1 = reflect.ValueOf(s1).Elem()
+	}
+	v2 := reflect.ValueOf(s2)
+	if v2.Kind() == reflect.Interface || v2.Kind() == reflect.Ptr {
+		v2 = reflect.ValueOf(s2).Elem()
+	}
+	vpos := reflect.ValueOf(pos)
+	if vpos.Kind() == reflect.Interface || vpos.Kind() == reflect.Ptr {
+		vpos = reflect.ValueOf(pos).Elem()
+	}
+	vneg := reflect.ValueOf(neg)
+	if vneg.Kind() == reflect.Interface || vneg.Kind() == reflect.Ptr {
+		vneg = reflect.ValueOf(neg).Elem()
+	}
 	if v1.Type() != v2.Type() {
 		pos = s2
 		neg = s1
@@ -140,15 +155,9 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 			vneg.Set(diffs[1])
 		}
 	case reflect.Ptr:
-		method := v1.MethodByName("Equals")
-		arg := []reflect.Value{v2}
-		if !method.Call(arg)[0].Bool() {
-			method := v1.MethodByName("Diff")
-			arg := []reflect.Value{v2}
-			diffs := method.Call(arg)
-			vpos.Set(diffs[0])
-			vneg.Set(diffs[1])
-		}
+		p, n := diffValue(reflect.Indirect(v1), reflect.Indirect(v2))
+		vpos.Set(p)
+		vneg.Set(n)
 	case reflect.Map:
 		for _, k := range v1.MapKeys() {
 			sub_pos, sub_neg := diffValue(v1.MapIndex(k), v2.MapIndex(k))
@@ -173,8 +182,7 @@ func emptyValue(v reflect.Value) (empty bool) {
 			empty = false
 		}
 	case reflect.Ptr:
-		method := v.MethodByName("Empty")
-		if !method.Call([]reflect.Value{})[0].Bool() {
+		if !emptyValue(reflect.Indirect(v)) {
 			empty = false
 		}
 	case reflect.Map:
