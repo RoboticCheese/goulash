@@ -1,9 +1,6 @@
 package common
 
 import (
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 )

@@ -38,22 +38,7 @@ type Supermarketer interface {
 // Empty can be passed any reflect.Value and determines whether it's been
 // populated with anything or still holds all the base defaults.
 func Empty(s Supermarketer) (empty bool) {
-	empty = true
-	v := reflect.ValueOf(s)
-	if !v.IsValid() {
-		return
-	}
-	r := v
-	if v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr {
-		r = v.Elem()
-	}
-	for i := 0; i < r.NumField(); i++ {
-		f := r.Field(i)
-		if !emptyValue(f) {
-			empty = false
-			break
-		}
-	}
+	empty = emptyValue(reflect.ValueOf(s))
 	return
 }
 
@@ -66,56 +51,20 @@ func Equals(s1 Supermarketer, s2 Supermarketer) (equal bool) {
 // Diff returns any attributes that have been changed from one reflect.Value
 // to another.
 func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarketer) (Supermarketer, Supermarketer) {
-	// TODO: Return an error if v1 and v2 are different types?
-	v1 := reflect.ValueOf(s1)
-	if v1.Kind() == reflect.Interface || v1.Kind() == reflect.Ptr {
-		v1 = reflect.ValueOf(s1).Elem()
-	}
-	v2 := reflect.ValueOf(s2)
-	if v2.Kind() == reflect.Interface || v2.Kind() == reflect.Ptr {
-		v2 = reflect.ValueOf(s2).Elem()
-	}
-	vpos := reflect.ValueOf(pos)
-	if vpos.Kind() == reflect.Interface || vpos.Kind() == reflect.Ptr {
-		vpos = reflect.ValueOf(pos).Elem()
-	}
-	vneg := reflect.ValueOf(neg)
-	if vneg.Kind() == reflect.Interface || vneg.Kind() == reflect.Ptr {
-		vneg = reflect.ValueOf(neg).Elem()
-	}
-	if v1.Type() != v2.Type() {
-		pos = s2
-		neg = s1
-		return pos, neg
-	}
 	if Equals(s1, s2) {
 		pos = nil
 		neg = nil
 		return pos, neg
 	}
-	if !v1.IsValid() {
-		pos = s2
-		neg = nil
-		return pos, neg
-	}
-	if !v2.IsValid() {
-		pos = nil
-		neg = s1
-		return pos, neg
-	}
 
-	for i := 0; i < v1.NumField(); i++ {
-		f1 := v1.Field(i)
-		f2 := v2.Field(i)
+	v1 := reflect.ValueOf(s1)
+	v2 := reflect.ValueOf(s2)
+	vpos := reflect.ValueOf(&pos).Elem()
+	vneg := reflect.ValueOf(&neg).Elem()
+	p, n := diffValue(v1, v2)
+	vpos.Set(p)
+	vneg.Set(n)
 
-		pos_diff, neg_diff := diffValue(f1, f2)
-		if pos_diff.IsValid() {
-			vpos.Field(i).Set(pos_diff)
-		}
-		if neg_diff.IsValid() {
-			vneg.Field(i).Set(neg_diff)
-		}
-	}
 	if Empty(pos) {
 		pos = nil
 	}
@@ -128,16 +77,23 @@ func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarket
 // diffValue implements a diff check on two reflect.Values so the check can be
 // iterable.
 func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg reflect.Value) {
+	vpos = reflect.New(v1.Type()).Elem()
+	vneg = reflect.New(v1.Type()).Elem()
+
 	if !v1.IsValid() {
-		vpos = v1
+		vpos.Set(v1)
 		return
 	}
 	if !v2.IsValid() {
-		vneg = v2
+		vneg.Set(v2)
 		return
 	}
-	vpos = reflect.New(v1.Type()).Elem()
-	vneg = reflect.New(v1.Type()).Elem()
+	if v1.Type() != v2.Type() {
+		vpos = v2
+		vneg = v1
+		return
+	}
+
 	switch v1.Kind() {
 	case reflect.String:
 		if v1.String() != v2.String() {
@@ -145,17 +101,19 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 			vneg.Set(v1)
 		}
 	case reflect.Struct:
-		method := v1.Addr().MethodByName("Equals")
-		arg := []reflect.Value{v2}
-		if !method.Call(arg)[0].Bool() {
-			method := v1.Addr().MethodByName("Diff")
-			arg := []reflect.Value{v2}
-			diffs := method.Call(arg)
-			vpos.Set(diffs[0])
-			vneg.Set(diffs[1])
+		for i := 0; i < v1.NumField(); i++ {
+			f1 := v1.Field(i)
+			f2 := v2.Field(i)
+			p, n := diffValue(f1, f2)
+			vpos.Field(i).Set(p)
+			vneg.Field(i).Set(n)
 		}
 	case reflect.Ptr:
-		p, n := diffValue(reflect.Indirect(v1), reflect.Indirect(v2))
+		p, n := diffValue(v1.Elem(), v2.Elem())
+		vpos.Set(p.Addr())
+		vneg.Set(n.Addr())
+	case reflect.Interface:
+		p, n := diffValue(v1.Elem(), v2.Elem())
 		vpos.Set(p)
 		vneg.Set(n)
 	case reflect.Map:
@@ -171,18 +129,24 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 // emptyValue splits out the iterable portion of an emptiness check.
 func emptyValue(v reflect.Value) (empty bool) {
 	empty = true
+	if !v.IsValid() {
+		return
+	}
 	switch v.Kind() {
 	case reflect.String:
 		if v.String() != "" {
 			empty = false
 		}
 	case reflect.Struct:
-		method := v.Addr().MethodByName("Empty")
-		if !method.Call([]reflect.Value{})[0].Bool() {
-			empty = false
+		for i := 0; i < v.NumField(); i++ {
+			f := v.Field(i)
+			if !emptyValue(f) {
+				empty = false
+				break
+			}
 		}
-	case reflect.Ptr:
-		if !emptyValue(reflect.Indirect(v)) {
+	case reflect.Ptr, reflect.Interface:
+		if !emptyValue(v.Elem()) {
 			empty = false
 		}
 	case reflect.Map:
