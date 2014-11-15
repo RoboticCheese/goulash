@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 )
 
@@ -108,7 +107,7 @@ func Test_CDiff_1_Equal(t *testing.T) {
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
 	pos2, neg2 := c2.Diff(&c1)
-	for _, i := range []Supermarketer{pos1, neg1, pos2, neg2} {
+	for _, i := range []*Component{pos1, neg1, pos2, neg2} {
 		if i != nil {
 			t.Fatalf("Expected nil, got: %v", i)
 		}
@@ -120,12 +119,12 @@ func Test_CDiff_2_AddedAndDeletedData(t *testing.T) {
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
 	pos2, neg2 := c2.Diff(&c1)
-	for _, i := range []Supermarketer{neg1, pos2} {
+	for _, i := range []*Component{neg1, pos2} {
 		if i != nil {
 			t.Fatalf("Expected nil, got: %v", i)
 		}
 	}
-	for _, k := range [][]Supermarketer{
+	for _, k := range [][]*Component{
 		{pos1, &Component{Endpoint: "abc", ETag: "def"}},
 		{neg2, &Component{Endpoint: "abc", ETag: "def"}},
 	} {
