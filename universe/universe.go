@@ -132,13 +132,13 @@ func NewUniverse() (u *Universe) {
 
 // Empty checks whether a Universe struct has been populated with anything or
 // still holds all the base defaults.
-func (u *Universe) Empty() (empty bool) {
+func (u Universe) Empty() (empty bool) {
 	empty = common.Empty(u)
 	return
 }
 
 // Equals implements an equality test for a Universe.
-func (u1 *Universe) Equals(u2 common.Supermarketer) (res bool) {
+func (u1 Universe) Equals(u2 *Universe) (res bool) {
 	res = common.Equals(u1, u2)
 	return
 }
@@ -167,29 +167,18 @@ func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
 
 // Diff returns any attributes that have changed from one Universe struct to
 // another.
-func (u1 *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
-	if u1.Equals(u2) {
-		return
-	}
-	pos = NewUniverse()
-	neg = NewUniverse()
-
-	for k, _ := range u1.Cookbooks {
-		if u2.Cookbooks[k] == nil {
-			neg.Cookbooks[k] = u1.Cookbooks[k]
-		} else if !u1.Cookbooks[k].Equals(u2.Cookbooks[k]) {
-			pos.Cookbooks[k], neg.Cookbooks[k] = u1.Cookbooks[k].Diff(u2.Cookbooks[k])
-		}
-	}
-	for k, _ := range u2.Cookbooks {
-		if u1.Cookbooks[k] == nil {
-			pos.Cookbooks[k] = u2.Cookbooks[k]
-		}
-	}
-	if pos.Empty() {
+func (u1 Universe) Diff(u2 *Universe) (pos, neg *Universe) {
+	ipos, ineg := common.Diff(u1, u2, Universe{}, Universe{})
+	if ipos != nil {
+		cpos := ipos.(Universe)
+		pos = &cpos
+	} else {
 		pos = nil
 	}
-	if neg.Empty() {
+	if ineg != nil {
+		cneg := ineg.(Universe)
+		neg = &cneg
+	} else {
 		neg = nil
 	}
 	return

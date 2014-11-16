@@ -42,7 +42,6 @@ package universe
 
 import (
 	"github.com/RoboticCheese/goulash/common"
-	"reflect"
 )
 
 // CookbookVersion implements a struct for each cookbook version underneath a
@@ -64,69 +63,31 @@ func NewCookbookVersion() (cv *CookbookVersion) {
 
 // Empty checks whether a CookbookVersion struct has been populated with
 // anything or still holds all the base defaults.
-func (cv *CookbookVersion) Empty() (empty bool) {
+func (cv CookbookVersion) Empty() (empty bool) {
 	empty = common.Empty(cv)
 	return
 }
 
 // Equals implements an equality test for a CookbookVersion struct
-func (cv1 *CookbookVersion) Equals(cv2 common.Supermarketer) (res bool) {
+func (cv1 CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = common.Equals(cv1, cv2)
 	return
 }
 
 // Diff returns any attributes that have been changed from one CookbookVersion
 // struct to another.
-func (cv1 *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
-	if cv1.Equals(cv2) {
-		return
-	}
-	r1 := reflect.ValueOf(cv1).Elem()
-	r2 := reflect.ValueOf(cv2).Elem()
-
-	if !r1.IsValid() {
-		pos = cv2
-		return
-	}
-	if !r2.IsValid() {
-		neg = cv1
-		return
-	}
-
-	pos = NewCookbookVersion()
-	neg = NewCookbookVersion()
-	rpos := reflect.ValueOf(pos).Elem()
-	rneg := reflect.ValueOf(neg).Elem()
-	for i := 0; i < r1.NumField(); i++ {
-		f1 := r1.Field(i)
-		f2 := r2.Field(i)
-
-		switch f1.Kind() {
-		case reflect.String:
-			if f1.String() != f2.String() {
-				rpos.Field(i).Set(f2)
-				rneg.Field(i).Set(f1)
-			}
-		case reflect.Map:
-			for _, k := range f1.MapKeys() {
-				if f2.MapIndex(k).Kind() == reflect.Invalid {
-					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
-				} else if f1.MapIndex(k).String() != f2.MapIndex(k).String() {
-					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
-					rneg.Field(i).SetMapIndex(k, f1.MapIndex(k))
-				}
-			}
-			for _, k := range f2.MapKeys() {
-				if f1.MapIndex(k).Kind() == reflect.Invalid {
-					rpos.Field(i).SetMapIndex(k, f2.MapIndex(k))
-				}
-			}
-		}
-	}
-	if pos.Empty() {
+func (cv1 CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
+	ipos, ineg := common.Diff(cv1, *cv2, CookbookVersion{}, CookbookVersion{})
+	if ipos != nil {
+		cpos := ipos.(CookbookVersion)
+		pos = &cpos
+	} else {
 		pos = nil
 	}
-	if neg.Empty() {
+	if ineg != nil {
+		cneg := ineg.(CookbookVersion)
+		neg = &cneg
+	} else {
 		neg = nil
 	}
 	return
