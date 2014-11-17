@@ -77,15 +77,15 @@ func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarket
 // diffValue implements a diff check on two reflect.Values so the check can be
 // iterable.
 func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg reflect.Value) {
-	vpos = reflect.New(v1.Type()).Elem()
-	vneg = reflect.New(v1.Type()).Elem()
-
+	if !v1.IsValid() && !v2.IsValid() {
+		return
+	}
 	if !v1.IsValid() {
-		vpos.Set(v1)
+		vpos = v2
 		return
 	}
 	if !v2.IsValid() {
-		vneg.Set(v2)
+		vneg = v1
 		return
 	}
 	if v1.Type() != v2.Type() {
@@ -93,6 +93,20 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 		vneg = v1
 		return
 	}
+	// IsValid() doesn't return false for the empty string zero val
+	if v1.Kind() == reflect.String {
+		if v1.String() == "" {
+			vpos = v2
+			return
+		}
+		if v2.String() == "" {
+			vneg = v1
+			return
+		}
+	}
+
+	vpos = reflect.New(v1.Type()).Elem()
+	vneg = reflect.New(v1.Type()).Elem()
 
 	switch v1.Kind() {
 	case reflect.String:
@@ -105,22 +119,49 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 			f1 := v1.Field(i)
 			f2 := v2.Field(i)
 			p, n := diffValue(f1, f2)
-			vpos.Field(i).Set(p)
-			vneg.Field(i).Set(n)
+			if p.IsValid() {
+				vpos.Field(i).Set(p)
+			}
+			if n.IsValid() {
+				vneg.Field(i).Set(n)
+			}
 		}
 	case reflect.Ptr:
 		p, n := diffValue(v1.Elem(), v2.Elem())
-		vpos.Set(p.Addr())
-		vneg.Set(n.Addr())
+		if p.IsValid() {
+			vpos.Set(p.Addr())
+		}
+		if n.IsValid() {
+			vneg.Set(n.Addr())
+		}
 	case reflect.Interface:
 		p, n := diffValue(v1.Elem(), v2.Elem())
-		vpos.Set(p)
-		vneg.Set(n)
+		if p.IsValid() {
+			vpos.Set(p)
+		}
+		if n.IsValid() {
+			vneg.Set(n)
+		}
 	case reflect.Map:
+		vpos = reflect.MakeMap(v1.Type())
+		vneg = reflect.MakeMap(v1.Type())
 		for _, k := range v1.MapKeys() {
-			sub_pos, sub_neg := diffValue(v1.MapIndex(k), v2.MapIndex(k))
-			vpos.SetMapIndex(k, sub_pos)
-			vneg.SetMapIndex(k, sub_neg)
+			p, n := diffValue(v1.MapIndex(k), v2.MapIndex(k))
+			if p.IsValid() {
+				if p.Kind() != reflect.String || p.String() != "" {
+					vpos.SetMapIndex(k, p)
+				}
+			}
+			if n.IsValid() {
+				if n.Kind() != reflect.String || n.String() != "" {
+					vneg.SetMapIndex(k, n)
+				}
+			}
+		}
+		for _, k := range v2.MapKeys() {
+			if v2.MapIndex(k).IsValid() && !v1.MapIndex(k).IsValid() {
+				vpos.SetMapIndex(k, v2.MapIndex(k))
+			}
 		}
 	}
 	return
