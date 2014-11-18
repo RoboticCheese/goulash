@@ -66,11 +66,12 @@ package cookbook
 
 import (
 	"encoding/json"
-	"github.com/RoboticCheese/goulash/api_instance"
-	"github.com/RoboticCheese/goulash/common"
 	"io"
 	"net/http"
 	"reflect"
+
+	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/common"
 )
 
 // Downloads represents the Downloads section of the metrics data.
@@ -133,23 +134,24 @@ func NewCookbook() (c *Cookbook) {
 
 // Empty checks whether a Cookbook struct has been populated with anything or
 // still holds all the base defaults.
-func (c Cookbook) Empty() (empty bool) {
+func (c *Cookbook) Empty() (empty bool) {
 	empty = common.Empty(c)
+	return
 }
 
 // Equals implements an equality test for a Cookbook.
-func (c1 Cookbook) Equals(c2 common.Supermarketer) (res bool) {
-	res = common.Equals(c1, c2)
+func (c *Cookbook) Equals(c2 common.Supermarketer) (res bool) {
+	res = common.Equals(c, c2)
 	return
 }
 
 // Diff returns any attributes added/changed/removed from one Cookbook struct
 // to another
-func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
-	if c1.Equals(c2) {
+func (c *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
+	if c.Equals(c2) {
 		return
 	}
-	r1 := reflect.ValueOf(c1).Elem()
+	r1 := reflect.ValueOf(c).Elem()
 	r2 := reflect.ValueOf(c2).Elem()
 
 	if !r1.IsValid() {
@@ -157,7 +159,7 @@ func (c1 *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 		return
 	}
 	if !r2.IsValid() {
-		neg = c1
+		neg = c
 		return
 	}
 

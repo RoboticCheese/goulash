@@ -15,10 +15,8 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
-
-This file implements a struct for a cookbook version, corresponding to how one
-is represented by the Supermarket API, e.g.
+Package cookbookversion implements a struct for a cookbook version,
+corresponding to how one is represented by the Supermarket API, e.g.
 
 https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0 =>
 
@@ -34,14 +32,15 @@ https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0 =>
 	}
 }
 */
-package cookbook_version
+package cookbookversion
 
 import (
 	"encoding/json"
-	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/cookbook"
 	"io"
 	"net/http"
+
+	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/cookbook"
 )
 
 // CookbookVersion implements a data structure for a specific version of a cookbook.
@@ -79,11 +78,12 @@ func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
 // anything or still holds all the base defaults.
 func (cv *CookbookVersion) Empty() (empty bool) {
 	empty = common.Empty(cv)
+	return
 }
 
 // Equals implements an equality test for a CookbookVersion.
-func (cv1 *CookbookVersion) Equals(cv2 Supermarketer) (res bool) {
-	res = common.Equals(cv1, cv2)
+func (cv *CookbookVersion) Equals(cv2 common.Supermarketer) (res bool) {
+	res = common.Equals(cv, cv2)
 	return
 }
 

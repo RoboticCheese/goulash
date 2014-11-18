@@ -1,12 +1,13 @@
-package cookbook_version
+package cookbookversion
 
 import (
 	"fmt"
-	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/cookbook"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/cookbook"
 )
 
 func cvdata1() (data1 CookbookVersion) {
@@ -41,7 +42,7 @@ func cvdata2() (data2 CookbookVersion) {
 	return
 }
 
-var json_data = map[string]string{
+var jsonData = map[string]string{
 	"license":           "Apache v2.0",
 	"tarball_file_size": "5913",
 	"version":           "2.0.0",
@@ -52,17 +53,17 @@ var json_data = map[string]string{
 }
 
 func jsonified() (res string) {
-	res = `{"license": "` + json_data["license"] + `",` +
-		`"tarball_file_size": ` + json_data["tarball_file_size"] + `,` +
-		`"version": "` + json_data["version"] + `",` +
-		`"average_rating": ` + json_data["average_rating"] + `,` +
-		`"cookbook": "` + json_data["cookbook"] + `",` +
-		`"file": "` + json_data["file"] + `",` +
-		`"dependencies": ` + json_data["dependencies"] + `}`
+	res = `{"license": "` + jsonData["license"] + `",` +
+		`"tarball_file_size": ` + jsonData["tarball_file_size"] + `,` +
+		`"version": "` + jsonData["version"] + `",` +
+		`"average_rating": ` + jsonData["average_rating"] + `,` +
+		`"cookbook": "` + jsonData["cookbook"] + `",` +
+		`"file": "` + jsonData["file"] + `",` +
+		`"dependencies": ` + jsonData["dependencies"] + `}`
 	return
 }
 
-func start_http() (ts *httptest.Server) {
+func startHTTP() (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -223,7 +224,7 @@ func Test_Equals_5_DifferentDependencies(t *testing.T) {
 }
 
 func Test_New_1_NoError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	defer ts.Close()
 
 	cb := new(cookbook.Cookbook)
@@ -234,10 +235,10 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 	for k, v := range map[string]string{
 		cv.Endpoint: ts.URL + "/api/v1/cookbooks/chef-dk/versions/2.0.0",
-		cv.License:  json_data["license"],
-		cv.Version:  json_data["version"],
-		cv.Cookbook: json_data["cookbook"],
-		cv.File:     json_data["file"],
+		cv.License:  jsonData["license"],
+		cv.Version:  jsonData["version"],
+		cv.Cookbook: jsonData["cookbook"],
+		cv.File:     jsonData["file"],
 	} {
 		if k != v {
 			t.Fatalf("Expected: %v, got: %v", v, k)
@@ -258,8 +259,8 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_AverageRating(t *testing.T) {
-	json_data["average_rating"] = "20"
-	ts := start_http()
+	jsonData["average_rating"] = "20"
+	ts := startHTTP()
 	defer ts.Close()
 
 	cb := new(cookbook.Cookbook)
@@ -274,7 +275,7 @@ func Test_New_2_AverageRating(t *testing.T) {
 }
 
 func Test_New_3_ConnError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	ts.Close()
 
 	cb := new(cookbook.Cookbook)
