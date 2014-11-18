@@ -62,8 +62,12 @@ func Diff(s1 Supermarketer, s2 Supermarketer, pos Supermarketer, neg Supermarket
 	vpos := reflect.ValueOf(&pos).Elem()
 	vneg := reflect.ValueOf(&neg).Elem()
 	p, n := diffValue(v1, v2)
-	vpos.Set(p)
-	vneg.Set(n)
+	if p.IsValid() {
+		vpos.Set(p)
+	}
+	if n.IsValid() {
+		vneg.Set(n)
+	}
 
 	if Empty(pos) {
 		pos = nil
@@ -163,6 +167,12 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 				vpos.SetMapIndex(k, v2.MapIndex(k))
 			}
 		}
+	}
+	if emptyValue(vpos) {
+		vpos = reflect.ValueOf(nil)
+	}
+	if emptyValue(vneg) {
+		vneg = reflect.ValueOf(nil)
 	}
 	return
 }

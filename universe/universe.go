@@ -134,13 +134,13 @@ func NewUniverse() (u *Universe) {
 
 // Empty checks whether a Universe struct has been populated with anything or
 // still holds all the base defaults.
-func (u Universe) Empty() (empty bool) {
+func (u *Universe) Empty() (empty bool) {
 	empty = common.Empty(u)
 	return
 }
 
 // Equals implements an equality test for a Universe.
-func (u Universe) Equals(u2 *Universe) (res bool) {
+func (u *Universe) Equals(u2 *Universe) (res bool) {
 	res = common.Equals(u, u2)
 	return
 }
@@ -170,7 +170,7 @@ func (u *Universe) Update() (posDiff, negDiff *Universe, err error) {
 // Diff returns any attributes that have changed from one Universe struct to
 // another.
 func (u *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
-	ipos, ineg := common.Diff(u, u2, Universe{}, Universe{})
+	ipos, ineg := common.Diff(u, u2, &Universe{}, &Universe{})
 	if ipos != nil {
 		cpos := ipos.(*Universe)
 		pos = cpos
