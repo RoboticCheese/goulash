@@ -3,11 +3,12 @@ package universe
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RoboticCheese/goulash/api_instance"
-	"github.com/RoboticCheese/goulash/common"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/common"
 )
 
 func udata() (data *Universe) {
@@ -35,8 +36,8 @@ func udata() (data *Universe) {
 	return
 }
 
-func json_data() (json_data map[string]map[string]*CookbookVersion) {
-	json_data = map[string]map[string]*CookbookVersion{
+func jsonData() (jsonData map[string]map[string]*CookbookVersion) {
+	jsonData = map[string]map[string]*CookbookVersion{
 		"chef": {
 			"0.12.0": &CookbookVersion{
 				LocationType: "opscode",
@@ -69,25 +70,25 @@ func json_data() (json_data map[string]map[string]*CookbookVersion) {
 	return
 }
 
-func http_headers() (res map[string]string) {
+func httpHeaders() (res map[string]string) {
 	res = map[string]string{}
 	return
 }
 
-func http_body(json_data map[string]map[string]*CookbookVersion) (res string) {
-	bres, _ := json.Marshal(json_data)
+func httpBody(jsonData map[string]map[string]*CookbookVersion) (res string) {
+	bres, _ := json.Marshal(jsonData)
 	res = string(bres)
 	return
 }
 
-func start_http(http_headers func() map[string]string, json_data func() map[string]map[string]*CookbookVersion) (ts *httptest.Server) {
+func startHTTP(httpHeaders func() map[string]string, jsonData func() map[string]map[string]*CookbookVersion) (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				for k, v := range http_headers() {
+				for k, v := range httpHeaders() {
 					w.Header().Set(k, v)
 				}
-				fmt.Fprint(w, http_body(json_data()))
+				fmt.Fprint(w, httpBody(jsonData()))
 			},
 		),
 	)
@@ -95,7 +96,7 @@ func start_http(http_headers func() map[string]string, json_data func() map[stri
 }
 
 func Test_New_1_NoError(t *testing.T) {
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	i := new(api_instance.APIInstance)
@@ -143,7 +144,7 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_ConnError(t *testing.T) {
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	ts.Close()
 
 	i := new(api_instance.APIInstance)
@@ -314,7 +315,7 @@ func Test_Equals_4_DifferentCookbooks(t *testing.T) {
 }
 
 func Test_Update_1_NoChanges(t *testing.T) {
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	a, err := api_instance.New(ts.URL)
@@ -338,12 +339,12 @@ func Test_Update_1_NoChanges(t *testing.T) {
 }
 
 func Test_Update_2_SomeChanges(t *testing.T) {
-	json := json_data()
-	json_data := func() map[string]map[string]*CookbookVersion {
+	json := jsonData()
+	jsonData := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	a, err := api_instance.New(ts.URL)
@@ -377,12 +378,12 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 }
 
 func Test_Update_3_NewVersionReleased(t *testing.T) {
-	json := json_data()
-	json_data := func() map[string]map[string]*CookbookVersion {
+	json := jsonData()
+	jsonData := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	a, err := api_instance.New(ts.URL)
@@ -435,17 +436,17 @@ func Test_Update_3_NewVersionReleased(t *testing.T) {
 }
 
 func Test_Update_4_ETagSomeChanges(t *testing.T) {
-	headers := http_headers()
+	headers := httpHeaders()
 	headers["ETag"] = "tag1"
-	http_headers := func() map[string]string {
+	httpHeaders := func() map[string]string {
 		return headers
 	}
-	json := json_data()
-	json_data := func() map[string]map[string]*CookbookVersion {
+	json := jsonData()
+	jsonData := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	a, err := api_instance.New(ts.URL)
@@ -481,17 +482,17 @@ func Test_Update_4_ETagSomeChanges(t *testing.T) {
 }
 
 func Test_Update_5_ETagNoChanges(t *testing.T) {
-	headers := http_headers()
+	headers := httpHeaders()
 	headers["ETag"] = "tag1"
-	http_headers := func() map[string]string {
+	httpHeaders := func() map[string]string {
 		return headers
 	}
-	json := json_data()
-	json_data := func() map[string]map[string]*CookbookVersion {
+	json := jsonData()
+	jsonData := func() map[string]map[string]*CookbookVersion {
 		return json
 	}
 
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	a, err := api_instance.New(ts.URL)
@@ -523,7 +524,7 @@ func Test_Update_5_ETagNoChanges(t *testing.T) {
 }
 
 func Test_Update_6_Error(t *testing.T) {
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 
 	a, err := api_instance.New(ts.URL)
 	if err != nil {
@@ -621,7 +622,7 @@ func Test_Diff_4_UpdatedCookbook(t *testing.T) {
 }
 
 func Test_decodeJSON_1(t *testing.T) {
-	ts := start_http(http_headers, json_data)
+	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL)
@@ -629,12 +630,12 @@ func Test_decodeJSON_1(t *testing.T) {
 		t.Fatalf("Expected nil, got: %v", err)
 	}
 
-	temp_u := map[string]map[string]*CookbookVersion{}
-	err = decodeJSON(resp.Body, &temp_u)
+	tempU := map[string]map[string]*CookbookVersion{}
+	err = decodeJSON(resp.Body, &tempU)
 	if err != nil {
 		t.Fatalf("Expected nil, got: %v", err)
 	}
-	if len(temp_u) != 2 {
-		t.Fatalf("Expected 2 cookbooks, got: %v", len(temp_u))
+	if len(tempU) != 2 {
+		t.Fatalf("Expected 2 cookbooks, got: %v", len(tempU))
 	}
 }

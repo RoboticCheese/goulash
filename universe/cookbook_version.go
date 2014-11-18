@@ -15,7 +15,8 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
+Package universe implements an API client for Supermarket's Berkshelf-style
+universe endpoint.
 
 This file implements a struct for a cookbook version as described by a
 Berkshelf-style universe endpoint, e.g.
@@ -69,15 +70,15 @@ func (cv CookbookVersion) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a CookbookVersion struct
-func (cv1 CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
-	res = common.Equals(cv1, cv2)
+func (cv CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
+	res = common.Equals(cv, cv2)
 	return
 }
 
 // Diff returns any attributes that have been changed from one CookbookVersion
 // struct to another.
-func (cv1 CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
-	ipos, ineg := common.Diff(cv1, *cv2, CookbookVersion{}, CookbookVersion{})
+func (cv CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
+	ipos, ineg := common.Diff(cv, *cv2, CookbookVersion{}, CookbookVersion{})
 	if ipos != nil {
 		cpos := ipos.(CookbookVersion)
 		pos = &cpos

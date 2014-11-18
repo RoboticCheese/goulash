@@ -15,10 +15,8 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
-
-This file implements a struct for a cookbook as described by a Berkshelf-style
-universe endpoint, e.g.
+Package universe implements an API client for Supermarket's Berkshelf-style
+universe endpoint.
 
 https://supermarket.getchef.com/universe =>
 
@@ -51,6 +49,8 @@ https://supermarket.getchef.com/universe =>
 package universe
 
 import (
+	"fmt"
+
 	"github.com/RoboticCheese/goulash/common"
 )
 
@@ -75,15 +75,15 @@ func (c Cookbook) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a Cookbook.
-func (c1 Cookbook) Equals(c2 *Cookbook) (res bool) {
-	res = common.Equals(c1, c2)
+func (c Cookbook) Equals(c2 *Cookbook) (res bool) {
+	res = common.Equals(c, c2)
 	return
 }
 
 // Diff returns any attributes that have changed from one Cookbook struct to
 // another.
-func (c1 Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
-	ipos, ineg := common.Diff(c1, *c2, Cookbook{}, Cookbook{})
+func (c Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
+	ipos, ineg := common.Diff(c, *c2, Cookbook{}, Cookbook{})
 	if ipos != nil {
 		cpos := ipos.(Cookbook)
 		pos = &cpos
@@ -96,5 +96,7 @@ func (c1 Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 	} else {
 		neg = nil
 	}
+	fmt.Println("Returning final pos:", pos)
+	fmt.Println("Returning final neg:", neg)
 	return
 }

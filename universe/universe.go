@@ -15,7 +15,8 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
+Package universe implements an API client for Supermarket's Berkshelf-style
+universe endpoint.
 
 This file implements a struct for the Berkshelf-style universe endpoint, e.g.
 
@@ -74,10 +75,11 @@ package universe
 
 import (
 	"encoding/json"
-	"github.com/RoboticCheese/goulash/api_instance"
-	"github.com/RoboticCheese/goulash/common"
 	"io"
 	"net/http"
+
+	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/common"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
@@ -105,19 +107,19 @@ func New(i *api_instance.APIInstance) (u *Universe, err error) {
 
 	// Create a temporary map that corresponds more closely to what the
 	// universe JSON data looks like
-	temp_u := map[string]map[string]*CookbookVersion{}
+	tempU := map[string]map[string]*CookbookVersion{}
 
-	err = decodeJSON(resp.Body, &temp_u)
+	err = decodeJSON(resp.Body, &tempU)
 	if err != nil {
 		return
 	}
 	// Fill in the Universe struct with the JSON data gathered above
-	for cb_name, cb := range temp_u {
-		u.Cookbooks[cb_name] = NewCookbook()
-		u.Cookbooks[cb_name].Name = cb_name
-		for cv_name, cv := range cb {
-			cv.Version = cv_name
-			u.Cookbooks[cb_name].Versions[cv_name] = cv
+	for cbName, cb := range tempU {
+		u.Cookbooks[cbName] = NewCookbook()
+		u.Cookbooks[cbName].Name = cbName
+		for cvName, cv := range cb {
+			cv.Version = cvName
+			u.Cookbooks[cbName].Versions[cvName] = cv
 		}
 	}
 	return
@@ -138,14 +140,14 @@ func (u Universe) Empty() (empty bool) {
 }
 
 // Equals implements an equality test for a Universe.
-func (u1 Universe) Equals(u2 *Universe) (res bool) {
-	res = common.Equals(u1, u2)
+func (u Universe) Equals(u2 *Universe) (res bool) {
+	res = common.Equals(u, u2)
 	return
 }
 
 // Update refreshes a Universe struct and returns the diff of the original
 // Universe and the updated one.
-func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
+func (u *Universe) Update() (posDiff, negDiff *Universe, err error) {
 	// Try to use the HTTP ETag header first; don't download the entire
 	// universe JSON if we don't need to.
 	if u.ETag != "" {
@@ -156,19 +158,19 @@ func (u *Universe) Update() (pos_diff, neg_diff *Universe, err error) {
 		}
 	}
 
-	cur_u, err := New(u.APIInstance)
+	curU, err := New(u.APIInstance)
 	if err != nil {
 		return
 	}
-	pos_diff, neg_diff = u.Diff(cur_u)
-	*u = *cur_u
+	posDiff, negDiff = u.Diff(curU)
+	*u = *curU
 	return
 }
 
 // Diff returns any attributes that have changed from one Universe struct to
 // another.
-func (u1 Universe) Diff(u2 *Universe) (pos, neg *Universe) {
-	ipos, ineg := common.Diff(u1, u2, Universe{}, Universe{})
+func (u Universe) Diff(u2 *Universe) (pos, neg *Universe) {
+	ipos, ineg := common.Diff(u, u2, Universe{}, Universe{})
 	if ipos != nil {
 		cpos := ipos.(Universe)
 		pos = &cpos
