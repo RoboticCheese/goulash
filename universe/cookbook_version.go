@@ -64,30 +64,30 @@ func NewCookbookVersion() (cv *CookbookVersion) {
 
 // Empty checks whether a CookbookVersion struct has been populated with
 // anything or still holds all the base defaults.
-func (cv CookbookVersion) Empty() (empty bool) {
+func (cv *CookbookVersion) Empty() (empty bool) {
 	empty = common.Empty(cv)
 	return
 }
 
 // Equals implements an equality test for a CookbookVersion struct
-func (cv CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
+func (cv *CookbookVersion) Equals(cv2 *CookbookVersion) (res bool) {
 	res = common.Equals(cv, cv2)
 	return
 }
 
 // Diff returns any attributes that have been changed from one CookbookVersion
 // struct to another.
-func (cv CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
-	ipos, ineg := common.Diff(cv, *cv2, CookbookVersion{}, CookbookVersion{})
+func (cv *CookbookVersion) Diff(cv2 *CookbookVersion) (pos, neg *CookbookVersion) {
+	ipos, ineg := common.Diff(cv, cv2, &CookbookVersion{}, &CookbookVersion{})
 	if ipos != nil {
-		cpos := ipos.(CookbookVersion)
-		pos = &cpos
+		cpos := ipos.(*CookbookVersion)
+		pos = cpos
 	} else {
 		pos = nil
 	}
 	if ineg != nil {
-		cneg := ineg.(CookbookVersion)
-		neg = &cneg
+		cneg := ineg.(*CookbookVersion)
+		neg = cneg
 	} else {
 		neg = nil
 	}

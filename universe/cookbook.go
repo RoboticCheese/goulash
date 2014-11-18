@@ -49,8 +49,6 @@ https://supermarket.getchef.com/universe =>
 package universe
 
 import (
-	"fmt"
-
 	"github.com/RoboticCheese/goulash/common"
 )
 
@@ -69,34 +67,32 @@ func NewCookbook() (c *Cookbook) {
 
 // Empty checks whether a Cookbook struct has been populated with anything or
 // still holds all the base defaults.
-func (c Cookbook) Empty() (empty bool) {
+func (c *Cookbook) Empty() (empty bool) {
 	empty = common.Empty(c)
 	return
 }
 
 // Equals implements an equality test for a Cookbook.
-func (c Cookbook) Equals(c2 *Cookbook) (res bool) {
+func (c *Cookbook) Equals(c2 *Cookbook) (res bool) {
 	res = common.Equals(c, c2)
 	return
 }
 
 // Diff returns any attributes that have changed from one Cookbook struct to
 // another.
-func (c Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
-	ipos, ineg := common.Diff(c, *c2, Cookbook{}, Cookbook{})
+func (c *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
+	ipos, ineg := common.Diff(c, c2, &Cookbook{}, &Cookbook{})
 	if ipos != nil {
-		cpos := ipos.(Cookbook)
-		pos = &cpos
+		cpos := ipos.(*Cookbook)
+		pos = cpos
 	} else {
 		pos = nil
 	}
 	if ineg != nil {
-		cneg := ineg.(Cookbook)
-		neg = &cneg
+		cneg := ineg.(*Cookbook)
+		neg = cneg
 	} else {
 		neg = nil
 	}
-	fmt.Println("Returning final pos:", pos)
-	fmt.Println("Returning final neg:", neg)
 	return
 }

@@ -169,17 +169,17 @@ func (u *Universe) Update() (posDiff, negDiff *Universe, err error) {
 
 // Diff returns any attributes that have changed from one Universe struct to
 // another.
-func (u Universe) Diff(u2 *Universe) (pos, neg *Universe) {
+func (u *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
 	ipos, ineg := common.Diff(u, u2, Universe{}, Universe{})
 	if ipos != nil {
-		cpos := ipos.(Universe)
-		pos = &cpos
+		cpos := ipos.(*Universe)
+		pos = cpos
 	} else {
 		pos = nil
 	}
 	if ineg != nil {
-		cneg := ineg.(Universe)
-		neg = &cneg
+		cneg := ineg.(*Universe)
+		neg = cneg
 	} else {
 		neg = nil
 	}
