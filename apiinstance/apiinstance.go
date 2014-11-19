@@ -30,7 +30,7 @@ import (
 	"github.com/RoboticCheese/goulash/common"
 )
 
-// Goulash implements a data structure for a Supermarket instance.
+// APIInstance implements a struct for the API connection.
 type APIInstance struct {
 	common.Component
 	BaseURL string

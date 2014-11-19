@@ -7,17 +7,17 @@ import (
 	"testing"
 )
 
-var http_etag = ""
-var http_data = "SOME HTTP DATA"
+var httpETag = ""
+var httpData = "SOME HTTP DATA"
 
-func start_http() (ts *httptest.Server) {
+func startHTTP() (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				if http_etag != "" {
-					w.Header().Set("ETag", http_etag)
+				if httpETag != "" {
+					w.Header().Set("ETag", httpETag)
 				}
-				fmt.Fprint(w, http_data)
+				fmt.Fprint(w, httpData)
 			},
 		),
 	)
@@ -44,7 +44,7 @@ func Test_Component_1(t *testing.T) {
 }
 
 func Test_CNew_1_NoETag(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	defer ts.Close()
 
 	c, err := New(ts.URL)
@@ -60,8 +60,8 @@ func Test_CNew_1_NoETag(t *testing.T) {
 }
 
 func Test_CNew_2_ETag(t *testing.T) {
-	http_etag = "hellothere"
-	ts := start_http()
+	httpETag = "hellothere"
+	ts := startHTTP()
 	defer ts.Close()
 
 	c, err := New(ts.URL)

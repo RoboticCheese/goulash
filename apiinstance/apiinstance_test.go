@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func start_http() (ts *httptest.Server) {
+func startHTTP() (ts *httptest.Server) {
 	response := "Everything's okay!"
 	ts = httptest.NewServer(
 		http.HandlerFunc(
@@ -20,7 +20,7 @@ func start_http() (ts *httptest.Server) {
 }
 
 func Test_New_1_NoError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	defer ts.Close()
 	i, err := New(ts.URL)
 	if err != nil {
@@ -39,7 +39,7 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_ConnError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	ts.Close()
 
 	_, err := New(ts.URL)

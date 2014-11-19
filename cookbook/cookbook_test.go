@@ -2,11 +2,12 @@ package cookbook
 
 import (
 	"fmt"
-	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/common"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/RoboticCheese/goulash/apiinstance"
+	"github.com/RoboticCheese/goulash/common"
 )
 
 func cdata() (data Cookbook) {
@@ -39,7 +40,7 @@ func cdata() (data Cookbook) {
 	return
 }
 
-var json_data = map[string]string{
+var jsonData = map[string]string{
 	"name":               "chef-dk",
 	"maintainer":         "roboticcheese",
 	"description":        "Installs/configures the Chef-DK",
@@ -67,23 +68,23 @@ var json_data = map[string]string{
 }
 
 func jsonified() (res string) {
-	res = `{"name": "` + json_data["name"] + `",` +
-		`"maintainer": "` + json_data["maintainer"] + `",` +
-		`"description": "` + json_data["description"] + `",` +
-		`"category": "` + json_data["category"] + `",` +
-		`"latest_version": "` + json_data["latest_version"] + `",` +
-		`"external_url": "` + json_data["external_url"] + `",` +
-		`"average_rating": ` + json_data["average_rating"] + `,` +
-		`"created_at": "` + json_data["created_at"] + `",` +
-		`"updated_at": "` + json_data["updated_at"] + `",` +
-		`"deprecated": ` + json_data["deprecated"] + `,` +
-		`"foodcritic_failure": ` + json_data["foodcritic_failure"] + `,` +
-		`"versions": ` + json_data["versions"] + `,` +
-		`"metrics": ` + json_data["metrics"] + `}`
+	res = `{"name": "` + jsonData["name"] + `",` +
+		`"maintainer": "` + jsonData["maintainer"] + `",` +
+		`"description": "` + jsonData["description"] + `",` +
+		`"category": "` + jsonData["category"] + `",` +
+		`"latest_version": "` + jsonData["latest_version"] + `",` +
+		`"external_url": "` + jsonData["external_url"] + `",` +
+		`"average_rating": ` + jsonData["average_rating"] + `,` +
+		`"created_at": "` + jsonData["created_at"] + `",` +
+		`"updated_at": "` + jsonData["updated_at"] + `",` +
+		`"deprecated": ` + jsonData["deprecated"] + `,` +
+		`"foodcritic_failure": ` + jsonData["foodcritic_failure"] + `,` +
+		`"versions": ` + jsonData["versions"] + `,` +
+		`"metrics": ` + jsonData["metrics"] + `}`
 	return
 }
 
-func start_http() (ts *httptest.Server) {
+func startHTTP() (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -97,17 +98,11 @@ func start_http() (ts *httptest.Server) {
 func Test_Equals_1_Equal(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != true {
 		t.Fatalf("Expected: true, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != true {
 		t.Fatalf("Expected: true, got: %v", res)
 	}
@@ -117,17 +112,11 @@ func Test_Equals_2_DifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
@@ -137,17 +126,11 @@ func Test_Equals_3_DifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
@@ -157,17 +140,11 @@ func Test_Equals_4_DifferentLatestVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.LatestVersion = "9.9.9"
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
@@ -177,17 +154,11 @@ func Test_Equals_5_DifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = append(data2.Versions, "9.9.9")
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
@@ -197,24 +168,18 @@ func Test_Equals_6_DifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions["1.2.3"] = 999
-	res, err := data1.Equals(data2)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
-	res, err = data2.Equals(data1)
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected: false, got: %v", res)
 	}
 }
 
 func Test_New_1_NoError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	defer ts.Close()
 
 	i := new(apiinstance.APIInstance)
@@ -225,14 +190,14 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 	for k, v := range map[string]string{
 		c.Endpoint:      ts.URL + "/api/v1/cookbooks/chef-dk",
-		c.Name:          json_data["name"],
-		c.Maintainer:    json_data["maintainer"],
-		c.Description:   json_data["description"],
-		c.Category:      json_data["category"],
-		c.LatestVersion: json_data["latest_version"],
-		c.ExternalURL:   json_data["external_url"],
-		c.CreatedAt:     json_data["created_at"],
-		c.UpdatedAt:     json_data["updated_at"],
+		c.Name:          jsonData["name"],
+		c.Maintainer:    jsonData["maintainer"],
+		c.Description:   jsonData["description"],
+		c.Category:      jsonData["category"],
+		c.LatestVersion: jsonData["latest_version"],
+		c.ExternalURL:   jsonData["external_url"],
+		c.CreatedAt:     jsonData["created_at"],
+		c.UpdatedAt:     jsonData["updated_at"],
 	} {
 		if k != v {
 			t.Fatalf("Expected: %v, got: %v", v, k)
@@ -273,8 +238,8 @@ func Test_New_1_NoError(t *testing.T) {
 }
 
 func Test_New_2_NilFoodcriticFailure(t *testing.T) {
-	json_data["foodcritic_failure"] = "null"
-	ts := start_http()
+	jsonData["foodcritic_failure"] = "null"
+	ts := startHTTP()
 	defer ts.Close()
 
 	i := new(apiinstance.APIInstance)
@@ -289,8 +254,8 @@ func Test_New_2_NilFoodcriticFailure(t *testing.T) {
 }
 
 func Test_New_3_AverageRating(t *testing.T) {
-	json_data["average_rating"] = "20"
-	ts := start_http()
+	jsonData["average_rating"] = "20"
+	ts := startHTTP()
 	defer ts.Close()
 
 	i := new(apiinstance.APIInstance)
@@ -305,7 +270,7 @@ func Test_New_3_AverageRating(t *testing.T) {
 }
 
 func Test_New_4_ConnError(t *testing.T) {
-	ts := start_http()
+	ts := startHTTP()
 	ts.Close()
 
 	i := new(apiinstance.APIInstance)

@@ -15,7 +15,7 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
+Package cookbook implements individual cookbook functionality.
 
 This file implements a struct for a cookbook, corresponding to how one is
 represented by the Supermarket API, e.g.
