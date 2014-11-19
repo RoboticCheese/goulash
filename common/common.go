@@ -15,9 +15,9 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
+Package common implements a shared set of Goulash functionality.
 
-This file defines a set of common interfaces and structs.
+This file defines common functions.
 */
 package common
 
