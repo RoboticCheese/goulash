@@ -2,7 +2,7 @@ package cookbook
 
 import (
 	"fmt"
-	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
 	"net/http"
 	"net/http/httptest"
@@ -217,7 +217,7 @@ func Test_New_1_NoError(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
@@ -277,7 +277,7 @@ func Test_New_2_NilFoodcriticFailure(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
@@ -293,7 +293,7 @@ func Test_New_3_AverageRating(t *testing.T) {
 	ts := start_http()
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {
@@ -308,7 +308,7 @@ func Test_New_4_ConnError(t *testing.T) {
 	ts := start_http()
 	ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
 	_, err := New(i, "chef-dk")
 	if err == nil {
@@ -320,7 +320,7 @@ func Test_New_5_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
 	_, err := New(i, "chef-dk")
 	if err == nil {
@@ -329,7 +329,7 @@ func Test_New_5_404Error(t *testing.T) {
 }
 
 func Test_New_6_RealData(t *testing.T) {
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.Endpoint = "https://supermarket.getchef.com/api/v1"
 	c, err := New(i, "chef-dk")
 	if err != nil {

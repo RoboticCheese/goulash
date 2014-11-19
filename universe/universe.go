@@ -78,20 +78,20 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
 type Universe struct {
 	common.Component
-	APIInstance *api_instance.APIInstance
+	APIInstance *apiinstance.APIInstance
 	Cookbooks   map[string]*Cookbook
 }
 
 // New accepts a pointer to an APIInstance struct and uses it to initialize
 // and return a pointer to a new Universe struct.
-func New(i *api_instance.APIInstance) (u *Universe, err error) {
+func New(i *apiinstance.APIInstance) (u *Universe, err error) {
 	u = NewUniverse()
 	u.APIInstance = i
 	u.Component, err = common.New(u.APIInstance.BaseURL + "/universe")

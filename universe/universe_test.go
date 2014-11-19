@@ -7,14 +7,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
 )
 
 func udata() (data *Universe) {
 	data = &Universe{
 		Component:   common.Component{Endpoint: "https://example.com"},
-		APIInstance: &api_instance.APIInstance{},
+		APIInstance: &apiinstance.APIInstance{},
 		Cookbooks: map[string]*Cookbook{
 			"test1": &Cookbook{
 				Name: "test1",
@@ -99,7 +99,7 @@ func Test_New_1_NoError(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.BaseURL = ts.URL
 	u, err := New(i)
 	if err != nil {
@@ -147,7 +147,7 @@ func Test_New_2_ConnError(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.BaseURL = ts.URL
 	_, err := New(i)
 	if err == nil {
@@ -159,7 +159,7 @@ func Test_New_3_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.BaseURL = ts.URL
 	_, err := New(i)
 	if err == nil {
@@ -168,7 +168,7 @@ func Test_New_3_404Error(t *testing.T) {
 }
 
 func Test_New_4_RealData(t *testing.T) {
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.BaseURL = "https://supermarket.getchef.com"
 	u, err := New(i)
 	if err != nil {
@@ -224,7 +224,7 @@ func Test_Empty_4_HasEndpoint(t *testing.T) {
 
 func Test_Empty_5_HasAPIInstance(t *testing.T) {
 	u := NewUniverse()
-	i := new(api_instance.APIInstance)
+	i := new(apiinstance.APIInstance)
 	i.BaseURL = "https://example.com"
 	u.APIInstance = i
 	res := u.Empty()
@@ -318,7 +318,7 @@ func Test_Update_1_NoChanges(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -347,7 +347,7 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -386,7 +386,7 @@ func Test_Update_3_NewVersionReleased(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -449,7 +449,7 @@ func Test_Update_4_ETagSomeChanges(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -495,7 +495,7 @@ func Test_Update_5_ETagNoChanges(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 	defer ts.Close()
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -526,7 +526,7 @@ func Test_Update_5_ETagNoChanges(t *testing.T) {
 func Test_Update_6_Error(t *testing.T) {
 	ts := startHTTP(httpHeaders, jsonData)
 
-	a, err := api_instance.New(ts.URL)
+	a, err := apiinstance.New(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}

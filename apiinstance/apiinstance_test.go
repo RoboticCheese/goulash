@@ -1,4 +1,4 @@
-package api_instance
+package apiinstance
 
 import (
 	"fmt"

@@ -15,18 +15,19 @@
 // limitations under the License.
 
 /*
-Package goulash implements an API client for the Chef Supermarket.
+Package apiinstance implements the API connection consumed by other Goulash
+functionality.
 
-This file implements the goulash struct, which handles the main, overarching
-information about the Supermarket instace to which you're connecting
+This file implements the APIInstance struct.
 */
-package api_instance
+package apiinstance
 
 import (
 	"errors"
-	"github.com/RoboticCheese/goulash/common"
 	"net/http"
 	"reflect"
+
+	"github.com/RoboticCheese/goulash/common"
 )
 
 // Goulash implements a data structure for a Supermarket instance.

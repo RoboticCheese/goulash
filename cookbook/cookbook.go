@@ -70,7 +70,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/RoboticCheese/goulash/api_instance"
+	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
 )
 
@@ -106,7 +106,7 @@ type Cookbook struct {
 
 // New initializes and returns a new Cookbook struct based on a Supermarket
 // struct and cookbook name.
-func New(i *api_instance.APIInstance, name string) (c *Cookbook, err error) {
+func New(i *apiinstance.APIInstance, name string) (c *Cookbook, err error) {
 	c = NewCookbook()
 	c.Endpoint = i.Endpoint + "/cookbooks/" + name
 	c.Component, err = common.New(c.Endpoint)
