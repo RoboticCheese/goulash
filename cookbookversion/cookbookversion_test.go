@@ -6,13 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 	"github.com/RoboticCheese/goulash/cookbook"
 )
 
 func cvdata1() (data1 CookbookVersion) {
 	data1 = CookbookVersion{
-		Component:       common.Component{Endpoint: "https://example1.com"},
+		Component:       component.Component{Endpoint: "https://example1.com"},
 		License:         "oss",
 		TarballFileSize: 123,
 		Version:         "1.2.3",
@@ -28,7 +28,7 @@ func cvdata1() (data1 CookbookVersion) {
 
 func cvdata2() (data2 CookbookVersion) {
 	data2 = CookbookVersion{
-		Component:       common.Component{Endpoint: "https://example1.com"},
+		Component:       component.Component{Endpoint: "https://example1.com"},
 		License:         "oss",
 		TarballFileSize: 123,
 		Version:         "1.2.3",
@@ -157,11 +157,11 @@ func Test_Empty_8_HasDependencies(t *testing.T) {
 func Test_Equals_1_Equal(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
-	res := data1.Equals(data2)
+	res := data1.Equals(&data2)
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
-	res = data2.Equals(data1)
+	res = data2.Equals(&data1)
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
@@ -171,11 +171,11 @@ func Test_Equals_2_DifferentEndpoints(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.Endpoint = "https://somewhereelse.com"
-	res := data1.Equals(data2)
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res = data2.Equals(data1)
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -185,11 +185,11 @@ func Test_Equals_3_DifferentLicense(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.License = "closedsource"
-	res := data1.Equals(data2)
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res = data2.Equals(data1)
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -199,11 +199,11 @@ func Test_Equals_4_DifferentFileSize(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.TarballFileSize = 1
-	res := data1.Equals(data2)
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res = data2.Equals(data1)
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
@@ -213,11 +213,11 @@ func Test_Equals_5_DifferentDependencies(t *testing.T) {
 	data1 := cvdata1()
 	data2 := cvdata2()
 	data2.Dependencies["thing2"] = ">= 0.0.0"
-	res := data1.Equals(data2)
+	res := data1.Equals(&data2)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
-	res = data2.Equals(data1)
+	res = data2.Equals(&data1)
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}

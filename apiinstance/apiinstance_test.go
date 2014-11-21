@@ -58,6 +58,20 @@ func Test_New_3_404Error(t *testing.T) {
 	}
 }
 
+func Test_NewAPIInstance_1_EmptyResult(t *testing.T) {
+	i := NewAPIInstance()
+	for _, k := range []string{
+		i.Endpoint,
+		i.ETag,
+		i.BaseURL,
+		i.Version,
+	} {
+		if k != "" {
+			t.Fatalf("Expected empty string, got: %v", k)
+		}
+	}
+}
+
 func Test_New_4_RealData(t *testing.T) {
 	_, err := New("https://supermarket.getchef.com")
 	if err != nil {

@@ -8,12 +8,12 @@ import (
 	"testing"
 
 	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 )
 
 func udata() (data *Universe) {
 	data = &Universe{
-		Component:   common.Component{Endpoint: "https://example.com"},
+		Component:   component.Component{Endpoint: "https://example.com"},
 		APIInstance: &apiinstance.APIInstance{},
 		Cookbooks: map[string]*Cookbook{
 			"test1": &Cookbook{

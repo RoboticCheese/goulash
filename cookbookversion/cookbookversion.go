@@ -40,12 +40,13 @@ import (
 	"net/http"
 
 	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 	"github.com/RoboticCheese/goulash/cookbook"
 )
 
 // CookbookVersion implements a data structure for a specific version of a cookbook.
 type CookbookVersion struct {
-	common.Component
+	component.Component
 	License         string            `json:"license"`
 	TarballFileSize int               `json:"tarball_file_size"`
 	Version         string            `json:"version"`
@@ -59,7 +60,7 @@ type CookbookVersion struct {
 func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
 	cv = new(CookbookVersion)
 	cv.Endpoint = cb.Endpoint + "/versions/" + v
-	cv.Component, err = common.New(cv.Endpoint)
+	cv.Component, err = component.New(cv.Endpoint)
 	if err != nil {
 		return
 	}

@@ -15,11 +15,17 @@
 // limitations under the License.
 
 /*
-Package common implements a shared set of Goulash functionality.
+Package component implements a shared set of Goulash functionality.
 
 This file defines a shared Component struct for any API endpoint.
 */
-package common
+package component
+
+import (
+	"net/http"
+
+	"github.com/RoboticCheese/goulash/common"
+)
 
 // Component defines variables to be shared by all the Goulash structs.
 type Component struct {
@@ -30,22 +36,28 @@ type Component struct {
 // New creates a new Component struct from a given endpoint string and returns
 // that struct and any error.
 func New(endpoint string) (c Component, err error) {
-	c = Component{}
+	c = NewComponent()
 	c.Endpoint = endpoint
-	c.ETag, err = getETag(c.Endpoint)
+	err = c.getETag()
+	return
+}
+
+// NewComponent generates an empty Component struct.
+func NewComponent() (c Component) {
+	c = Component{}
 	return
 }
 
 // Empty checks whether a Component struct has been populated with anything
 // or still holds all the base defaults.
 func (c *Component) Empty() (empty bool) {
-	empty = Empty(c)
+	empty = common.Empty(c)
 	return
 }
 
 // Equals checks whether one Component struct is equal to another.
 func (c *Component) Equals(c2 *Component) (equal bool) {
-	equal = Equals(c, c2)
+	equal = common.Equals(c, c2)
 	return
 }
 
@@ -54,7 +66,7 @@ func (c *Component) Equals(c2 *Component) (equal bool) {
 func (c *Component) Diff(c2 *Component) (pos, neg *Component) {
 	// TODO: How do we handle when there's a struct/pointer type mismatch
 	// between c1 and c2?
-	ipos, ineg := Diff(c, c2, &Component{}, &Component{})
+	ipos, ineg := common.Diff(c, c2, &Component{}, &Component{})
 	if ipos != nil {
 		cpos := ipos.(*Component)
 		pos = cpos
@@ -67,5 +79,16 @@ func (c *Component) Diff(c2 *Component) (pos, neg *Component) {
 	} else {
 		neg = nil
 	}
+	return
+}
+
+// getETag accepts a URL string and returns any ETag header and error returned
+// from an HTTP HEAD on that URL.
+func (c *Component) getETag() (err error) {
+	resp, err := http.Head(c.Endpoint)
+	if err != nil {
+		return
+	}
+	c.ETag = resp.Header.Get("etag")
 	return
 }

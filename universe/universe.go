@@ -80,11 +80,12 @@ import (
 
 	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
 type Universe struct {
-	common.Component
+	component.Component
 	APIInstance *apiinstance.APIInstance
 	Cookbooks   map[string]*Cookbook
 }
@@ -94,7 +95,7 @@ type Universe struct {
 func New(i *apiinstance.APIInstance) (u *Universe, err error) {
 	u = NewUniverse()
 	u.APIInstance = i
-	u.Component, err = common.New(u.APIInstance.BaseURL + "/universe")
+	u.Component, err = component.New(u.APIInstance.BaseURL + "/universe")
 	if err != nil {
 		return
 	}
@@ -152,7 +153,7 @@ func (u *Universe) Update() (posDiff, negDiff *Universe, err error) {
 	// universe JSON if we don't need to.
 	if u.ETag != "" {
 		// Fall through to the regular compare if there's an error
-		tmp, _ := common.New(u.Endpoint)
+		tmp, _ := component.New(u.Endpoint)
 		if tmp.ETag != "" && tmp.ETag == u.ETag {
 			return
 		}

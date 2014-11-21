@@ -1,10 +1,12 @@
-package common
+package component
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/RoboticCheese/goulash/common"
 )
 
 var httpETag = ""
@@ -43,7 +45,7 @@ func Test_Component_1(t *testing.T) {
 	}
 }
 
-func Test_CNew_1_NoETag(t *testing.T) {
+func Test_New_1_NoETag(t *testing.T) {
 	ts := startHTTP()
 	defer ts.Close()
 
@@ -59,7 +61,7 @@ func Test_CNew_1_NoETag(t *testing.T) {
 	}
 }
 
-func Test_CNew_2_ETag(t *testing.T) {
+func Test_New_2_ETag(t *testing.T) {
 	httpETag = "hellothere"
 	ts := startHTTP()
 	defer ts.Close()
@@ -76,7 +78,19 @@ func Test_CNew_2_ETag(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_1_Empty(t *testing.T) {
+func Test_NewComponent_1_EmptyStruct(t *testing.T) {
+	c := NewComponent()
+	for _, k := range []string{
+		c.Endpoint,
+		c.ETag,
+	} {
+		if k != "" {
+			t.Fatalf("Expected empty string, got: %v", k)
+		}
+	}
+}
+
+func Test_Empty_1_Empty(t *testing.T) {
 	c := new(Component)
 	res := c.Empty()
 	if res != true {
@@ -84,7 +98,7 @@ func Test_CEmpty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_2_HasEndpoint(t *testing.T) {
+func Test_Empty_2_HasEndpoint(t *testing.T) {
 	c := new(Component)
 	c.Endpoint = "https://example.com"
 	res := c.Empty()
@@ -93,7 +107,7 @@ func Test_CEmpty_2_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_3_HasETag(t *testing.T) {
+func Test_Empty_3_HasETag(t *testing.T) {
 	c := new(Component)
 	c.ETag = "thing"
 	res := c.Empty()
@@ -102,7 +116,7 @@ func Test_CEmpty_3_HasETag(t *testing.T) {
 	}
 }
 
-func Test_CDiff_1_Equal(t *testing.T) {
+func Test_Diff_1_Equal(t *testing.T) {
 	c1 := Component{Endpoint: "abc", ETag: "def"}
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
@@ -114,7 +128,7 @@ func Test_CDiff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_CDiff_2_AddedAndDeletedData(t *testing.T) {
+func Test_Diff_2_AddedAndDeletedData(t *testing.T) {
 	c1 := Component{}
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
@@ -128,24 +142,24 @@ func Test_CDiff_2_AddedAndDeletedData(t *testing.T) {
 		{pos1, &Component{Endpoint: "abc", ETag: "def"}},
 		{neg2, &Component{Endpoint: "abc", ETag: "def"}},
 	} {
-		if !Equals(k[0], k[1]) {
+		if !common.Equals(k[0], k[1]) {
 			t.Fatalf("Expected %v, got: %v", k[1], k[0])
 		}
 	}
 }
 
-func Test_CDiff_3_ChangedData(t *testing.T) {
+func Test_Diff_3_ChangedData(t *testing.T) {
 	c1 := Component{Endpoint: "abc", ETag: "def"}
 	c2 := Component{Endpoint: "uvw", ETag: "xyz"}
 	pos1, neg1 := c1.Diff(&c2)
 	pos2, neg2 := c2.Diff(&c1)
-	for _, k := range [][]Supermarketer{
+	for _, k := range [][]common.Supermarketer{
 		{pos1, &Component{Endpoint: "uvw", ETag: "xyz"}},
 		{neg1, &Component{Endpoint: "abc", ETag: "def"}},
 		{pos2, &Component{Endpoint: "abc", ETag: "def"}},
 		{neg2, &Component{Endpoint: "uvw", ETag: "xyz"}},
 	} {
-		if !Equals(k[0], k[1]) {
+		if !common.Equals(k[0], k[1]) {
 			t.Fatalf("Expected %v, got: %v", k[1], k[0])
 		}
 	}

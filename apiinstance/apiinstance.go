@@ -27,21 +27,21 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 )
 
 // APIInstance implements a struct for the API connection.
 type APIInstance struct {
-	common.Component
+	component.Component
 	BaseURL string
 	Version string
 }
 
 // New initializes and returns a new API instance based on a Supermarket URL.
 func New(url string) (i *APIInstance, err error) {
-	i = new(APIInstance)
+	i = NewAPIInstance()
 	i.BaseURL = url
-	i.Component, err = common.New(i.BaseURL)
+	i.Component, err = component.New(i.BaseURL)
 	if err != nil {
 		return
 	}
@@ -55,6 +55,12 @@ func New(url string) (i *APIInstance, err error) {
 	if resp.StatusCode != 200 {
 		err = errors.New(resp.Status)
 	}
+	return
+}
+
+// NewAPIInstance generates an empty APIInstance struct.
+func NewAPIInstance() (i *APIInstance) {
+	i = new(APIInstance)
 	return
 }
 

@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 )
 
 func cdata() (data Cookbook) {
 	data = Cookbook{
-		Component:         common.Component{Endpoint: "https://example1.com"},
+		Component:         component.Component{Endpoint: "https://example1.com"},
 		Name:              "test1",
 		Maintainer:        "someuser",
 		Description:       "A cookbook",

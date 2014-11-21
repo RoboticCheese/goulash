@@ -72,6 +72,7 @@ import (
 
 	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
+	"github.com/RoboticCheese/goulash/component"
 )
 
 // Downloads represents the Downloads section of the metrics data.
@@ -88,7 +89,7 @@ type Metrics struct {
 
 // Cookbook implements a data structure for a single Chef cookbook.
 type Cookbook struct {
-	common.Component
+	component.Component
 	Name              string   `json:"name"`
 	Maintainer        string   `json:"maintainer"`
 	Description       string   `json:"description"`
@@ -109,7 +110,7 @@ type Cookbook struct {
 func New(i *apiinstance.APIInstance, name string) (c *Cookbook, err error) {
 	c = NewCookbook()
 	c.Endpoint = i.Endpoint + "/cookbooks/" + name
-	c.Component, err = common.New(c.Endpoint)
+	c.Component, err = component.New(c.Endpoint)
 	if err != nil {
 		return
 	}
