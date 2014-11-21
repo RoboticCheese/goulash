@@ -21,10 +21,7 @@ This file defines common functions.
 */
 package common
 
-import (
-	"net/http"
-	"reflect"
-)
+import "reflect"
 
 // Supermarketer implements an interface shared by all the Goulash structs.
 type Supermarketer interface {
@@ -113,6 +110,11 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 	vneg = reflect.New(v1.Type()).Elem()
 
 	switch v1.Kind() {
+	case reflect.Int:
+		if v1.Int() != v2.Int() {
+			vpos.Set(v2)
+			vneg.Set(v1)
+		}
 	case reflect.String:
 		if v1.String() != v2.String() {
 			vpos.Set(v2)
@@ -184,6 +186,10 @@ func emptyValue(v reflect.Value) (empty bool) {
 		return
 	}
 	switch v.Kind() {
+	case reflect.Int:
+		if v.Int() != 0 {
+			empty = false
+		}
 	case reflect.String:
 		if v.String() != "" {
 			empty = false
@@ -208,14 +214,5 @@ func emptyValue(v reflect.Value) (empty bool) {
 			}
 		}
 	}
-	return
-}
-
-func getETag(url string) (etag string, err error) {
-	resp, err := http.Head(url)
-	if err != nil {
-		return
-	}
-	etag = resp.Header.Get("etag")
 	return
 }
