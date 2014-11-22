@@ -58,7 +58,7 @@ type CookbookVersion struct {
 
 // New initializes and returns a new CookbookVersion struct based on a Cookbook.
 func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
-	cv = new(CookbookVersion)
+	cv = NewCookbookVersion()
 	cv.Endpoint = cb.Endpoint + "/versions/" + v
 	cv.Component, err = component.New(cv.Endpoint)
 	if err != nil {
@@ -72,6 +72,13 @@ func New(cb *cookbook.Cookbook, v string) (cv *CookbookVersion, err error) {
 	defer resp.Body.Close()
 
 	err = decodeJSON(resp.Body, cv)
+	return
+}
+
+// NewCookbookVersion generates an empty CookbookVersion struct.
+func NewCookbookVersion() (cv *CookbookVersion) {
+	cv = new(CookbookVersion)
+	cv.Dependencies = map[string]string{}
 	return
 }
 
