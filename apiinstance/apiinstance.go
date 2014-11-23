@@ -25,8 +25,8 @@ package apiinstance
 import (
 	"errors"
 	"net/http"
-	"reflect"
 
+	"github.com/RoboticCheese/goulash/common"
 	"github.com/RoboticCheese/goulash/component"
 )
 
@@ -67,26 +67,6 @@ func NewAPIInstance() (i *APIInstance) {
 // Empty checks whether an APIInstance struct has been populated with anything
 // or still holds all the base defaults.
 func (a *APIInstance) Empty() (empty bool) {
-	empty = true
-	if a == nil {
-		return
-	}
-	r := reflect.ValueOf(a).Elem()
-	for i := 0; i < r.NumField(); i++ {
-		f := r.Field(i)
-		switch f.Kind() {
-		case reflect.String:
-			if f.String() != "" {
-				empty = false
-				break
-			}
-		case reflect.Struct:
-			meth := f.Addr().MethodByName("Empty")
-			if !meth.Call([]reflect.Value{})[0].Bool() {
-				empty = false
-				break
-			}
-		}
-	}
+	empty = common.Empty(a)
 	return
 }
