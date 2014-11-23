@@ -315,3 +315,41 @@ func Test_Equals_5_DifferentDependencies(t *testing.T) {
 		t.Fatalf("Expected false, got: %v", res)
 	}
 }
+
+func Test_Diff_1_Equal(t *testing.T) {
+	data1 := cvdata()
+	data2 := cvdata()
+	pos1, neg1 := data1.Diff(&data2)
+	pos2, neg2 := data2.Diff(&data1)
+	for _, i := range []*CookbookVersion{
+		pos1,
+		neg1,
+		pos2,
+		neg2,
+	} {
+		if i != nil {
+			t.Fatalf("Expected nil, got: %v", i)
+		}
+	}
+}
+
+func Test_Diff_2_DataAddedAndDeleted(t *testing.T) {
+	data1 := cvdata()
+	data2 := cvdata()
+	data2.License = ""
+	data2.File = "otherfile"
+	pos1, neg1 := data1.Diff(&data2)
+	pos2, neg2 := data2.Diff(&data1)
+	for _, i := range [][]interface{}{
+		{pos1.File, "otherfile"},
+		{neg1.License, "oss"},
+		{pos2.License, "oss"},
+		{pos2.File, "https://example1.com/cookbook1/file"},
+		{neg2.License, ""},
+		{neg2.File, "otherfile"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected %v, got: %v", i[1], i[0])
+		}
+	}
+}
