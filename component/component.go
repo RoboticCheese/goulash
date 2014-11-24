@@ -64,18 +64,14 @@ func (c *Component) Equals(c2 *Component) (equal bool) {
 // Diff returns any attributes that have been changed from one Component struct
 // to another.
 func (c *Component) Diff(c2 *Component) (pos, neg *Component) {
-	// TODO: How do we handle when there's a struct/pointer type mismatch
-	// between c1 and c2?
 	ipos, ineg := common.Diff(c, c2, &Component{}, &Component{})
 	if ipos != nil {
-		cpos := ipos.(*Component)
-		pos = cpos
+		pos = ipos.(*Component)
 	} else {
 		pos = nil
 	}
 	if ineg != nil {
-		cneg := ineg.(*Component)
-		neg = cneg
+		neg = ineg.(*Component)
 	} else {
 		neg = nil
 	}

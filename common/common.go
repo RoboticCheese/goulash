@@ -186,6 +186,10 @@ func emptyValue(v reflect.Value) (empty bool) {
 		return
 	}
 	switch v.Kind() {
+	case reflect.Bool:
+		if v.Bool() != false {
+			empty = false
+		}
 	case reflect.Int:
 		if v.Int() != 0 {
 			empty = false
@@ -209,6 +213,13 @@ func emptyValue(v reflect.Value) (empty bool) {
 	case reflect.Map:
 		for _, k := range v.MapKeys() {
 			if !emptyValue(v.MapIndex(k)) {
+				empty = false
+				break
+			}
+		}
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			if !emptyValue(v.Index(i)) {
 				empty = false
 				break
 			}

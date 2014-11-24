@@ -130,6 +130,7 @@ func NewCookbook() (c *Cookbook) {
 	c = new(Cookbook)
 	c.Versions = []string{}
 	c.Metrics = Metrics{Downloads: Downloads{}}
+	c.Metrics.Downloads.Versions = map[string]int{}
 	return
 }
 
@@ -147,7 +148,7 @@ func (c *Cookbook) Equals(c2 common.Supermarketer) (res bool) {
 }
 
 // Diff returns any attributes added/changed/removed from one Cookbook struct
-// to another
+// to another, represented by a positive and negative diff Cookbook.
 func (c *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 	if c.Equals(c2) {
 		return
