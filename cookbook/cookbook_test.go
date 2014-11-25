@@ -476,10 +476,14 @@ func Test_Diff_4_DifferentRating(t *testing.T) {
 	data2.AverageRating = 99
 	pos1, neg1 := data1.Diff(&data2)
 	pos2, neg2 := data2.Diff(&data1)
-	for _, i := range [][]int{
+	if neg1 != nil {
+		t.Fatalf("Expected: nil, got: %v", neg1)
+	}
+	if pos2 != nil {
+		t.Fatalf("Expected: nil, got: %v", pos2)
+	}
+	for _, i := range [][]interface{}{
 		{pos1.AverageRating, 99},
-		{neg1.AverageRating, 0},
-		{pos2.AverageRating, 0},
 		{neg2.AverageRating, 99},
 	} {
 		if i[0] != i[1] {
@@ -494,10 +498,14 @@ func Test_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
 	data2.Deprecated = true
 	pos1, neg1 := data1.Diff(&data2)
 	pos2, neg2 := data2.Diff(&data1)
-	for _, i := range [][]bool{
+	if neg1 != nil {
+		t.Fatalf("Expected: nil, got: %v", neg1)
+	}
+	if pos2 != nil {
+		t.Fatalf("Expected: nil, got: %v", pos2)
+	}
+	for _, i := range [][]interface{}{
 		{pos1.Deprecated, true},
-		{neg1.Deprecated, false},
-		{pos2.Deprecated, false},
 		{neg2.Deprecated, true},
 	} {
 		if i[0] != i[1] {

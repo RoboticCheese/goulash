@@ -68,7 +68,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"reflect"
 
 	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
@@ -150,77 +149,15 @@ func (c *Cookbook) Equals(c2 common.Supermarketer) (res bool) {
 // Diff returns any attributes added/changed/removed from one Cookbook struct
 // to another, represented by a positive and negative diff Cookbook.
 func (c *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
-	if c.Equals(c2) {
-		return
-	}
-	r1 := reflect.ValueOf(c).Elem()
-	r2 := reflect.ValueOf(c2).Elem()
-
-	if !r1.IsValid() {
-		pos = c2
-		return
-	}
-	if !r2.IsValid() {
-		neg = c
-		return
-	}
-
-	pos = NewCookbook()
-	neg = NewCookbook()
-	rpos := reflect.ValueOf(pos).Elem()
-	rneg := reflect.ValueOf(neg).Elem()
-	for i := 0; i < r1.NumField(); i++ {
-		f1 := r1.Field(i)
-		f2 := r2.Field(i)
-
-		switch f1.Kind() {
-		case reflect.String:
-			if f1.String() != f2.String() {
-				rpos.Field(i).Set(f2)
-				rneg.Field(i).Set(f1)
-			}
-		case reflect.Int:
-			if f1.Int() != f2.Int() {
-				rpos.Field(i).Set(f2)
-				rneg.Field(i).Set(f1)
-			}
-		case reflect.Bool:
-			if f1.Bool() != f2.Bool() {
-				rpos.Field(i).Set(f2)
-				rneg.Field(i).Set(f1)
-			}
-		case reflect.Slice:
-			for j := 0; j < f1.Len(); j++ {
-				found := false
-				for k := 0; k < f2.Len(); k++ {
-					if f2.Index(k) == f1.Index(j) {
-						found = true
-						break
-					}
-				}
-				if found == false {
-					rneg.Field(i).Set(reflect.Append(rneg.Field(i), f1.Index(j)))
-				}
-			}
-			for j := 0; j < f2.Len(); j++ {
-				found := false
-				for k := 0; k < f1.Len(); k++ {
-					if f1.Index(k) == f2.Index(j) {
-						found = true
-						break
-					}
-				}
-				if found == false {
-					rpos.Field(i).Set(reflect.Append(rpos.Field(i), f2.Index(j)))
-				}
-			}
-		case reflect.Struct:
-		}
-	}
-	if pos.Empty() {
+	ipos, ineg := common.Diff(c, c2, &Cookbook{}, &Cookbook{})
+	if ipos != nil {
+		pos = ipos.(*Cookbook)
+	} else {
 		pos = nil
 	}
-	if neg.Empty() {
+	if ineg != nil {
+		neg = ineg.(*Cookbook)
+	} else {
 		neg = nil
 	}
 	return

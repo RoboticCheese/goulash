@@ -21,7 +21,9 @@ This file defines common functions.
 */
 package common
 
-import "reflect"
+import (
+	"reflect"
+)
 
 // Supermarketer implements an interface shared by all the Goulash structs.
 type Supermarketer interface {
@@ -110,6 +112,11 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 	vneg = reflect.New(v1.Type()).Elem()
 
 	switch v1.Kind() {
+	case reflect.Bool:
+		if v1.Bool() != v2.Bool() {
+			vpos.Set(v2)
+			vneg.Set(v1)
+		}
 	case reflect.Int:
 		if v1.Int() != v2.Int() {
 			vpos.Set(v2)
@@ -147,6 +154,35 @@ func diffValue(v1 reflect.Value, v2 reflect.Value) (vpos reflect.Value, vneg ref
 		}
 		if n.IsValid() {
 			vneg.Set(n)
+		}
+	case reflect.Slice:
+		vpos = reflect.MakeSlice(v1.Type(), 0, 0)
+		vneg = reflect.MakeSlice(v1.Type(), 0, 0)
+		for i := 0; i < v1.Len(); i++ {
+			found := false
+			for j := 0; j < v2.Len(); j++ {
+				// TODO: What if slice is not of strings?
+				if v2.Index(j).String() == v1.Index(i).String() {
+					found = true
+					break
+				}
+			}
+			if found == false {
+				vneg = reflect.Append(vneg, v1.Index(i))
+			}
+		}
+		for i := 0; i < v2.Len(); i++ {
+			found := false
+			for j := 0; j < v1.Len(); j++ {
+				// TODO: What if slice is not of strings?
+				if v1.Index(j).String() == v2.Index(i).String() {
+					found = true
+					break
+				}
+			}
+			if found == false {
+				vpos = reflect.Append(vpos, v2.Index(i))
+			}
 		}
 	case reflect.Map:
 		vpos = reflect.MakeMap(v1.Type())
