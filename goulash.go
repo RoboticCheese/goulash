@@ -15,42 +15,6 @@
 // limitations under the License.
 
 /*
-Package goulash wraps all the sub-packages to over consumers of this library
-a single package to import and namespace to contend with.
+Package goulash implements a Go client library for the Chef Supermarket API.
 */
 package goulash
-
-import (
-	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/cookbook"
-	"github.com/RoboticCheese/goulash/cookbookversion"
-	"github.com/RoboticCheese/goulash/universe"
-)
-
-// NewAPIInstance accepts a URL string and returns a pointer to a new API
-// instance and any error encountered.
-func NewAPIInstance(url string) (i *apiinstance.APIInstance, err error) {
-	i, err = apiinstance.New(url)
-	return
-}
-
-// NewCookbook accepts a pointer to an APIInstance struct and a name string and
-// returns a pointer to a new Cookbook struct and any error encountered.
-func NewCookbook(i *apiinstance.APIInstance, name string) (c *cookbook.Cookbook, err error) {
-	c, err = cookbook.New(i, name)
-	return
-}
-
-// NewCookbookVersion accepts a pointer to a Cookbook struct and a version
-// string and returns a pointer to a new CookbookVersion struct.
-func NewCookbookVersion(c *cookbook.Cookbook, v string) (cv *cookbookversion.CookbookVersion, err error) {
-	cv, err = cookbookversion.New(c, v)
-	return
-}
-
-// NewUniverse accepts a pointer to an APIInstance struct and returns a pointer
-// to a new Universe struct and any error encountered.
-func NewUniverse(i *apiinstance.APIInstance) (u *universe.Universe, err error) {
-	u, err = universe.New(i)
-	return
-}

@@ -15,13 +15,18 @@ This project currently depends only on packages in the Go standard library.
 Usage
 =====
 
-To do anything, you first need to set up a connection to your API instance:
+To do anything, you first need to import the goulash package and set up a
+connection to your API instance:
 
-    i, err := api_instance.New("https://supermarket.getchef.com") // Or your API server
+    import (
+        "goulash"
+    )
+
+    i, err := goulash.NewAPIInstance("https://supermarket.getchef.com") // Or your API server
 
 That instance can then be used to examine cookbook data:
 
-    cb, err := cookbook.New(i, "nginx") // Or your API instance and cookbook name
+    cb, err := goulash.NewCookbook(i, "nginx") // Or your API instance and cookbook name
     fmt.Print(cb.Name)
     fmt.Print(cb.Maintainer)
     fmt.Print(cb.Description)
@@ -44,7 +49,7 @@ That instance can then be used to examine cookbook data:
 
 And that cookbook can be used to examine cookbook version data:
 
-    cv, err := cookbook_version.New(cb, "0.1.0") // Or your cookbook and version string
+    cv, err := goulash.NewCookbookVersion(cb, "0.1.0") // Or your cookbook and version string
     fmt.Print(cv.License)
     fmt.Print(cv.TarballFileSize)
     fmt.Print(cv.Version)
@@ -57,26 +62,45 @@ And that cookbook can be used to examine cookbook version data:
 The instance can also be used to examine the Berkshelf-style `universe`
 endpoint:
 
-    u, err := universe.New(i)
+    u, err := goulash.NewUniverse(i)
     fmt.Print(u["nginx"]["2.7.4"].LocationType)
     fmt.Print(u["nginx"]["2.7.4"].LocationPath)
     fmt.Print(u["nginx"]["2.7.4"].DownloadURL)
     fmt.Print(u["nginx"]["2.7.4"].Dependencies["apt"])
 
-Each data structure has an equality test that will return true only if all
-of the two structs' member attributes are equal:
+Each data structure has tests for...
 
-    boolean_res, err := cookbook1.Equals(cookbook2)
-    boolean_res, err := cookbook_version1.Equals(cookbook_version2)
-    boolean_res, err := universe1.Equals(universe2)
-    boolean_res, err := universe1["nginx"].Equals(universe2["nginx"])
+***Emptiness***
+
+Return a boolean representing whether all fields in a struct are their zero
+values.
+
+c, err := goulash.NewCookbook(api, "nginx")
+empty := c.Empty()
+
+***Equality***
+
+Return a boolean representing whether all fields in two structs are equal.
+
+c1, err := goulash.NewCookbook(api, "nginx")
+c2, err := goulash.NewCookbook(api, "othernginx")
+equal := c1.Equals(c2)
+
+***Diffs***
+
+Return two new instances of the type being compared that represent a positive
+(any new or modified) and negative (any removed or modified) diff of each field.
+
+c1, err := goulash.NewCookbook(api, "nginx")
+c2, err := goulash.NewCookbook(api, "othernginx")
+positiveDiff, negativeDiff := c1.Diff(c2)
 
 Contributing
 ============
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Include unit tests with any changes and make sure they pass (`go test`)
+3. Include unit tests with any changes and make sure they pass (`go test ./...`)
 4. Commit your changes (`git commit -am 'Add some feature'`)
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create new Pull Request

@@ -1,4 +1,4 @@
-package apiinstance
+package goulash
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func startHTTP() (ts *httptest.Server) {
+func istartHTTP() (ts *httptest.Server) {
 	response := "Everything's okay!"
 	ts = httptest.NewServer(
 		http.HandlerFunc(
@@ -19,10 +19,10 @@ func startHTTP() (ts *httptest.Server) {
 	return
 }
 
-func Test_New_1_NoError(t *testing.T) {
-	ts := startHTTP()
+func Test_NewAPIInstance_1_NoError(t *testing.T) {
+	ts := istartHTTP()
 	defer ts.Close()
-	i, err := New(ts.URL)
+	i, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -38,28 +38,35 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_New_2_ConnError(t *testing.T) {
-	ts := startHTTP()
+func Test_NewAPIInstance_2_ConnError(t *testing.T) {
+	ts := istartHTTP()
 	ts.Close()
 
-	_, err := New(ts.URL)
+	_, err := NewAPIInstance(ts.URL)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_New_3_404Error(t *testing.T) {
+func Test_NewAPIInstance_3_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	_, err := New(ts.URL)
+	_, err := NewAPIInstance(ts.URL)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_NewAPIInstance_1_EmptyResult(t *testing.T) {
-	i := NewAPIInstance()
+func Test_NewAPIInstance_4_RealData(t *testing.T) {
+	_, err := NewAPIInstance("https://supermarket.getchef.com")
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+}
+
+func Test_InitAPIInstance_1_EmptyResult(t *testing.T) {
+	i := InitAPIInstance()
 	for _, k := range []string{
 		i.Endpoint,
 		i.ETag,
@@ -72,14 +79,7 @@ func Test_NewAPIInstance_1_EmptyResult(t *testing.T) {
 	}
 }
 
-func Test_New_4_RealData(t *testing.T) {
-	_, err := New("https://supermarket.getchef.com")
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
-}
-
-func Test_Empty_1_Empty(t *testing.T) {
+func Test_APIInstance_Empty_1_Empty(t *testing.T) {
 	a := new(APIInstance)
 	res := a.Empty()
 	if res != true {
@@ -87,7 +87,7 @@ func Test_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_Empty_2_HasEndpoint(t *testing.T) {
+func Test_APIInstance_Empty_2_HasEndpoint(t *testing.T) {
 	a := new(APIInstance)
 	a.Endpoint = "https://example.com"
 	res := a.Empty()
@@ -96,7 +96,7 @@ func Test_Empty_2_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_Empty_3_HasBaseURL(t *testing.T) {
+func Test_APIInstance_Empty_3_HasBaseURL(t *testing.T) {
 	a := new(APIInstance)
 	a.BaseURL = "https://example.com"
 	res := a.Empty()
@@ -105,7 +105,7 @@ func Test_Empty_3_HasBaseURL(t *testing.T) {
 	}
 }
 
-func Test_Empty_4_HasVersion(t *testing.T) {
+func Test_APIInstance_Empty_4_HasVersion(t *testing.T) {
 	a := new(APIInstance)
 	a.Version = "1"
 	res := a.Empty()

@@ -15,10 +15,10 @@
 // limitations under the License.
 
 /*
-Package universe implements an API client for Supermarket's Berkshelf-style
-universe endpoint.
+Package goulash implements a Go client library for the Chef Supermarket API.
 
-This file implements a struct for the Berkshelf-style universe endpoint, e.g.
+This file defines a Universe struct, corresponding to how a Berkshelf-style
+universe endpoint is represented by the API, e.g.
 
 https://supermarket.getchef.com/universe =>
 
@@ -71,31 +71,30 @@ https://supermarket.getchef.com/universe =>
 	},
 	...
 */
-package universe
+package goulash
 
 import (
 	"encoding/json"
 	"io"
 	"net/http"
 
-	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/component"
+	"github.com/RoboticCheese/goulash/universe"
 )
 
 // Universe contains a Cookbooks map of cookbook name strings to Cookbook items.
 type Universe struct {
-	component.Component
-	APIInstance *apiinstance.APIInstance
-	Cookbooks   map[string]*Cookbook
+	Component
+	APIInstance *APIInstance
+	Cookbooks   map[string]*universe.Cookbook
 }
 
-// New accepts a pointer to an APIInstance struct and uses it to initialize
-// and return a pointer to a new Universe struct.
-func New(i *apiinstance.APIInstance) (u *Universe, err error) {
-	u = NewUniverse()
+// NewUniverse accepts a pointer to an APIInstance struct and uses it to
+// initialize and return a pointer to a new Universe struct.
+func NewUniverse(i *APIInstance) (u *Universe, err error) {
+	u = InitUniverse()
 	u.APIInstance = i
-	u.Component, err = component.New(u.APIInstance.BaseURL + "/universe")
+	u.Component, err = NewComponent(u.APIInstance.BaseURL + "/universe")
 	if err != nil {
 		return
 	}
@@ -108,15 +107,15 @@ func New(i *apiinstance.APIInstance) (u *Universe, err error) {
 
 	// Create a temporary map that corresponds more closely to what the
 	// universe JSON data looks like
-	tempU := map[string]map[string]*CookbookVersion{}
+	tempU := map[string]map[string]*universe.CookbookVersion{}
 
-	err = decodeJSON(resp.Body, &tempU)
+	err = decodeUniverseJSON(resp.Body, &tempU)
 	if err != nil {
 		return
 	}
 	// Fill in the Universe struct with the JSON data gathered above
 	for cbName, cb := range tempU {
-		u.Cookbooks[cbName] = NewCookbook()
+		u.Cookbooks[cbName] = universe.NewCookbook()
 		u.Cookbooks[cbName].Name = cbName
 		for cvName, cv := range cb {
 			cv.Version = cvName
@@ -126,10 +125,10 @@ func New(i *apiinstance.APIInstance) (u *Universe, err error) {
 	return
 }
 
-// NewUniverse generates an empty Universe struct.
-func NewUniverse() (u *Universe) {
+// InitUniverse generates an empty Universe struct.
+func InitUniverse() (u *Universe) {
 	u = new(Universe)
-	u.Cookbooks = map[string]*Cookbook{}
+	u.Cookbooks = map[string]*universe.Cookbook{}
 	return
 }
 
@@ -153,13 +152,13 @@ func (u *Universe) Update() (posDiff, negDiff *Universe, err error) {
 	// universe JSON if we don't need to.
 	if u.ETag != "" {
 		// Fall through to the regular compare if there's an error
-		tmp, _ := component.New(u.Endpoint)
+		tmp, _ := NewComponent(u.Endpoint)
 		if tmp.ETag != "" && tmp.ETag == u.ETag {
 			return
 		}
 	}
 
-	curU, err := New(u.APIInstance)
+	curU, err := NewUniverse(u.APIInstance)
 	if err != nil {
 		return
 	}
@@ -187,10 +186,10 @@ func (u *Universe) Diff(u2 *Universe) (pos, neg *Universe) {
 	return
 }
 
-// decodeJSON accepts an IO reader and a Universe struct and populates that
-// struct with the JSON data, after doing some extra parsing to account for the
-// variant cookbook name and version number keys.
-func decodeJSON(r io.Reader, u *map[string]map[string]*CookbookVersion) (err error) {
+// decodeUniverseJSON accepts an IO reader and a Universe struct and populates
+// that struct with the JSON data, after doing some extra parsing to account
+// for the variant cookbook name and version number keys.
+func decodeUniverseJSON(r io.Reader, u *map[string]map[string]*universe.CookbookVersion) (err error) {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(u)
 }
