@@ -15,33 +15,33 @@
 // limitations under the License.
 
 /*
-Package apiinstance implements the API connection consumed by other Goulash
-functionality.
+Package goulash implements a Go client library for the Chef Supermarket API.
 
-This file implements the APIInstance struct.
+This file defines an APIInstance struct, representing an API conection to be
+consumed by other Goulash components.
 */
-package apiinstance
+package goulash
 
 import (
 	"errors"
 	"net/http"
 
 	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/component"
 )
 
 // APIInstance implements a struct for the API connection.
 type APIInstance struct {
-	component.Component
+	Component
 	BaseURL string
 	Version string
 }
 
-// New initializes and returns a new API instance based on a Supermarket URL.
-func New(url string) (i *APIInstance, err error) {
-	i = NewAPIInstance()
+// NewAPIInstance initializes and returns a new API instance based on a
+// Supermarket URL.
+func NewAPIInstance(url string) (i *APIInstance, err error) {
+	i = InitAPIInstance()
 	i.BaseURL = url
-	i.Component, err = component.New(i.BaseURL)
+	i.Component, err = NewComponent(i.BaseURL)
 	if err != nil {
 		return
 	}
@@ -58,8 +58,8 @@ func New(url string) (i *APIInstance, err error) {
 	return
 }
 
-// NewAPIInstance generates an empty APIInstance struct.
-func NewAPIInstance() (i *APIInstance) {
+// InitAPIInstance generates an empty APIInstance struct.
+func InitAPIInstance() (i *APIInstance) {
 	i = new(APIInstance)
 	return
 }

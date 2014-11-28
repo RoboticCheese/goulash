@@ -15,11 +15,12 @@
 // limitations under the License.
 
 /*
-Package component implements a shared set of Goulash functionality.
+Package goulash implements a Go client library for the Chef Supermarket API.
 
-This file defines a shared Component struct for any API endpoint.
+This file defines a shared Component struct to be used as an anonymous field
+by any other Goulash structs.
 */
-package component
+package goulash
 
 import (
 	"net/http"
@@ -33,17 +34,17 @@ type Component struct {
 	ETag     string
 }
 
-// New creates a new Component struct from a given endpoint string and returns
-// that struct and any error.
-func New(endpoint string) (c Component, err error) {
-	c = NewComponent()
+// NewComponent creates a new Component struct from a given endpoint string and
+// returns that struct and any error.
+func NewComponent(endpoint string) (c Component, err error) {
+	c = InitComponent()
 	c.Endpoint = endpoint
 	err = c.getETag()
 	return
 }
 
-// NewComponent generates an empty Component struct.
-func NewComponent() (c Component) {
+// InitComponent generates an empty Component struct.
+func InitComponent() (c Component) {
 	c = Component{}
 	return
 }

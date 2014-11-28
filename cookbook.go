@@ -15,10 +15,10 @@
 // limitations under the License.
 
 /*
-Package cookbook implements individual cookbook functionality.
+Package goulash implements a Go client library for the Chef Supermarket API.
 
-This file implements a struct for a cookbook, corresponding to how one is
-represented by the Supermarket API, e.g.
+This file defines a Cookbook struct, corresponding to how a cookbook is
+represented by the API, e.g.
 
 https://supermarket.getchef.com/api/v1/cookbooks/chef-dk =>
 
@@ -62,16 +62,14 @@ https://supermarket.getchef.com/api/v1/cookbooks/chef-dk =>
 	}
 }
 */
-package cookbook
+package goulash
 
 import (
 	"encoding/json"
 	"io"
 	"net/http"
 
-	"github.com/RoboticCheese/goulash/apiinstance"
 	"github.com/RoboticCheese/goulash/common"
-	"github.com/RoboticCheese/goulash/component"
 )
 
 // Downloads represents the Downloads section of the metrics data.
@@ -88,7 +86,7 @@ type Metrics struct {
 
 // Cookbook implements a data structure for a single Chef cookbook.
 type Cookbook struct {
-	component.Component
+	Component
 	Name              string   `json:"name"`
 	Maintainer        string   `json:"maintainer"`
 	Description       string   `json:"description"`
@@ -104,12 +102,12 @@ type Cookbook struct {
 	Metrics           Metrics  `json:"metrics"`
 }
 
-// New initializes and returns a new Cookbook struct based on a Supermarket
-// struct and cookbook name.
-func New(i *apiinstance.APIInstance, name string) (c *Cookbook, err error) {
-	c = NewCookbook()
+// NewCookbook initializes and returns a new Cookbook struct based on a
+// Supermarket struct and cookbook name.
+func NewCookbook(i *APIInstance, name string) (c *Cookbook, err error) {
+	c = InitCookbook()
 	c.Endpoint = i.Endpoint + "/cookbooks/" + name
-	c.Component, err = component.New(c.Endpoint)
+	c.Component, err = NewComponent(c.Endpoint)
 	if err != nil {
 		return
 	}
@@ -120,12 +118,12 @@ func New(i *apiinstance.APIInstance, name string) (c *Cookbook, err error) {
 	}
 	defer resp.Body.Close()
 
-	err = decodeJSON(resp.Body, c)
+	err = c.decodeJSON(resp.Body)
 	return
 }
 
-// NewCookbook generates an empty Cookbook struct.
-func NewCookbook() (c *Cookbook) {
+// InitCookbook generates an empty Cookbook struct.
+func InitCookbook() (c *Cookbook) {
 	c = new(Cookbook)
 	c.Versions = []string{}
 	c.Metrics = Metrics{Downloads: Downloads{}}
@@ -165,7 +163,7 @@ func (c *Cookbook) Diff(c2 *Cookbook) (pos, neg *Cookbook) {
 
 // decodeJSON accepts an IO reader and a Cookbook struct and populates that
 // struct with the JSON data.
-func decodeJSON(r io.Reader, c *Cookbook) (err error) {
+func (c *Cookbook) decodeJSON(r io.Reader) (err error) {
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(c)
 }

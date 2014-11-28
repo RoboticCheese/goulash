@@ -1,18 +1,15 @@
-package cookbook
+package goulash
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/component"
 )
 
 func cdata() (data Cookbook) {
 	data = Cookbook{
-		Component:         component.Component{Endpoint: "https://example1.com"},
+		Component:         Component{Endpoint: "https://example1.com"},
 		Name:              "test1",
 		Maintainer:        "someuser",
 		Description:       "A cookbook",
@@ -40,7 +37,7 @@ func cdata() (data Cookbook) {
 	return
 }
 
-var jsonData = map[string]string{
+var cjsonData = map[string]string{
 	"name":               "chef-dk",
 	"maintainer":         "roboticcheese",
 	"description":        "Installs/configures the Chef-DK",
@@ -67,54 +64,54 @@ var jsonData = map[string]string{
 	}`,
 }
 
-func jsonified() (res string) {
-	res = `{"name": "` + jsonData["name"] + `",` +
-		`"maintainer": "` + jsonData["maintainer"] + `",` +
-		`"description": "` + jsonData["description"] + `",` +
-		`"category": "` + jsonData["category"] + `",` +
-		`"latest_version": "` + jsonData["latest_version"] + `",` +
-		`"external_url": "` + jsonData["external_url"] + `",` +
-		`"average_rating": ` + jsonData["average_rating"] + `,` +
-		`"created_at": "` + jsonData["created_at"] + `",` +
-		`"updated_at": "` + jsonData["updated_at"] + `",` +
-		`"deprecated": ` + jsonData["deprecated"] + `,` +
-		`"foodcritic_failure": ` + jsonData["foodcritic_failure"] + `,` +
-		`"versions": ` + jsonData["versions"] + `,` +
-		`"metrics": ` + jsonData["metrics"] + `}`
+func cjsonified() (res string) {
+	res = `{"name": "` + cjsonData["name"] + `",` +
+		`"maintainer": "` + cjsonData["maintainer"] + `",` +
+		`"description": "` + cjsonData["description"] + `",` +
+		`"category": "` + cjsonData["category"] + `",` +
+		`"latest_version": "` + cjsonData["latest_version"] + `",` +
+		`"external_url": "` + cjsonData["external_url"] + `",` +
+		`"average_rating": ` + cjsonData["average_rating"] + `,` +
+		`"created_at": "` + cjsonData["created_at"] + `",` +
+		`"updated_at": "` + cjsonData["updated_at"] + `",` +
+		`"deprecated": ` + cjsonData["deprecated"] + `,` +
+		`"foodcritic_failure": ` + cjsonData["foodcritic_failure"] + `,` +
+		`"versions": ` + cjsonData["versions"] + `,` +
+		`"metrics": ` + cjsonData["metrics"] + `}`
 	return
 }
 
-func startHTTP() (ts *httptest.Server) {
+func cstartHTTP() (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprint(w, jsonified())
+				fmt.Fprint(w, cjsonified())
 			},
 		),
 	)
 	return
 }
 
-func Test_New_1_NoError(t *testing.T) {
-	ts := startHTTP()
+func Test_NewCookbook_1_NoError(t *testing.T) {
+	ts := cstartHTTP()
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
-	c, err := New(i, "chef-dk")
+	c, err := NewCookbook(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 	for k, v := range map[string]string{
 		c.Endpoint:      ts.URL + "/api/v1/cookbooks/chef-dk",
-		c.Name:          jsonData["name"],
-		c.Maintainer:    jsonData["maintainer"],
-		c.Description:   jsonData["description"],
-		c.Category:      jsonData["category"],
-		c.LatestVersion: jsonData["latest_version"],
-		c.ExternalURL:   jsonData["external_url"],
-		c.CreatedAt:     jsonData["created_at"],
-		c.UpdatedAt:     jsonData["updated_at"],
+		c.Name:          cjsonData["name"],
+		c.Maintainer:    cjsonData["maintainer"],
+		c.Description:   cjsonData["description"],
+		c.Category:      cjsonData["category"],
+		c.LatestVersion: cjsonData["latest_version"],
+		c.ExternalURL:   cjsonData["external_url"],
+		c.CreatedAt:     cjsonData["created_at"],
+		c.UpdatedAt:     cjsonData["updated_at"],
 	} {
 		if k != v {
 			t.Fatalf("Expected: %v, got: %v", v, k)
@@ -154,14 +151,14 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_New_2_NilFoodcriticFailure(t *testing.T) {
-	jsonData["foodcritic_failure"] = "null"
-	ts := startHTTP()
+func Test_NewCookbook_2_NilFoodcriticFailure(t *testing.T) {
+	cjsonData["foodcritic_failure"] = "null"
+	ts := cstartHTTP()
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
-	c, err := New(i, "chef-dk")
+	c, err := NewCookbook(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -170,14 +167,14 @@ func Test_New_2_NilFoodcriticFailure(t *testing.T) {
 	}
 }
 
-func Test_New_3_AverageRating(t *testing.T) {
-	jsonData["average_rating"] = "20"
-	ts := startHTTP()
+func Test_NewCookbook_3_AverageRating(t *testing.T) {
+	cjsonData["average_rating"] = "20"
+	ts := cstartHTTP()
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
-	c, err := New(i, "chef-dk")
+	c, err := NewCookbook(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -186,34 +183,34 @@ func Test_New_3_AverageRating(t *testing.T) {
 	}
 }
 
-func Test_New_4_ConnError(t *testing.T) {
-	ts := startHTTP()
+func Test_NewCookbook_4_ConnError(t *testing.T) {
+	ts := cstartHTTP()
 	ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
-	_, err := New(i, "chef-dk")
+	_, err := NewCookbook(i, "chef-dk")
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_New_5_404Error(t *testing.T) {
+func Test_NewCookbook_5_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.Endpoint = ts.URL + "/api/v1"
-	_, err := New(i, "chef-dk")
+	_, err := NewCookbook(i, "chef-dk")
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_New_6_RealData(t *testing.T) {
-	i := new(apiinstance.APIInstance)
+func Test_NewCookbook_6_RealData(t *testing.T) {
+	i := new(APIInstance)
 	i.Endpoint = "https://supermarket.getchef.com/api/v1"
-	c, err := New(i, "chef-dk")
+	c, err := NewCookbook(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -229,8 +226,8 @@ func Test_New_6_RealData(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_1_EmptyStruct(t *testing.T) {
-	c := NewCookbook()
+func Test_InitCookbook_1_EmptyStruct(t *testing.T) {
+	c := InitCookbook()
 	for _, i := range [][]interface{}{
 		{c.Endpoint, ""},
 		{c.Name, ""},
@@ -255,16 +252,16 @@ func Test_NewCookbook_1_EmptyStruct(t *testing.T) {
 	}
 }
 
-func Test_Empty_1_Empty(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_1_Empty(t *testing.T) {
+	c := InitCookbook()
 	res := c.Empty()
 	if res != true {
 		t.Fatalf("Expected: true, got: %v", res)
 	}
 }
 
-func Test_Empty_2_HasName(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_2_HasName(t *testing.T) {
+	c := InitCookbook()
 	c.Name = "thing"
 	res := c.Empty()
 	if res != false {
@@ -272,8 +269,8 @@ func Test_Empty_2_HasName(t *testing.T) {
 	}
 }
 
-func Test_Empty_3_HasRating(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_3_HasRating(t *testing.T) {
+	c := InitCookbook()
 	c.AverageRating = 10
 	res := c.Empty()
 	if res != false {
@@ -281,8 +278,8 @@ func Test_Empty_3_HasRating(t *testing.T) {
 	}
 }
 
-func Test_Empty_4_IsDeprecated(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_4_IsDeprecated(t *testing.T) {
+	c := InitCookbook()
 	c.Deprecated = true
 	res := c.Empty()
 	if res != false {
@@ -290,8 +287,8 @@ func Test_Empty_4_IsDeprecated(t *testing.T) {
 	}
 }
 
-func Test_Empty_5_HasVersions(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_5_HasVersions(t *testing.T) {
+	c := InitCookbook()
 	c.Versions = []string{"0.1.0"}
 	res := c.Empty()
 	if res != false {
@@ -299,8 +296,8 @@ func Test_Empty_5_HasVersions(t *testing.T) {
 	}
 }
 
-func Test_Empty_5_HasFollowers(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_5_HasFollowers(t *testing.T) {
+	c := InitCookbook()
 	c.Metrics.Followers = 20
 	res := c.Empty()
 	if res != false {
@@ -308,8 +305,8 @@ func Test_Empty_5_HasFollowers(t *testing.T) {
 	}
 }
 
-func Test_Empty_5_HasDownloads(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_5_HasDownloads(t *testing.T) {
+	c := InitCookbook()
 	c.Metrics.Downloads.Total = 20
 	res := c.Empty()
 	if res != false {
@@ -317,8 +314,8 @@ func Test_Empty_5_HasDownloads(t *testing.T) {
 	}
 }
 
-func Test_Empty_6_HasVersionDownloads(t *testing.T) {
-	c := NewCookbook()
+func Test_Cookbook_Empty_6_HasVersionDownloads(t *testing.T) {
+	c := InitCookbook()
 	c.Metrics.Downloads.Versions["0.1.0"] = 20
 	res := c.Empty()
 	if res != false {
@@ -326,7 +323,7 @@ func Test_Empty_6_HasVersionDownloads(t *testing.T) {
 	}
 }
 
-func Test_Equals_1_Equal(t *testing.T) {
+func Test_Cookbook_Equals_1_Equal(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	res := data1.Equals(&data2)
@@ -339,7 +336,7 @@ func Test_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Equals_2_DifferentEndpoints(t *testing.T) {
+func Test_Cookbook_Equals_2_DifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
@@ -353,7 +350,7 @@ func Test_Equals_2_DifferentEndpoints(t *testing.T) {
 	}
 }
 
-func Test_Equals_3_DifferentName(t *testing.T) {
+func Test_Cookbook_Equals_3_DifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
@@ -367,7 +364,7 @@ func Test_Equals_3_DifferentName(t *testing.T) {
 	}
 }
 
-func Test_Equals_4_DifferentLatestVersion(t *testing.T) {
+func Test_Cookbook_Equals_4_DifferentLatestVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.LatestVersion = "9.9.9"
@@ -381,7 +378,7 @@ func Test_Equals_4_DifferentLatestVersion(t *testing.T) {
 	}
 }
 
-func Test_Equals_5_DifferentVersions(t *testing.T) {
+func Test_Cookbook_Equals_5_DifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = append(data2.Versions, "9.9.9")
@@ -395,7 +392,7 @@ func Test_Equals_5_DifferentVersions(t *testing.T) {
 	}
 }
 
-func Test_Equals_6_DifferentMetrics(t *testing.T) {
+func Test_Cookbook_Equals_6_DifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions["1.2.3"] = 999
@@ -409,7 +406,7 @@ func Test_Equals_6_DifferentMetrics(t *testing.T) {
 	}
 }
 
-func Test_Diff_1_Equal(t *testing.T) {
+func Test_Cookbook_Diff_1_Equal(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	pos1, neg1 := data1.Diff(&data2)
@@ -426,7 +423,7 @@ func Test_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Diff_2_DifferentEndpoints(t *testing.T) {
+func Test_Cookbook_Diff_2_DifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
@@ -448,7 +445,7 @@ func Test_Diff_2_DifferentEndpoints(t *testing.T) {
 	}
 }
 
-func Test_Diff_3_DifferentName(t *testing.T) {
+func Test_Cookbook_Diff_3_DifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
@@ -470,7 +467,7 @@ func Test_Diff_3_DifferentName(t *testing.T) {
 	}
 }
 
-func Test_Diff_4_DifferentRating(t *testing.T) {
+func Test_Cookbook_Diff_4_DifferentRating(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.AverageRating = 99
@@ -492,7 +489,7 @@ func Test_Diff_4_DifferentRating(t *testing.T) {
 	}
 }
 
-func Test_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
+func Test_Cookbook_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Deprecated = true
@@ -514,7 +511,7 @@ func Test_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
 	}
 }
 
-func Test_Diff_6_DifferentVersions(t *testing.T) {
+func Test_Cookbook_Diff_6_DifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = []string{"1.2.3", "1.1.0", "9.9.9"}
@@ -536,7 +533,7 @@ func Test_Diff_6_DifferentVersions(t *testing.T) {
 	}
 }
 
-func Test_Diff_7_DifferentMetrics(t *testing.T) {
+func Test_Cookbook_Diff_7_DifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions = map[string]int{

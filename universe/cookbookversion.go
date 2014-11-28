@@ -15,29 +15,10 @@
 // limitations under the License.
 
 /*
-Package universe implements an API client for Supermarket's Berkshelf-style
-universe endpoint.
+Package universe implements the building blocks that make up the top-level
+Universe struct.
 
-This file implements a struct for a cookbook version as described by a
-Berkshelf-style universe endpoint, e.g.
-
-https://supermarket.getchef.com/universe =>
-
-{
-	"chef": {
-		"0.12.0": {
-			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url": "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
-			"dependencies": {
-				"runit":">= 0.0.0",
-				"couchdb":">= 0.0.0",
-				...
-			}
-		},
-		...
-	},
-	...
+This file defines a universe-style CookbookVersion struct.
 */
 package universe
 

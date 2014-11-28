@@ -1,4 +1,4 @@
-package universe
+package goulash
 
 import (
 	"encoding/json"
@@ -7,19 +7,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/RoboticCheese/goulash/apiinstance"
-	"github.com/RoboticCheese/goulash/component"
+	"github.com/RoboticCheese/goulash/universe"
 )
 
 func udata() (data *Universe) {
 	data = &Universe{
-		Component:   component.Component{Endpoint: "https://example.com"},
-		APIInstance: &apiinstance.APIInstance{},
-		Cookbooks: map[string]*Cookbook{
-			"test1": &Cookbook{
+		Component:   Component{Endpoint: "https://example.com"},
+		APIInstance: &APIInstance{},
+		Cookbooks: map[string]*universe.Cookbook{
+			"test1": &universe.Cookbook{
 				Name: "test1",
-				Versions: map[string]*CookbookVersion{
-					"0.1.0": &CookbookVersion{
+				Versions: map[string]*universe.CookbookVersion{
+					"0.1.0": &universe.CookbookVersion{
 						Version:      "0.1.0",
 						LocationType: "opscode",
 						LocationPath: "https://example.com",
@@ -36,16 +35,16 @@ func udata() (data *Universe) {
 	return
 }
 
-func jsonData() (jsonData map[string]map[string]*CookbookVersion) {
-	jsonData = map[string]map[string]*CookbookVersion{
+func ujsonData() (jsonData map[string]map[string]*universe.CookbookVersion) {
+	jsonData = map[string]map[string]*universe.CookbookVersion{
 		"chef": {
-			"0.12.0": &CookbookVersion{
+			"0.12.0": &universe.CookbookVersion{
 				LocationType: "opscode",
 				LocationPath: "https://supermarket.getchef.com/api/v1",
 				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "couchdb": ">= 0.0.0"},
 			},
-			"0.20.0": &CookbookVersion{
+			"0.20.0": &universe.CookbookVersion{
 				LocationType: "opscode",
 				LocationPath: "https://supermarket.getchef.com/api/v1",
 				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
@@ -53,13 +52,13 @@ func jsonData() (jsonData map[string]map[string]*CookbookVersion) {
 			},
 		},
 		"djbdns": {
-			"0.7.0": &CookbookVersion{
+			"0.7.0": &universe.CookbookVersion{
 				LocationType: "opscode",
 				LocationPath: "https://supermarket.getchef.com/api/v1",
 				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "build-essential": ">= 0.0.0"},
 			},
-			"0.8.2": &CookbookVersion{
+			"0.8.2": &universe.CookbookVersion{
 				LocationType: "opscode",
 				LocationPath: "https://supermarket.getchef.com/api/v1",
 				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
@@ -70,38 +69,38 @@ func jsonData() (jsonData map[string]map[string]*CookbookVersion) {
 	return
 }
 
-func httpHeaders() (res map[string]string) {
+func uhttpHeaders() (res map[string]string) {
 	res = map[string]string{}
 	return
 }
 
-func httpBody(jsonData map[string]map[string]*CookbookVersion) (res string) {
-	bres, _ := json.Marshal(jsonData)
+func uhttpBody(ujsonData map[string]map[string]*universe.CookbookVersion) (res string) {
+	bres, _ := json.Marshal(ujsonData)
 	res = string(bres)
 	return
 }
 
-func startHTTP(httpHeaders func() map[string]string, jsonData func() map[string]map[string]*CookbookVersion) (ts *httptest.Server) {
+func ustartHTTP(uhttpHeaders func() map[string]string, ujsonData func() map[string]map[string]*universe.CookbookVersion) (ts *httptest.Server) {
 	ts = httptest.NewServer(
 		http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
-				for k, v := range httpHeaders() {
+				for k, v := range uhttpHeaders() {
 					w.Header().Set(k, v)
 				}
-				fmt.Fprint(w, httpBody(jsonData()))
+				fmt.Fprint(w, uhttpBody(ujsonData()))
 			},
 		),
 	)
 	return
 }
 
-func Test_New_1_NoError(t *testing.T) {
-	ts := startHTTP(httpHeaders, jsonData)
+func Test_NewUniverse_1_NoError(t *testing.T) {
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.BaseURL = ts.URL
-	u, err := New(i)
+	u, err := NewUniverse(i)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -143,34 +142,34 @@ func Test_New_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_New_2_ConnError(t *testing.T) {
-	ts := startHTTP(httpHeaders, jsonData)
+func Test_NewUniverse_2_ConnError(t *testing.T) {
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.BaseURL = ts.URL
-	_, err := New(i)
+	_, err := NewUniverse(i)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_New_3_404Error(t *testing.T) {
+func Test_NewUniverse_3_404Error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
 	defer ts.Close()
 
-	i := new(apiinstance.APIInstance)
+	i := new(APIInstance)
 	i.BaseURL = ts.URL
-	_, err := New(i)
+	_, err := NewUniverse(i)
 	if err == nil {
 		t.Fatalf("Expected an error but didn't get one")
 	}
 }
 
-func Test_New_4_RealData(t *testing.T) {
-	i := new(apiinstance.APIInstance)
+func Test_NewUniverse_4_RealData(t *testing.T) {
+	i := new(APIInstance)
 	i.BaseURL = "https://supermarket.getchef.com"
-	u, err := New(i)
+	u, err := NewUniverse(i)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -188,7 +187,7 @@ func Test_New_4_RealData(t *testing.T) {
 	}
 }
 
-func Test_Empty_1_Empty(t *testing.T) {
+func Test_Universe_Empty_1_Empty(t *testing.T) {
 	u := new(Universe)
 	res := u.Empty()
 	if res != true {
@@ -196,25 +195,25 @@ func Test_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_Empty_2_StillEmpty(t *testing.T) {
-	u := NewUniverse()
+func Test_Universe_Empty_2_StillEmpty(t *testing.T) {
+	u := InitUniverse()
 	res := u.Empty()
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
 }
 
-func Test_Empty_3_HasEmptyCookbooks(t *testing.T) {
-	u := NewUniverse()
-	u.Cookbooks["thing1"] = NewCookbook()
+func Test_Universe_Empty_3_HasEmptyCookbooks(t *testing.T) {
+	u := InitUniverse()
+	u.Cookbooks["thing1"] = universe.NewCookbook()
 	res := u.Empty()
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
 }
 
-func Test_Empty_4_HasEndpoint(t *testing.T) {
-	u := NewUniverse()
+func Test_Universe_Empty_4_HasEndpoint(t *testing.T) {
+	u := InitUniverse()
 	u.Endpoint = "http://example.com"
 	res := u.Empty()
 	if res != false {
@@ -222,9 +221,9 @@ func Test_Empty_4_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_Empty_5_HasAPIInstance(t *testing.T) {
-	u := NewUniverse()
-	i := new(apiinstance.APIInstance)
+func Test_Universe_Empty_5_HasAPIInstance(t *testing.T) {
+	u := InitUniverse()
+	i := new(APIInstance)
 	i.BaseURL = "https://example.com"
 	u.APIInstance = i
 	res := u.Empty()
@@ -233,10 +232,10 @@ func Test_Empty_5_HasAPIInstance(t *testing.T) {
 	}
 }
 
-func Test_Empty_6_HasCookbooks(t *testing.T) {
-	u := NewUniverse()
-	u.Cookbooks["nginx"] = NewCookbook()
-	u.Cookbooks["nginx"].Versions["0.1.0"] = NewCookbookVersion()
+func Test_Universe_Empty_6_HasCookbooks(t *testing.T) {
+	u := InitUniverse()
+	u.Cookbooks["nginx"] = universe.NewCookbook()
+	u.Cookbooks["nginx"].Versions["0.1.0"] = universe.NewCookbookVersion()
 	u.Cookbooks["nginx"].Versions["0.1.0"].LocationType = "opscode"
 	res := u.Empty()
 	if res != false {
@@ -244,7 +243,7 @@ func Test_Empty_6_HasCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Equals_1_Equal(t *testing.T) {
+func Test_Universe_Equals_1_Equal(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	for _, res := range []bool{
@@ -258,7 +257,7 @@ func Test_Equals_1_Equal(t *testing.T) {
 }
 
 // TODO
-//func Test_Equals_2_DifferentEndpoints(t *testing.T) {
+//func Test_Universe_Equals_2_DifferentEndpoints(t *testing.T) {
 //	data1 := udata()
 //	data2 := udata()
 //	data2.Endpoint = "otherexample.com"
@@ -272,10 +271,10 @@ func Test_Equals_1_Equal(t *testing.T) {
 //	}
 //}
 
-func Test_Equals_2_MoreCookbooks(t *testing.T) {
+func Test_Universe_Equals_2_MoreCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
-	data2.Cookbooks["test2"] = &Cookbook{}
+	data2.Cookbooks["test2"] = &universe.Cookbook{}
 	for _, res := range []bool{
 		data1.Equals(data2),
 		data2.Equals(data1),
@@ -286,10 +285,10 @@ func Test_Equals_2_MoreCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Equals_3_FewerCookbooks(t *testing.T) {
+func Test_Universe_Equals_3_FewerCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
-	data2.Cookbooks = map[string]*Cookbook{}
+	data2.Cookbooks = map[string]*universe.Cookbook{}
 	for _, res := range []bool{
 		data1.Equals(data2),
 		data2.Equals(data1),
@@ -300,7 +299,7 @@ func Test_Equals_3_FewerCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Equals_4_DifferentCookbooks(t *testing.T) {
+func Test_Universe_Equals_4_DifferentCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["test1"].Versions["0.1.0"].LocationType = "other"
@@ -314,15 +313,15 @@ func Test_Equals_4_DifferentCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Update_1_NoChanges(t *testing.T) {
-	ts := startHTTP(httpHeaders, jsonData)
+func Test_Universe_Update_1_NoChanges(t *testing.T) {
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -338,20 +337,20 @@ func Test_Update_1_NoChanges(t *testing.T) {
 	}
 }
 
-func Test_Update_2_SomeChanges(t *testing.T) {
-	json := jsonData()
-	jsonData := func() map[string]map[string]*CookbookVersion {
+func Test_Universe_Update_2_SomeChanges(t *testing.T) {
+	json := ujsonData()
+	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
 		return json
 	}
 
-	ts := startHTTP(httpHeaders, jsonData)
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -377,25 +376,25 @@ func Test_Update_2_SomeChanges(t *testing.T) {
 	}
 }
 
-func Test_Update_3_NewVersionReleased(t *testing.T) {
-	json := jsonData()
-	jsonData := func() map[string]map[string]*CookbookVersion {
+func Test_Universe_Update_3_NewVersionReleased(t *testing.T) {
+	json := ujsonData()
+	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
 		return json
 	}
 
-	ts := startHTTP(httpHeaders, jsonData)
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["9.9.9"] = &CookbookVersion{
+	json["chef"]["9.9.9"] = &universe.CookbookVersion{
 		LocationType: "opsplode",
 		LocationPath: "https://example.com",
 		DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/9.9.9/download",
@@ -435,25 +434,25 @@ func Test_Update_3_NewVersionReleased(t *testing.T) {
 	}
 }
 
-func Test_Update_4_ETagSomeChanges(t *testing.T) {
-	headers := httpHeaders()
+func Test_Universe_Update_4_ETagSomeChanges(t *testing.T) {
+	headers := uhttpHeaders()
 	headers["ETag"] = "tag1"
-	httpHeaders := func() map[string]string {
+	uhttpHeaders := func() map[string]string {
 		return headers
 	}
-	json := jsonData()
-	jsonData := func() map[string]map[string]*CookbookVersion {
+	json := ujsonData()
+	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
 		return json
 	}
 
-	ts := startHTTP(httpHeaders, jsonData)
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -481,25 +480,25 @@ func Test_Update_4_ETagSomeChanges(t *testing.T) {
 	}
 }
 
-func Test_Update_5_ETagNoChanges(t *testing.T) {
-	headers := httpHeaders()
+func Test_Universe_Update_5_ETagNoChanges(t *testing.T) {
+	headers := uhttpHeaders()
 	headers["ETag"] = "tag1"
-	httpHeaders := func() map[string]string {
+	uhttpHeaders := func() map[string]string {
 		return headers
 	}
-	json := jsonData()
-	jsonData := func() map[string]map[string]*CookbookVersion {
+	json := ujsonData()
+	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
 		return json
 	}
 
-	ts := startHTTP(httpHeaders, jsonData)
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -523,14 +522,14 @@ func Test_Update_5_ETagNoChanges(t *testing.T) {
 	}
 }
 
-func Test_Update_6_Error(t *testing.T) {
-	ts := startHTTP(httpHeaders, jsonData)
+func Test_Universe_Update_6_Error(t *testing.T) {
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 
-	a, err := apiinstance.New(ts.URL)
+	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
-	u, err := New(a)
+	u, err := NewUniverse(a)
 	if err != nil {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
@@ -543,7 +542,7 @@ func Test_Update_6_Error(t *testing.T) {
 	}
 }
 
-func Test_Diff_1_Equal(t *testing.T) {
+func Test_Universe_Diff_1_Equal(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	pos, neg := data1.Diff(data2)
@@ -555,13 +554,13 @@ func Test_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Diff_2_AddedCookbook(t *testing.T) {
+func Test_Universe_Diff_2_AddedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
-	data2.Cookbooks["nginx"] = &Cookbook{
+	data2.Cookbooks["nginx"] = &universe.Cookbook{
 		Name: "nginx",
-		Versions: map[string]*CookbookVersion{
-			"0.1.0": &CookbookVersion{
+		Versions: map[string]*universe.CookbookVersion{
+			"0.1.0": &universe.CookbookVersion{
 				Version:      "0.1.0",
 				LocationType: "somewhere",
 				LocationPath: "https://example.com/nginx",
@@ -583,7 +582,7 @@ func Test_Diff_2_AddedCookbook(t *testing.T) {
 	}
 }
 
-func Test_Diff_3_DeletedCookbook(t *testing.T) {
+func Test_Universe_Diff_3_DeletedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	delete(data2.Cookbooks, "test1")
@@ -600,7 +599,7 @@ func Test_Diff_3_DeletedCookbook(t *testing.T) {
 	}
 }
 
-func Test_Diff_4_UpdatedCookbook(t *testing.T) {
+func Test_Universe_Diff_4_UpdatedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["test1"].Versions["0.1.0"].LocationType = "elsewhere"
@@ -621,8 +620,8 @@ func Test_Diff_4_UpdatedCookbook(t *testing.T) {
 	}
 }
 
-func Test_decodeJSON_1(t *testing.T) {
-	ts := startHTTP(httpHeaders, jsonData)
+func Test_decodeUniverseJSON_1(t *testing.T) {
+	ts := ustartHTTP(uhttpHeaders, ujsonData)
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL)
@@ -630,8 +629,8 @@ func Test_decodeJSON_1(t *testing.T) {
 		t.Fatalf("Expected nil, got: %v", err)
 	}
 
-	tempU := map[string]map[string]*CookbookVersion{}
-	err = decodeJSON(resp.Body, &tempU)
+	tempU := map[string]map[string]*universe.CookbookVersion{}
+	err = decodeUniverseJSON(resp.Body, &tempU)
 	if err != nil {
 		t.Fatalf("Expected nil, got: %v", err)
 	}
