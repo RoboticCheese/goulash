@@ -1,84 +1,64 @@
 package goulash
 
 import (
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/RoboticCheese/goulash/common"
 )
 
-var compHTTPETag = ""
-var compHTTPData = "SOME HTTP DATA"
-
-func compStartHTTP() (ts *httptest.Server) {
-	ts = httptest.NewServer(
-		http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				if compHTTPETag != "" {
-					w.Header().Set("ETag", compHTTPETag)
-				}
-				fmt.Fprint(w, compHTTPData)
-			},
-		),
-	)
-	return
-}
-
-func Test_Component_1(t *testing.T) {
+func TestComponent(t *testing.T) {
 	type Thing struct {
 		Component
 	}
-
 	res := Thing{
 		Component: Component{
 			Endpoint: "something",
 			ETag:     "anotherthing",
 		},
 	}
-	if res.Endpoint != "something" {
-		t.Fatalf("Expected 'something', got: %v", res.Endpoint)
-	}
-	if res.ETag != "anotherthing" {
-		t.Fatalf("Expected 'anotherthing', got: %v", res.ETag)
+	for _, i := range [][]string{
+		{res.Endpoint, "something"},
+		{res.ETag, "anotherthing"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
-func Test_NewComponent_1_NoETag(t *testing.T) {
-	ts := compStartHTTP()
+func TestNewComponentNoETag(t *testing.T) {
+	ts := StartHTTP("", nil)
 	defer ts.Close()
 
 	c, err := NewComponent(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected no err, got: %v", err)
-	}
-	if c.Endpoint != ts.URL {
-		t.Fatalf("Expected '%v', got: %v", ts.URL, c.Endpoint)
-	}
-	if c.ETag != "" {
-		t.Fatalf("Expected empty str, got: %v", c.ETag)
+	for _, i := range [][]interface{}{
+		{err, nil},
+		{c.Endpoint, ts.URL},
+		{c.ETag, ""},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
-func Test_NewComponent_2_ETag(t *testing.T) {
-	compHTTPETag = "hellothere"
-	ts := compStartHTTP()
+func TestNewComponentETag(t *testing.T) {
+	ts := StartHTTP("", map[string]string{"ETag": "hellothere"})
 	defer ts.Close()
 
 	c, err := NewComponent(ts.URL)
-	if err != nil {
-		t.Fatalf("Expected no err, got: %v", err)
-	}
-	if c.Endpoint != ts.URL {
-		t.Fatalf("Expected '%v', got: %v", ts.URL, c.Endpoint)
-	}
-	if c.ETag != "hellothere" {
-		t.Fatalf("Expected 'hellothere', got: %v", c.ETag)
+	for _, i := range [][]interface{}{
+		{err, nil},
+		{c.Endpoint, ts.URL},
+		{c.ETag, "hellothere"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
-func Test_InitComponent_1_EmptyStruct(t *testing.T) {
+func TestInitComponentEmptyStruct(t *testing.T) {
 	c := InitComponent()
 	for _, k := range []string{
 		c.Endpoint,
@@ -90,7 +70,7 @@ func Test_InitComponent_1_EmptyStruct(t *testing.T) {
 	}
 }
 
-func Test_Component_Empty_1_Empty(t *testing.T) {
+func TestComponentEmptyIsEmpty(t *testing.T) {
 	c := new(Component)
 	res := c.Empty()
 	if res != true {
@@ -98,7 +78,7 @@ func Test_Component_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_Component_Empty_2_HasEndpoint(t *testing.T) {
+func TestComponentEmptyHasEndpoint(t *testing.T) {
 	c := new(Component)
 	c.Endpoint = "https://example.com"
 	res := c.Empty()
@@ -107,7 +87,7 @@ func Test_Component_Empty_2_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_Component_Empty_3_HasETag(t *testing.T) {
+func TestComponentEmptyHasETag(t *testing.T) {
 	c := new(Component)
 	c.ETag = "thing"
 	res := c.Empty()
@@ -116,7 +96,7 @@ func Test_Component_Empty_3_HasETag(t *testing.T) {
 	}
 }
 
-func Test_Component_Diff_1_Equal(t *testing.T) {
+func TestComponentDiffEqual(t *testing.T) {
 	c1 := Component{Endpoint: "abc", ETag: "def"}
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
@@ -128,7 +108,7 @@ func Test_Component_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Component_Diff_2_AddedAndDeletedData(t *testing.T) {
+func TestComponentDiffAddedAndDeletedData(t *testing.T) {
 	c1 := Component{}
 	c2 := Component{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := c1.Diff(&c2)
@@ -148,7 +128,7 @@ func Test_Component_Diff_2_AddedAndDeletedData(t *testing.T) {
 	}
 }
 
-func Test_Component_Diff_3_ChangedData(t *testing.T) {
+func TestComponentDiffChangedData(t *testing.T) {
 	c1 := Component{Endpoint: "abc", ETag: "def"}
 	c2 := Component{Endpoint: "uvw", ETag: "xyz"}
 	pos1, neg1 := c1.Diff(&c2)

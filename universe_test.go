@@ -2,9 +2,7 @@ package goulash
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/RoboticCheese/goulash/universe"
@@ -69,33 +67,14 @@ func ujsonData() (jsonData map[string]map[string]*universe.CookbookVersion) {
 	return
 }
 
-func uhttpHeaders() (res map[string]string) {
-	res = map[string]string{}
-	return
-}
-
 func uhttpBody(ujsonData map[string]map[string]*universe.CookbookVersion) (res string) {
 	bres, _ := json.Marshal(ujsonData)
 	res = string(bres)
 	return
 }
 
-func ustartHTTP(uhttpHeaders func() map[string]string, ujsonData func() map[string]map[string]*universe.CookbookVersion) (ts *httptest.Server) {
-	ts = httptest.NewServer(
-		http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				for k, v := range uhttpHeaders() {
-					w.Header().Set(k, v)
-				}
-				fmt.Fprint(w, uhttpBody(ujsonData()))
-			},
-		),
-	)
-	return
-}
-
-func Test_NewUniverse_1_NoError(t *testing.T) {
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+func TestNewUniverseNoError(t *testing.T) {
+	ts := StartHTTP(uhttpBody(ujsonData()), nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -142,8 +121,8 @@ func Test_NewUniverse_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_NewUniverse_2_ConnError(t *testing.T) {
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+func TestNewUniverseConnError(t *testing.T) {
+	ts := StartHTTP(uhttpBody(ujsonData()), nil)
 	ts.Close()
 
 	i := new(APIInstance)
@@ -154,8 +133,8 @@ func Test_NewUniverse_2_ConnError(t *testing.T) {
 	}
 }
 
-func Test_NewUniverse_3_404Error(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
+func TestNewUniverse404Error(t *testing.T) {
+	ts := StartHTTP(http.NotFound, nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -166,7 +145,7 @@ func Test_NewUniverse_3_404Error(t *testing.T) {
 	}
 }
 
-func Test_NewUniverse_4_RealData(t *testing.T) {
+func TestNewUniverseRealData(t *testing.T) {
 	i := new(APIInstance)
 	i.BaseURL = "https://supermarket.getchef.com"
 	u, err := NewUniverse(i)
@@ -187,7 +166,7 @@ func Test_NewUniverse_4_RealData(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_1_Empty(t *testing.T) {
+func TestUniverseEmptyEmpty(t *testing.T) {
 	u := new(Universe)
 	res := u.Empty()
 	if res != true {
@@ -195,7 +174,7 @@ func Test_Universe_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_2_StillEmpty(t *testing.T) {
+func TestUniverseEmptyStillEmpty(t *testing.T) {
 	u := InitUniverse()
 	res := u.Empty()
 	if res != true {
@@ -203,7 +182,7 @@ func Test_Universe_Empty_2_StillEmpty(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_3_HasEmptyCookbooks(t *testing.T) {
+func TestUniverseEmptyHasEmptyCookbooks(t *testing.T) {
 	u := InitUniverse()
 	u.Cookbooks["thing1"] = universe.NewCookbook()
 	res := u.Empty()
@@ -212,7 +191,7 @@ func Test_Universe_Empty_3_HasEmptyCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_4_HasEndpoint(t *testing.T) {
+func TestUniverseEmptyHasEndpoint(t *testing.T) {
 	u := InitUniverse()
 	u.Endpoint = "http://example.com"
 	res := u.Empty()
@@ -221,7 +200,7 @@ func Test_Universe_Empty_4_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_5_HasAPIInstance(t *testing.T) {
+func TestUniverseEmptyHasAPIInstance(t *testing.T) {
 	u := InitUniverse()
 	i := new(APIInstance)
 	i.BaseURL = "https://example.com"
@@ -232,7 +211,7 @@ func Test_Universe_Empty_5_HasAPIInstance(t *testing.T) {
 	}
 }
 
-func Test_Universe_Empty_6_HasCookbooks(t *testing.T) {
+func TestUniverseEmptyHasCookbooks(t *testing.T) {
 	u := InitUniverse()
 	u.Cookbooks["nginx"] = universe.NewCookbook()
 	u.Cookbooks["nginx"].Versions["0.1.0"] = universe.NewCookbookVersion()
@@ -243,7 +222,7 @@ func Test_Universe_Empty_6_HasCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Universe_Equals_1_Equal(t *testing.T) {
+func TestUniverseEqualsEqual(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	for _, res := range []bool{
@@ -256,22 +235,7 @@ func Test_Universe_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-// TODO
-//func Test_Universe_Equals_2_DifferentEndpoints(t *testing.T) {
-//	data1 := udata()
-//	data2 := udata()
-//	data2.Endpoint = "otherexample.com"
-//	for _, res := range []bool{
-//		data1.Equals(data2),
-//		data2.Equals(data1),
-//	} {
-//		if res != false {
-//			t.Fatalf("Expected false, got: %v", res)
-//		}
-//	}
-//}
-
-func Test_Universe_Equals_2_MoreCookbooks(t *testing.T) {
+func TestUniverseEqualsMoreCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["test2"] = &universe.Cookbook{}
@@ -285,7 +249,7 @@ func Test_Universe_Equals_2_MoreCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Universe_Equals_3_FewerCookbooks(t *testing.T) {
+func TestUniverseEqualsFewerCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks = map[string]*universe.Cookbook{}
@@ -299,7 +263,7 @@ func Test_Universe_Equals_3_FewerCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Universe_Equals_4_DifferentCookbooks(t *testing.T) {
+func TestUniverseEqualsDifferentCookbooks(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["test1"].Versions["0.1.0"].LocationType = "other"
@@ -313,8 +277,8 @@ func Test_Universe_Equals_4_DifferentCookbooks(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_1_NoChanges(t *testing.T) {
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+func TestUniverseUpdateNoChanges(t *testing.T) {
+	ts := StartHTTP(uhttpBody(ujsonData()), nil)
 	defer ts.Close()
 
 	a, err := NewAPIInstance(ts.URL)
@@ -337,13 +301,14 @@ func Test_Universe_Update_1_NoChanges(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_2_SomeChanges(t *testing.T) {
-	json := ujsonData()
-	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
-		return json
+func TestUniverseUpdateSomeChanges(t *testing.T) {
+	data := ujsonData()
+	body := func() string {
+		res, _ := json.Marshal(data)
+		return string(res)
 	}
 
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+	ts := StartHTTP(body, nil)
 	defer ts.Close()
 
 	a, err := NewAPIInstance(ts.URL)
@@ -355,8 +320,8 @@ func Test_Universe_Update_2_SomeChanges(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["0.12.0"].LocationType = "elsewhere"
-	json["chef"]["0.12.0"].LocationPath = "https://example.com"
+	data["chef"]["0.12.0"].LocationType = "elsewhere"
+	data["chef"]["0.12.0"].LocationPath = "https://example.com"
 
 	pos, neg, err := u.Update()
 	if err != nil {
@@ -376,13 +341,14 @@ func Test_Universe_Update_2_SomeChanges(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_3_NewVersionReleased(t *testing.T) {
-	json := ujsonData()
-	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
-		return json
+func TestUniverseUpdateNewVersionReleased(t *testing.T) {
+	data := ujsonData()
+	body := func() string {
+		res, _ := json.Marshal(data)
+		return string(res)
 	}
 
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+	ts := StartHTTP(body, nil)
 	defer ts.Close()
 
 	a, err := NewAPIInstance(ts.URL)
@@ -394,7 +360,7 @@ func Test_Universe_Update_3_NewVersionReleased(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["9.9.9"] = &universe.CookbookVersion{
+	data["chef"]["9.9.9"] = &universe.CookbookVersion{
 		LocationType: "opsplode",
 		LocationPath: "https://example.com",
 		DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/9.9.9/download",
@@ -434,18 +400,15 @@ func Test_Universe_Update_3_NewVersionReleased(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_4_ETagSomeChanges(t *testing.T) {
-	headers := uhttpHeaders()
-	headers["ETag"] = "tag1"
-	uhttpHeaders := func() map[string]string {
-		return headers
-	}
-	json := ujsonData()
-	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
-		return json
+func TestUniverseUpdateETagSomeChanges(t *testing.T) {
+	headers := map[string]string{"ETag": "tag1"}
+	data := ujsonData()
+	body := func() string {
+		res, _ := json.Marshal(data)
+		return string(res)
 	}
 
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+	ts := StartHTTP(body, func() map[string]string { return headers })
 	defer ts.Close()
 
 	a, err := NewAPIInstance(ts.URL)
@@ -457,8 +420,8 @@ func Test_Universe_Update_4_ETagSomeChanges(t *testing.T) {
 		t.Fatalf("Expected no err, got: %v", err)
 	}
 
-	json["chef"]["0.12.0"].LocationType = "elsewhere"
-	json["chef"]["0.12.0"].LocationPath = "https://example.com"
+	data["chef"]["0.12.0"].LocationType = "elsewhere"
+	data["chef"]["0.12.0"].LocationPath = "https://example.com"
 	headers["ETag"] = "tag2"
 
 	pos, neg, err := u.Update()
@@ -480,18 +443,12 @@ func Test_Universe_Update_4_ETagSomeChanges(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_5_ETagNoChanges(t *testing.T) {
-	headers := uhttpHeaders()
-	headers["ETag"] = "tag1"
-	uhttpHeaders := func() map[string]string {
-		return headers
-	}
+func TestUniverseUpdateETagNoChanges(t *testing.T) {
 	json := ujsonData()
 	ujsonData := func() map[string]map[string]*universe.CookbookVersion {
 		return json
 	}
-
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+	ts := StartHTTP(uhttpBody(ujsonData()), map[string]string{"ETag": "tag1"})
 	defer ts.Close()
 
 	a, err := NewAPIInstance(ts.URL)
@@ -522,8 +479,8 @@ func Test_Universe_Update_5_ETagNoChanges(t *testing.T) {
 	}
 }
 
-func Test_Universe_Update_6_Error(t *testing.T) {
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+func TestUniverseUpdateError(t *testing.T) {
+	ts := StartHTTP(uhttpBody(ujsonData()), nil)
 
 	a, err := NewAPIInstance(ts.URL)
 	if err != nil {
@@ -542,7 +499,7 @@ func Test_Universe_Update_6_Error(t *testing.T) {
 	}
 }
 
-func Test_Universe_Diff_1_Equal(t *testing.T) {
+func TestUniverseDiffEqual(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	pos, neg := data1.Diff(data2)
@@ -554,7 +511,7 @@ func Test_Universe_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Universe_Diff_2_AddedCookbook(t *testing.T) {
+func TestUniverseDiffAddedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["nginx"] = &universe.Cookbook{
@@ -582,7 +539,7 @@ func Test_Universe_Diff_2_AddedCookbook(t *testing.T) {
 	}
 }
 
-func Test_Universe_Diff_3_DeletedCookbook(t *testing.T) {
+func TestUniverseDiffDeletedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	delete(data2.Cookbooks, "test1")
@@ -599,7 +556,7 @@ func Test_Universe_Diff_3_DeletedCookbook(t *testing.T) {
 	}
 }
 
-func Test_Universe_Diff_4_UpdatedCookbook(t *testing.T) {
+func TestUniverseDiffUpdatedCookbook(t *testing.T) {
 	data1 := udata()
 	data2 := udata()
 	data2.Cookbooks["test1"].Versions["0.1.0"].LocationType = "elsewhere"
@@ -620,8 +577,8 @@ func Test_Universe_Diff_4_UpdatedCookbook(t *testing.T) {
 	}
 }
 
-func Test_decodeUniverseJSON_1(t *testing.T) {
-	ts := ustartHTTP(uhttpHeaders, ujsonData)
+func TestdecodeUniverseJSON(t *testing.T) {
+	ts := StartHTTP(uhttpBody(ujsonData()), nil)
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL)

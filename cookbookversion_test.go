@@ -1,9 +1,7 @@
 package goulash
 
 import (
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -44,19 +42,8 @@ func cvjsonified() (res string) {
 	return
 }
 
-func cvstartHTTP() (ts *httptest.Server) {
-	ts = httptest.NewServer(
-		http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprint(w, cvjsonified())
-			},
-		),
-	)
-	return
-}
-
-func Test_NewCookbookVersion_1_NoError(t *testing.T) {
-	ts := cvstartHTTP()
+func TestNewCookbookVersionNoError(t *testing.T) {
+	ts := StartHTTP(cvjsonified(), nil)
 	defer ts.Close()
 
 	cb := new(Cookbook)
@@ -81,9 +68,9 @@ func Test_NewCookbookVersion_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_NewCookbookVersion_2_AverageRating(t *testing.T) {
+func TestNewCookbookVersionAverageRating(t *testing.T) {
 	cvjsonData["average_rating"] = "20"
-	ts := cvstartHTTP()
+	ts := StartHTTP(cvjsonified(), nil)
 	defer ts.Close()
 
 	cb := new(Cookbook)
@@ -97,8 +84,8 @@ func Test_NewCookbookVersion_2_AverageRating(t *testing.T) {
 	}
 }
 
-func Test_NewCookbookVersion_3_ConnError(t *testing.T) {
-	ts := cvstartHTTP()
+func TestNewCookbookVersionConnError(t *testing.T) {
+	ts := StartHTTP(cvjsonified(), nil)
 	ts.Close()
 
 	cb := new(Cookbook)
@@ -109,8 +96,8 @@ func Test_NewCookbookVersion_3_ConnError(t *testing.T) {
 	}
 }
 
-func Test_NewCookbookVersion_4_404Error(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
+func TestNewCookbookVersion404Error(t *testing.T) {
+	ts := StartHTTP(http.NotFound, nil)
 	defer ts.Close()
 
 	cb := new(Cookbook)
@@ -121,7 +108,7 @@ func Test_NewCookbookVersion_4_404Error(t *testing.T) {
 	}
 }
 
-func Test_NewCookbookVersion_5_RealData(t *testing.T) {
+func TestNewCookbookVersionRealData(t *testing.T) {
 	cb := new(Cookbook)
 	cb.Endpoint = "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk"
 	cv, err := NewCookbookVersion(cb, "2.0.0")
@@ -145,7 +132,7 @@ func Test_NewCookbookVersion_5_RealData(t *testing.T) {
 	}
 }
 
-func Test_InitCookbookVersion_1_EmptyStruct(t *testing.T) {
+func TestInitCookbookVersionEmptyStruct(t *testing.T) {
 	cv := InitCookbookVersion()
 	for _, i := range [][]interface{}{
 		{cv.License, ""},
@@ -164,7 +151,7 @@ func Test_InitCookbookVersion_1_EmptyStruct(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_1_Empty(t *testing.T) {
+func TestCookbookVersionEmptyIsEmpty(t *testing.T) {
 	data := new(CookbookVersion)
 	res := data.Empty()
 	if res != true {
@@ -172,7 +159,7 @@ func Test_CookbookVersion_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_2_HasEndpoint(t *testing.T) {
+func TestCookbookVersionEmptyHasEndpoint(t *testing.T) {
 	data := new(CookbookVersion)
 	data.Endpoint = "something"
 	res := data.Empty()
@@ -181,7 +168,7 @@ func Test_CookbookVersion_Empty_2_HasEndpoint(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_3_HasLicense(t *testing.T) {
+func TestCookbookVersionEmptyHasLicense(t *testing.T) {
 	data := new(CookbookVersion)
 	data.License = "something"
 	res := data.Empty()
@@ -190,7 +177,7 @@ func Test_CookbookVersion_Empty_3_HasLicense(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_4_HasTarballFileSize(t *testing.T) {
+func TestCookbookVersionEmptyHasTarballFileSize(t *testing.T) {
 	data := new(CookbookVersion)
 	data.TarballFileSize = 21
 	res := data.Empty()
@@ -199,7 +186,7 @@ func Test_CookbookVersion_Empty_4_HasTarballFileSize(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_5_HasVersion(t *testing.T) {
+func TestCookbookVersionEmptyHasVersion(t *testing.T) {
 	data := new(CookbookVersion)
 	data.Version = "1.2.3"
 	res := data.Empty()
@@ -208,7 +195,7 @@ func Test_CookbookVersion_Empty_5_HasVersion(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_6_HasAverageRating(t *testing.T) {
+func TestCookbookVersionEmptyHasAverageRating(t *testing.T) {
 	data := new(CookbookVersion)
 	data.AverageRating = 1
 	res := data.Empty()
@@ -217,7 +204,7 @@ func Test_CookbookVersion_Empty_6_HasAverageRating(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_7_HasCookbook(t *testing.T) {
+func TestCookbookVersionEmptyHasCookbook(t *testing.T) {
 	data := new(CookbookVersion)
 	data.Cookbook = "something"
 	res := data.Empty()
@@ -226,7 +213,7 @@ func Test_CookbookVersion_Empty_7_HasCookbook(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_8_HasFile(t *testing.T) {
+func TestCookbookVersionEmptyHasFile(t *testing.T) {
 	data := new(CookbookVersion)
 	data.File = "something"
 	res := data.Empty()
@@ -235,7 +222,7 @@ func Test_CookbookVersion_Empty_8_HasFile(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Empty_8_HasDependencies(t *testing.T) {
+func TestCookbookVersionEmptyHasDependencies(t *testing.T) {
 	data := new(CookbookVersion)
 	data.Dependencies = map[string]string{"thing1": "1.2.3"}
 	res := data.Empty()
@@ -244,7 +231,7 @@ func Test_CookbookVersion_Empty_8_HasDependencies(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Equals_1_Equal(t *testing.T) {
+func TestCookbookVersionEqualsEqual(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	res := data1.Equals(&data2)
@@ -257,7 +244,7 @@ func Test_CookbookVersion_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Equals_2_DifferentEndpoints(t *testing.T) {
+func TestCookbookVersionEqualsDifferentEndpoints(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Endpoint = "https://somewhereelse.com"
@@ -271,7 +258,7 @@ func Test_CookbookVersion_Equals_2_DifferentEndpoints(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Equals_3_DifferentLicense(t *testing.T) {
+func TestCookbookVersionEqualsDifferentLicense(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.License = "closedsource"
@@ -285,7 +272,7 @@ func Test_CookbookVersion_Equals_3_DifferentLicense(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Equals_4_DifferentFileSize(t *testing.T) {
+func TestCookbookVersionEqualsDifferentFileSize(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.TarballFileSize = 1
@@ -299,7 +286,7 @@ func Test_CookbookVersion_Equals_4_DifferentFileSize(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Equals_5_DifferentDependencies(t *testing.T) {
+func TestCookbookVersionEqualsDifferentDependencies(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.Dependencies["thing2"] = ">= 0.0.0"
@@ -313,7 +300,7 @@ func Test_CookbookVersion_Equals_5_DifferentDependencies(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Diff_1_Equal(t *testing.T) {
+func TestCookbookVersionDiffEqual(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	pos1, neg1 := data1.Diff(&data2)
@@ -330,7 +317,7 @@ func Test_CookbookVersion_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_CookbookVersion_Diff_2_DataAddedAndDeleted(t *testing.T) {
+func TestCookbookVersionDiffDataAddedAndDeleted(t *testing.T) {
 	data1 := cvdata()
 	data2 := cvdata()
 	data2.License = ""

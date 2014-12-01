@@ -19,11 +19,7 @@ func (t *thing) Empty() (empty bool) {
 	return
 }
 
-func Test_Supermarketer_1(t *testing.T) {
-	// Doesn't do anything just yet
-}
-
-func Test_Equals_1_Equal(t *testing.T) {
+func TestEqualsEqual(t *testing.T) {
 	c1 := thing{Endpoint: "somewhere"}
 	c2 := thing{Endpoint: "somewhere"}
 	res := Equals(&c1, &c2)
@@ -32,7 +28,7 @@ func Test_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Equals_2_NotEqual(t *testing.T) {
+func TestEqualsNotEqual(t *testing.T) {
 	c1 := thing{Endpoint: "somewhere"}
 	c2 := thing{Endpoint: "elsewhere"}
 	res := Equals(&c1, &c2)
@@ -41,7 +37,7 @@ func Test_Equals_2_NotEqual(t *testing.T) {
 	}
 }
 
-func Test_Diff_1_Equal(t *testing.T) {
+func TestDiffEqual(t *testing.T) {
 	c1 := thing{Endpoint: "abc", ETag: "def"}
 	c2 := thing{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := Diff(&c1, &c2, &thing{}, &thing{})
@@ -53,7 +49,7 @@ func Test_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Diff_2_AddedAndDeletedData(t *testing.T) {
+func TestDiffAddedAndDeletedData(t *testing.T) {
 	c1 := thing{}
 	c2 := thing{Endpoint: "abc", ETag: "def"}
 	pos1, neg1 := Diff(&c1, &c2, &thing{}, &thing{})
@@ -73,7 +69,7 @@ func Test_Diff_2_AddedAndDeletedData(t *testing.T) {
 	}
 }
 
-func Test_Diff_3_ChangedData(t *testing.T) {
+func TestDiffChangedData(t *testing.T) {
 	c1 := thing{Endpoint: "abc", ETag: "def"}
 	c2 := thing{Endpoint: "uvw", ETag: "xyz"}
 	pos1, neg1 := Diff(&c1, &c2, &thing{}, &thing{})
@@ -90,21 +86,21 @@ func Test_Diff_3_ChangedData(t *testing.T) {
 	}
 }
 
-func Test_emptyValue_1_EmptyString(t *testing.T) {
+func TestemptyValueEmptyString(t *testing.T) {
 	res := emptyValue(reflect.ValueOf(""))
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
 }
 
-func Test_emptyValue_2_NonEmptyString(t *testing.T) {
+func TestemptyValueNonEmptyString(t *testing.T) {
 	res := emptyValue(reflect.ValueOf("abc"))
 	if res != false {
 		t.Fatalf("Expected false, got: %v", res)
 	}
 }
 
-func Test_emptyValue_3_EmptyPtr(t *testing.T) {
+func TestemptyValueEmptyPtr(t *testing.T) {
 	c := thing{}
 	res := emptyValue(reflect.ValueOf(&c))
 	if res != true {
@@ -112,7 +108,7 @@ func Test_emptyValue_3_EmptyPtr(t *testing.T) {
 	}
 }
 
-func Test_emptyValue_4_NonEmptyPtr(t *testing.T) {
+func TestemptyValueNonEmptyPtr(t *testing.T) {
 	c := thing{Endpoint: "abc"}
 	res := emptyValue(reflect.ValueOf(&c))
 	if res != false {
@@ -120,14 +116,14 @@ func Test_emptyValue_4_NonEmptyPtr(t *testing.T) {
 	}
 }
 
-func Test_emptyValue_5_EmptyMap(t *testing.T) {
+func TestemptyValueEmptyMap(t *testing.T) {
 	res := emptyValue(reflect.ValueOf(map[string]string{}))
 	if res != true {
 		t.Fatalf("Expected true, got: %v", res)
 	}
 }
 
-func Test_emptyValue_6_NonEmptyMap(t *testing.T) {
+func TestemptyValueNonEmptyMap(t *testing.T) {
 	c := thing{Endpoint: "abc"}
 	res := emptyValue(reflect.ValueOf(map[string]*thing{"thing": &c}))
 	if res != false {

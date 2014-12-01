@@ -1,9 +1,7 @@
 package goulash
 
 import (
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -81,19 +79,8 @@ func cjsonified() (res string) {
 	return
 }
 
-func cstartHTTP() (ts *httptest.Server) {
-	ts = httptest.NewServer(
-		http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprint(w, cjsonified())
-			},
-		),
-	)
-	return
-}
-
-func Test_NewCookbook_1_NoError(t *testing.T) {
-	ts := cstartHTTP()
+func TestNewCookbookNoError(t *testing.T) {
+	ts := StartHTTP(cjsonified(), nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -151,9 +138,9 @@ func Test_NewCookbook_1_NoError(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_2_NilFoodcriticFailure(t *testing.T) {
+func TestNewCookbookNilFoodcriticFailure(t *testing.T) {
 	cjsonData["foodcritic_failure"] = "null"
-	ts := cstartHTTP()
+	ts := StartHTTP(cjsonified(), nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -167,9 +154,9 @@ func Test_NewCookbook_2_NilFoodcriticFailure(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_3_AverageRating(t *testing.T) {
+func TestNewCookbookAverageRating(t *testing.T) {
 	cjsonData["average_rating"] = "20"
-	ts := cstartHTTP()
+	ts := StartHTTP(cjsonified(), nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -183,8 +170,8 @@ func Test_NewCookbook_3_AverageRating(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_4_ConnError(t *testing.T) {
-	ts := cstartHTTP()
+func TestNewCookbookConnError(t *testing.T) {
+	ts := StartHTTP(cjsonified(), nil)
 	ts.Close()
 
 	i := new(APIInstance)
@@ -195,8 +182,8 @@ func Test_NewCookbook_4_ConnError(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_5_404Error(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(http.NotFound))
+func TestNewCookbook404Error(t *testing.T) {
+	ts := StartHTTP(http.NotFound, nil)
 	defer ts.Close()
 
 	i := new(APIInstance)
@@ -207,7 +194,7 @@ func Test_NewCookbook_5_404Error(t *testing.T) {
 	}
 }
 
-func Test_NewCookbook_6_RealData(t *testing.T) {
+func TestNewCookbookRealData(t *testing.T) {
 	i := new(APIInstance)
 	i.Endpoint = "https://supermarket.getchef.com/api/v1"
 	c, err := NewCookbook(i, "chef-dk")
@@ -226,7 +213,7 @@ func Test_NewCookbook_6_RealData(t *testing.T) {
 	}
 }
 
-func Test_InitCookbook_1_EmptyStruct(t *testing.T) {
+func TestInitCookbookEmptyStruct(t *testing.T) {
 	c := InitCookbook()
 	for _, i := range [][]interface{}{
 		{c.Endpoint, ""},
@@ -252,7 +239,7 @@ func Test_InitCookbook_1_EmptyStruct(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_1_Empty(t *testing.T) {
+func TestCookbookEmptyEmpty(t *testing.T) {
 	c := InitCookbook()
 	res := c.Empty()
 	if res != true {
@@ -260,7 +247,7 @@ func Test_Cookbook_Empty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_2_HasName(t *testing.T) {
+func TestCookbookEmptyHasName(t *testing.T) {
 	c := InitCookbook()
 	c.Name = "thing"
 	res := c.Empty()
@@ -269,7 +256,7 @@ func Test_Cookbook_Empty_2_HasName(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_3_HasRating(t *testing.T) {
+func TestCookbookEmptyHasRating(t *testing.T) {
 	c := InitCookbook()
 	c.AverageRating = 10
 	res := c.Empty()
@@ -278,7 +265,7 @@ func Test_Cookbook_Empty_3_HasRating(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_4_IsDeprecated(t *testing.T) {
+func TestCookbookEmptyIsDeprecated(t *testing.T) {
 	c := InitCookbook()
 	c.Deprecated = true
 	res := c.Empty()
@@ -287,7 +274,7 @@ func Test_Cookbook_Empty_4_IsDeprecated(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_5_HasVersions(t *testing.T) {
+func TestCookbookEmptyHasVersions(t *testing.T) {
 	c := InitCookbook()
 	c.Versions = []string{"0.1.0"}
 	res := c.Empty()
@@ -296,7 +283,7 @@ func Test_Cookbook_Empty_5_HasVersions(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_5_HasFollowers(t *testing.T) {
+func TestCookbookEmptyHasFollowers(t *testing.T) {
 	c := InitCookbook()
 	c.Metrics.Followers = 20
 	res := c.Empty()
@@ -305,7 +292,7 @@ func Test_Cookbook_Empty_5_HasFollowers(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_5_HasDownloads(t *testing.T) {
+func TestCookbookEmptyHasDownloads(t *testing.T) {
 	c := InitCookbook()
 	c.Metrics.Downloads.Total = 20
 	res := c.Empty()
@@ -314,7 +301,7 @@ func Test_Cookbook_Empty_5_HasDownloads(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Empty_6_HasVersionDownloads(t *testing.T) {
+func TestCookbookEmptyHasVersionDownloads(t *testing.T) {
 	c := InitCookbook()
 	c.Metrics.Downloads.Versions["0.1.0"] = 20
 	res := c.Empty()
@@ -323,7 +310,7 @@ func Test_Cookbook_Empty_6_HasVersionDownloads(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_1_Equal(t *testing.T) {
+func TestCookbookEqualsEqual(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	res := data1.Equals(&data2)
@@ -336,7 +323,7 @@ func Test_Cookbook_Equals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_2_DifferentEndpoints(t *testing.T) {
+func TestCookbookEqualsDifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
@@ -350,7 +337,7 @@ func Test_Cookbook_Equals_2_DifferentEndpoints(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_3_DifferentName(t *testing.T) {
+func TestCookbookEqualsDifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
@@ -364,7 +351,7 @@ func Test_Cookbook_Equals_3_DifferentName(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_4_DifferentLatestVersion(t *testing.T) {
+func TestCookbookEqualsDifferentLatestVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.LatestVersion = "9.9.9"
@@ -378,7 +365,7 @@ func Test_Cookbook_Equals_4_DifferentLatestVersion(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_5_DifferentVersions(t *testing.T) {
+func TestCookbookEqualsDifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = append(data2.Versions, "9.9.9")
@@ -392,7 +379,7 @@ func Test_Cookbook_Equals_5_DifferentVersions(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Equals_6_DifferentMetrics(t *testing.T) {
+func TestCookbookEqualsDifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions["1.2.3"] = 999
@@ -406,7 +393,7 @@ func Test_Cookbook_Equals_6_DifferentMetrics(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_1_Equal(t *testing.T) {
+func TestCookbookDiffEqual(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	pos1, neg1 := data1.Diff(&data2)
@@ -423,7 +410,7 @@ func Test_Cookbook_Diff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_2_DifferentEndpoints(t *testing.T) {
+func TestCookbookDiffDifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
@@ -445,7 +432,7 @@ func Test_Cookbook_Diff_2_DifferentEndpoints(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_3_DifferentName(t *testing.T) {
+func TestCookbookDiffDifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
@@ -467,7 +454,7 @@ func Test_Cookbook_Diff_3_DifferentName(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_4_DifferentRating(t *testing.T) {
+func TestCookbookDiffDifferentRating(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.AverageRating = 99
@@ -489,7 +476,7 @@ func Test_Cookbook_Diff_4_DifferentRating(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
+func TestCookbookDiffDifferentDeprecatedStatus(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Deprecated = true
@@ -511,7 +498,7 @@ func Test_Cookbook_Diff_5_DifferentDeprecatedStatus(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_6_DifferentVersions(t *testing.T) {
+func TestCookbookDiffDifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = []string{"1.2.3", "1.1.0", "9.9.9"}
@@ -533,7 +520,7 @@ func Test_Cookbook_Diff_6_DifferentVersions(t *testing.T) {
 	}
 }
 
-func Test_Cookbook_Diff_7_DifferentMetrics(t *testing.T) {
+func TestCookbookDiffDifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions = map[string]int{
