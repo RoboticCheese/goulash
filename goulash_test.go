@@ -95,8 +95,8 @@ func TestNewUniverse(t *testing.T) {
 		"chef": {
 			"0.12.0": &universe.CookbookVersion{
 				LocationType: "opscode",
-				LocationPath: "https://supermarket.getchef.com/api/v1",
-				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+				LocationPath: "https://supermarket.chef.io/api/v1",
+				DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "couchdb": ">= 0.0.0"},
 			},
 		},

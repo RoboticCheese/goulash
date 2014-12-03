@@ -26,8 +26,8 @@ var cvjsonData = map[string]string{
 	"tarball_file_size": "5913",
 	"version":           "2.0.0",
 	"average_rating":    "null",
-	"cookbook":          "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk",
-	"file":              "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
+	"cookbook":          "https://supermarket.chef.io/api/v1/cookbooks/chef-dk",
+	"file":              "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
 	"dependencies":      `{"dmg": "~> 2.2"}`,
 }
 
@@ -110,19 +110,19 @@ func TestNewCookbookVersion404Error(t *testing.T) {
 
 func TestNewCookbookVersionRealData(t *testing.T) {
 	cb := new(Cookbook)
-	cb.Endpoint = "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk"
+	cb.Endpoint = "https://supermarket.chef.io/api/v1/cookbooks/chef-dk"
 	cv, err := NewCookbookVersion(cb, "2.0.0")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 	for _, i := range [][]interface{}{
-		{cv.Endpoint, "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0"},
+		{cv.Endpoint, "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0"},
 		{cv.License, "Apache v2.0"},
 		{cv.TarballFileSize, 5913},
 		{cv.Version, "2.0.0"},
 		{cv.AverageRating, 0},
-		{cv.Cookbook, "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk"},
-		{cv.File, "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0/download"},
+		{cv.Cookbook, "https://supermarket.chef.io/api/v1/cookbooks/chef-dk"},
+		{cv.File, "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download"},
 		{len(cv.Dependencies), 1},
 		{cv.Dependencies["dmg"], "~> 2.2"},
 	} {

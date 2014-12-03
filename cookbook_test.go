@@ -40,7 +40,7 @@ var cjsonData = map[string]string{
 	"maintainer":         "roboticcheese",
 	"description":        "Installs/configures the Chef-DK",
 	"category":           "Other",
-	"latest_version":     "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1",
+	"latest_version":     "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.1",
 	"external_url":       "https://github.com/RoboticCheese/chef-dk-chef",
 	"average_rating":     "null",
 	"created_at":         "2014-06-24T01:14:49.000Z",
@@ -48,8 +48,8 @@ var cjsonData = map[string]string{
 	"deprecated":         "false",
 	"foodcritic_failure": "false",
 	"versions": `
-		[ "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1",
-		 "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0"]`,
+		[ "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.1",
+		 "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0"]`,
 	"metrics": `{
 		"downloads": {
 			"total": 100,
@@ -103,8 +103,8 @@ func TestNewCookbookNoError(t *testing.T) {
 		{c.FoodcriticFailure, false},
 		{c.AverageRating, 0},
 		{len(c.Versions), 2},
-		{c.Versions[0], "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1"},
-		{c.Versions[1], "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0"},
+		{c.Versions[0], "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.1"},
+		{c.Versions[1], "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0"},
 		{c.Metrics.Downloads.Total, 100},
 		{c.Metrics.Downloads.Versions["2.0.0"], 50},
 		{c.Metrics.Downloads.Versions["2.0.1"], 50},
@@ -174,7 +174,7 @@ func TestNewCookbook404Error(t *testing.T) {
 
 func TestNewCookbookRealData(t *testing.T) {
 	i := new(APIInstance)
-	i.Endpoint = "https://supermarket.getchef.com/api/v1"
+	i.Endpoint = "https://supermarket.chef.io/api/v1"
 	c, err := NewCookbook(i, "chef-dk")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)

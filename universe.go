@@ -20,14 +20,14 @@ Package goulash implements a Go client library for the Chef Supermarket API.
 This file defines a Universe struct, corresponding to how a Berkshelf-style
 universe endpoint is represented by the API, e.g.
 
-https://supermarket.getchef.com/universe =>
+https://supermarket.chef.io/universe =>
 
 {
 	"chef": {
 		"0.12.0": {
 			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url": "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+			"location_path": "https://supermarket.chef.io/api/v1",
+			"download_url": "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download",
 			"dependencies": {
 				"runit":">= 0.0.0",
 				"couchdb":">= 0.0.0",
@@ -36,8 +36,8 @@ https://supermarket.getchef.com/universe =>
 		},
 		"0.20.0": {
 			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url": "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
+			"location_path": "https://supermarket.chef.io/api/v1",
+			"download_url": "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.20.0/download",
 			"dependencies": {
 				"zlib":">= 0.0.0",
 				"xml": ">= 0.0.0",
@@ -49,8 +49,8 @@ https://supermarket.getchef.com/universe =>
 	"djbdns": {
 		"0.7.0": {
 			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url": "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
+			"location_path": "https://supermarket.chef.io/api/v1",
+			"download_url": "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.7.0/download",
 			"dependencies": {
 				"runit": ">= 0.0.0",
 				"build-essential": ">= 0.0.0",
@@ -59,8 +59,8 @@ https://supermarket.getchef.com/universe =>
 		},
 		"0.8.2": {
 			"location_type": "opscode",
-			"location_path": "https://supermarket.getchef.com/api/v1",
-			"download_url": "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
+			"location_path": "https://supermarket.chef.io/api/v1",
+			"download_url": "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.8.2/download",
 			"dependencies": {
 				"runit": ">= 0.0.0",
 				"build-essential": ">= 0.0.0",

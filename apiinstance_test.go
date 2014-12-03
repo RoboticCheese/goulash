@@ -42,7 +42,7 @@ func TestNewAPIInstance404Error(t *testing.T) {
 }
 
 func TestNewAPIInstanceRealData(t *testing.T) {
-	_, err := NewAPIInstance("https://supermarket.getchef.com")
+	_, err := NewAPIInstance("https://supermarket.chef.io")
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}

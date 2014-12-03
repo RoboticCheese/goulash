@@ -20,14 +20,14 @@ Package goulash implements a Go client library for the Chef Supermarket API.
 This file defines a Cookbook struct, corresponding to how a cookbook is
 represented by the API, e.g.
 
-https://supermarket.getchef.com/api/v1/cookbooks/chef-dk =>
+https://supermarket.chef.io/api/v1/cookbooks/chef-dk =>
 
 {
 	"name": "chef-dk",
 	"maintainer": "roboticcheese",
 	"description": "Installs/configures the Chef-DK",
 	"category": "Other",
-	"latest_version": "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1",
+	"latest_version": "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.1",
 	"external_url": "https://github.com/RoboticCheese/chef-dk-chef",
 	"average_rating": null,
 	"created_at": "2014-06-24T01:14:49.000Z",
@@ -35,14 +35,14 @@ https://supermarket.getchef.com/api/v1/cookbooks/chef-dk =>
 	"deprecated": false,
 	"foodcritic_failure": false,
 	"versions": [
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/1.0.2",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/1.0.0",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/0.3.2",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/0.3.0",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/0.2.0",
-		"https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/0.1.0"
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.1",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/1.0.2",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/1.0.0",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/0.3.2",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/0.3.0",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/0.2.0",
+		"https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/0.1.0"
 	],
 	"metrics": {
 		"downloads": {

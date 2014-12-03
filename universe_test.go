@@ -38,28 +38,28 @@ func ujsonData() (jsonData map[string]map[string]*universe.CookbookVersion) {
 		"chef": {
 			"0.12.0": &universe.CookbookVersion{
 				LocationType: "opscode",
-				LocationPath: "https://supermarket.getchef.com/api/v1",
-				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+				LocationPath: "https://supermarket.chef.io/api/v1",
+				DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "couchdb": ">= 0.0.0"},
 			},
 			"0.20.0": &universe.CookbookVersion{
 				LocationType: "opscode",
-				LocationPath: "https://supermarket.getchef.com/api/v1",
-				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
+				LocationPath: "https://supermarket.chef.io/api/v1",
+				DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.20.0/download",
 				Dependencies: map[string]string{"zlib": ">= 0.0.0", "xml": ">= 0.0.0"},
 			},
 		},
 		"djbdns": {
 			"0.7.0": &universe.CookbookVersion{
 				LocationType: "opscode",
-				LocationPath: "https://supermarket.getchef.com/api/v1",
-				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
+				LocationPath: "https://supermarket.chef.io/api/v1",
+				DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.7.0/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "build-essential": ">= 0.0.0"},
 			},
 			"0.8.2": &universe.CookbookVersion{
 				LocationType: "opscode",
-				LocationPath: "https://supermarket.getchef.com/api/v1",
-				DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
+				LocationPath: "https://supermarket.chef.io/api/v1",
+				DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.8.2/download",
 				Dependencies: map[string]string{"runit": ">= 0.0.0", "build-essential": ">= 0.0.0"},
 			},
 		},
@@ -92,26 +92,26 @@ func TestNewUniverseNoError(t *testing.T) {
 		u.Cookbooks["chef"].Versions["0.12.0"].Version:                          "0.12.0",
 		u.Cookbooks["chef"].Versions["0.12.0"].LocationType:                     "opscode",
 		u.Cookbooks["chef"].Versions["0.12.0"].LocationPath:                     "https://supermarket.getchf.com/api/v1",
-		u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL:                      "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.12.0/download",
+		u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL:                      "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download",
 		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["runit"]:            ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["couchdb"]:          ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.20.0"].Version:                          "0.20.0",
 		u.Cookbooks["chef"].Versions["0.20.0"].LocationType:                     "opscode",
-		u.Cookbooks["chef"].Versions["0.20.0"].LocationPath:                     "https://supermarket.getchef.com/api/v1",
-		u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL:                      "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/0.20.0/download",
+		u.Cookbooks["chef"].Versions["0.20.0"].LocationPath:                     "https://supermarket.chef.io/api/v1",
+		u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL:                      "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.20.0/download",
 		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["zlib"]:             ">= 0.0.0",
 		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["xml"]:              ">= 0.0.0",
 		u.Cookbooks["djbdns"].Name:                                              "djbdns",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Version:                         "0.7.0",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationType:                    "opscode",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath:                    "https://supermarket.getchef.com/api/v1",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL:                     "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.7.0/download",
+		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath:                    "https://supermarket.chef.io/api/v1",
+		u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL:                     "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.7.0/download",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["runit"]:           ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["build-essential"]: ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Version:                         "0.8.2",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationType:                    "opscode",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath:                    "https://supermarket.getchef.com/api/v1",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL:                     "https://supermarket.getchef.com/api/v1/cookbooks/djbdns/versions/0.8.2/download",
+		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath:                    "https://supermarket.chef.io/api/v1",
+		u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL:                     "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.8.2/download",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["runit"]:           ">= 0.0.0",
 		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["build-essential"]: ">= 0.0.0",
 	} {
@@ -147,7 +147,7 @@ func TestNewUniverse404Error(t *testing.T) {
 
 func TestNewUniverseRealData(t *testing.T) {
 	i := new(APIInstance)
-	i.BaseURL = "https://supermarket.getchef.com"
+	i.BaseURL = "https://supermarket.chef.io"
 	u, err := NewUniverse(i)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -156,8 +156,8 @@ func TestNewUniverseRealData(t *testing.T) {
 		u.Cookbooks["chef-dk"].Name:                                  "chef-dk",
 		u.Cookbooks["chef-dk"].Versions["2.0.0"].Version:             "2.0.0",
 		u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationType:        "opscode",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationPath:        "https://supermarket.getchef.com/api/v1",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].DownloadURL:         "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
+		u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationPath:        "https://supermarket.chef.io/api/v1",
+		u.Cookbooks["chef-dk"].Versions["2.0.0"].DownloadURL:         "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
 		u.Cookbooks["chef-dk"].Versions["2.0.0"].Dependencies["dmg"]: "~> 2.2",
 	} {
 		if k != v {
@@ -333,7 +333,7 @@ func TestUniverseUpdateSomeChanges(t *testing.T) {
 		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
 		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
 		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationType, "opscode"},
-		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.getchef.com/api/v1"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
 	} {
 		if i[0] != i[1] {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])
@@ -363,7 +363,7 @@ func TestUniverseUpdateNewVersionReleased(t *testing.T) {
 	data["chef"]["9.9.9"] = &universe.CookbookVersion{
 		LocationType: "opsplode",
 		LocationPath: "https://example.com",
-		DownloadURL:  "https://supermarket.getchef.com/api/v1/cookbooks/chef/versions/9.9.9/download",
+		DownloadURL:  "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/9.9.9/download",
 		Dependencies: map[string]string{"otherthing": ">= 0.0.0"},
 	}
 	pos, neg, err := u.Update()
@@ -435,7 +435,7 @@ func TestUniverseUpdateETagSomeChanges(t *testing.T) {
 		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationType, "elsewhere"},
 		{pos.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://example.com"},
 		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationType, "opscode"},
-		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.getchef.com/api/v1"},
+		{neg.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
 	} {
 		if i[0] != i[1] {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])

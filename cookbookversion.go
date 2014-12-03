@@ -20,15 +20,15 @@ Package goulash implements a Go client library for the Chef Supermarket API.
 This file defines a CookbookVersion struct, corresponding to how a cookbook
 version is represented by the API, e.g.
 
-https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0 =>
+https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0 =>
 
 {
 	"license": "Apache v2.0",
 	"tarball_file_size": 5913,
 	"version": "2.0.0",
 	"average_rating": null,
-	"cookbook": "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk",
-	"file": "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
+	"cookbook": "https://supermarket.chef.io/api/v1/cookbooks/chef-dk",
+	"file": "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
 	"dependencies": {
 		"dmg":"~> 2.2"
 	}

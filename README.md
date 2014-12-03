@@ -22,7 +22,7 @@ connection to your API instance:
         "goulash"
     )
 
-    i, err := goulash.NewAPIInstance("https://supermarket.getchef.com") // Or your API server
+    i, err := goulash.NewAPIInstance("https://supermarket.chef.io") // Or your API server
 
 That instance can then be used to examine cookbook data:
 
