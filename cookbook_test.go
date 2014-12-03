@@ -89,52 +89,30 @@ func TestNewCookbookNoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
-	for k, v := range map[string]string{
-		c.Endpoint:      ts.URL + "/api/v1/cookbooks/chef-dk",
-		c.Name:          cjsonData["name"],
-		c.Maintainer:    cjsonData["maintainer"],
-		c.Description:   cjsonData["description"],
-		c.Category:      cjsonData["category"],
-		c.LatestVersion: cjsonData["latest_version"],
-		c.ExternalURL:   cjsonData["external_url"],
-		c.CreatedAt:     cjsonData["created_at"],
-		c.UpdatedAt:     cjsonData["updated_at"],
+	for _, i := range [][]interface{}{
+		{c.Endpoint, ts.URL + "/api/v1/cookbooks/chef-dk"},
+		{c.Name, cjsonData["name"]},
+		{c.Maintainer, cjsonData["maintainer"]},
+		{c.Description, cjsonData["description"]},
+		{c.Category, cjsonData["category"]},
+		{c.LatestVersion, cjsonData["latest_version"]},
+		{c.ExternalURL, cjsonData["external_url"]},
+		{c.CreatedAt, cjsonData["created_at"]},
+		{c.UpdatedAt, cjsonData["updated_at"]},
+		{c.Deprecated, false},
+		{c.FoodcriticFailure, false},
+		{c.AverageRating, 0},
+		{len(c.Versions), 2},
+		{c.Versions[0], "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1"},
+		{c.Versions[1], "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0"},
+		{c.Metrics.Downloads.Total, 100},
+		{c.Metrics.Downloads.Versions["2.0.0"], 50},
+		{c.Metrics.Downloads.Versions["2.0.1"], 50},
+		{c.Metrics.Followers, 20},
 	} {
-		if k != v {
-			t.Fatalf("Expected: %v, got: %v", v, k)
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
 		}
-	}
-	if c.Deprecated != false {
-		t.Fatalf("Expected: false, got: %v", c.Deprecated)
-	}
-	if c.FoodcriticFailure != false {
-		t.Fatalf("Expected: false, got: %v", c.FoodcriticFailure)
-	}
-	if c.AverageRating != 0 {
-		t.Fatalf("Expected: 0, got: %v", c.AverageRating)
-	}
-	if len(c.Versions) != 2 {
-		t.Fatalf("Expected: 2 versions, got: %v", len(c.Versions))
-	}
-	ver := "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.1"
-	if c.Versions[0] != ver {
-		t.Fatalf("Expected: %v, got: %v", ver, c.Versions[0])
-	}
-	ver = "https://supermarket.getchef.com/api/v1/cookbooks/chef-dk/versions/2.0.0"
-	if c.Versions[1] != ver {
-		t.Fatalf("Expected: %v, got: %v", ver, c.Versions[1])
-	}
-	if c.Metrics.Downloads.Total != 100 {
-		t.Fatalf("Expected: 100, got: %v", c.Metrics.Downloads.Total)
-	}
-	if c.Metrics.Downloads.Versions["2.0.0"] != 50 {
-		t.Fatalf("Expected: 50, got: %v", c.Metrics.Downloads.Versions["2.0.0"])
-	}
-	if c.Metrics.Downloads.Versions["2.0.1"] != 50 {
-		t.Fatalf("Expected: 50, got: %v", c.Metrics.Downloads.Versions["2.0.1"])
-	}
-	if c.Metrics.Followers != 20 {
-		t.Fatalf("Expected: 20, got: %v", c.Metrics.Followers)
 	}
 }
 
@@ -313,13 +291,15 @@ func TestCookbookEmptyHasVersionDownloads(t *testing.T) {
 func TestCookbookEqualsEqual(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
-	res := data1.Equals(&data2)
-	if res != true {
-		t.Fatalf("Expected: true, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != true {
-		t.Fatalf("Expected: true, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, true},
+		{res2, true},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -327,13 +307,15 @@ func TestCookbookEqualsDifferentEndpoints(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Endpoint = "https://somewherelse.com"
-	res := data1.Equals(&data2)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, false},
+		{res2, false},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -341,13 +323,15 @@ func TestCookbookEqualsDifferentName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "ansible"
-	res := data1.Equals(&data2)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, false},
+		{res2, false},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -355,13 +339,15 @@ func TestCookbookEqualsDifferentLatestVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.LatestVersion = "9.9.9"
-	res := data1.Equals(&data2)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, false},
+		{res2, false},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -369,13 +355,15 @@ func TestCookbookEqualsDifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = append(data2.Versions, "9.9.9")
-	res := data1.Equals(&data2)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, false},
+		{res2, false},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -383,13 +371,15 @@ func TestCookbookEqualsDifferentMetrics(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Metrics.Downloads.Versions["1.2.3"] = 999
-	res := data1.Equals(&data2)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
-	}
-	res = data2.Equals(&data1)
-	if res != false {
-		t.Fatalf("Expected: false, got: %v", res)
+	res1 := data1.Equals(&data2)
+	res2 := data2.Equals(&data1)
+	for _, i := range [][]bool{
+		{res1, false},
+		{res2, false},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
