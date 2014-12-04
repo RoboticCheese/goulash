@@ -22,17 +22,19 @@ func cdata() (data *Cookbook) {
 	return
 }
 
-func Test_NewCookbook_1(t *testing.T) {
+func TestNewCookbook(t *testing.T) {
 	c := NewCookbook()
-	if c.Name != "" {
-		t.Fatalf("Expected empty string, got: %v", c.Name)
-	}
-	if len(c.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(c.Versions))
+	for _, i := range [][]interface{}{
+		{c.Name, ""},
+		{len(c.Versions), 0},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
-func Test_CEmpty_1_Empty(t *testing.T) {
+func TestCookbookEmptyIsEmpty(t *testing.T) {
 	c := new(Cookbook)
 	res := c.Empty()
 	if res != true {
@@ -40,7 +42,7 @@ func Test_CEmpty_1_Empty(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_2_StillEmpty(t *testing.T) {
+func TestCookbookEmptyStillEmpty(t *testing.T) {
 	c := NewCookbook()
 	res := c.Empty()
 	if res != true {
@@ -48,7 +50,7 @@ func Test_CEmpty_2_StillEmpty(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_3_HasName(t *testing.T) {
+func TestCookbookEmptyHasName(t *testing.T) {
 	c := NewCookbook()
 	c.Name = "thing"
 	res := c.Empty()
@@ -57,7 +59,7 @@ func Test_CEmpty_3_HasName(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_3_HasEmptyVersions(t *testing.T) {
+func TestCookbookEmptyHasEmptyVersions(t *testing.T) {
 	c := NewCookbook()
 	c.Versions["0.1.0"] = NewCookbookVersion()
 	res := c.Empty()
@@ -66,7 +68,7 @@ func Test_CEmpty_3_HasEmptyVersions(t *testing.T) {
 	}
 }
 
-func Test_CEmpty_3_HasNonEmptyVersions(t *testing.T) {
+func TestCookbookEmptyHasNonEmptyVersions(t *testing.T) {
 	c := NewCookbook()
 	c.Versions["0.1.0"] = NewCookbookVersion()
 	c.Versions["0.1.0"].LocationType = "opscode"
@@ -76,7 +78,7 @@ func Test_CEmpty_3_HasNonEmptyVersions(t *testing.T) {
 	}
 }
 
-func Test_CEquals_1_Equal(t *testing.T) {
+func TestCookbookEqualsEqual(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	for _, res := range []bool{
@@ -89,7 +91,7 @@ func Test_CEquals_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_CEquals_2_ChangedName(t *testing.T) {
+func TestCookbookEqualsChangedName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "otherthing"
@@ -103,7 +105,7 @@ func Test_CEquals_2_ChangedName(t *testing.T) {
 	}
 }
 
-func Test_CEquals_3_MoreVersions(t *testing.T) {
+func TestCookbookEqualsMoreVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["0.2.0"] = &CookbookVersion{}
@@ -117,7 +119,7 @@ func Test_CEquals_3_MoreVersions(t *testing.T) {
 	}
 }
 
-func Test_CEquals_4_FewerVersions(t *testing.T) {
+func TestCookbookEqualsFewerVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions = map[string]*CookbookVersion{}
@@ -131,7 +133,7 @@ func Test_CEquals_4_FewerVersions(t *testing.T) {
 	}
 }
 
-func Test_CEquals_5_DifferentVersions(t *testing.T) {
+func TestCookbookEqualsDifferentVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["0.1.0"] = &CookbookVersion{}
@@ -145,7 +147,7 @@ func Test_CEquals_5_DifferentVersions(t *testing.T) {
 	}
 }
 
-func Test_CDiff_1_Equal(t *testing.T) {
+func TestCookbookDiffEqual(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	pos, neg := data1.Diff(data2)
@@ -157,7 +159,7 @@ func Test_CDiff_1_Equal(t *testing.T) {
 	}
 }
 
-func Test_CDiff_2_DataAddedAndDeleted(t *testing.T) {
+func TestCookbookDiffDataAddedAndDeleted(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	delete(data2.Versions, "0.1.0")
@@ -173,28 +175,24 @@ func Test_CDiff_2_DataAddedAndDeleted(t *testing.T) {
 	}
 }
 
-func Test_CDiff_3_ChangedName(t *testing.T) {
+func TestCookbookDiffChangedName(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Name = "somethingelse"
 	pos, neg := data1.Diff(data2)
-	for _, i := range [][]string{
+	for _, i := range [][]interface{}{
 		{pos.Name, "somethingelse"},
+		{len(pos.Versions), 0},
 		{neg.Name, "something"},
+		{len(neg.Versions), 0},
 	} {
 		if i[0] != i[1] {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])
 		}
 	}
-	if len(pos.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(pos.Versions))
-	}
-	if len(neg.Versions) != 0 {
-		t.Fatalf("Expected 0 versions, got: %v", len(neg.Versions))
-	}
 }
 
-func Test_CDiff_4_NewVersions(t *testing.T) {
+func TestCookbookDiffNewVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["9.9.9"] = &CookbookVersion{Version: "9.9.9"}
@@ -202,29 +200,29 @@ func Test_CDiff_4_NewVersions(t *testing.T) {
 	if neg != nil {
 		t.Fatalf("Expected nil, got: %v", neg)
 	}
-	for _, i := range [][]string{
+	for _, i := range [][]interface{}{
 		{pos.Name, ""},
+		{len(pos.Versions), 1},
 		{pos.Versions["9.9.9"].Version, "9.9.9"},
 	} {
 		if i[0] != i[1] {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])
 		}
 	}
-	if len(pos.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(pos.Versions))
-	}
 }
 
-func Test_CDiff_5_ChangedVersion(t *testing.T) {
+func TestCookbookDiffChangedVersion(t *testing.T) {
 	data1 := cdata()
 	data2 := cdata()
 	data2.Versions["0.1.0"].LocationType = "elsewhere"
 	pos, neg := data1.Diff(data2)
-	for _, i := range [][]string{
+	for _, i := range [][]interface{}{
 		{pos.Name, ""},
+		{len(pos.Versions), 1},
 		{pos.Versions["0.1.0"].LocationType, "elsewhere"},
 		{pos.Versions["0.1.0"].LocationPath, ""},
 		{neg.Name, ""},
+		{len(neg.Versions), 1},
 		{neg.Versions["0.1.0"].LocationType, "opscode"},
 		{neg.Versions["0.1.0"].LocationPath, ""},
 	} {
@@ -232,31 +230,23 @@ func Test_CDiff_5_ChangedVersion(t *testing.T) {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])
 		}
 	}
-	if len(pos.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(pos.Versions))
-	}
-	if len(neg.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(neg.Versions))
-	}
 }
 
-func Test_CDiff_6_RemovedVersions(t *testing.T) {
+func TestCookbookDiffRemovedVersions(t *testing.T) {
 	data1 := cdata()
 	data2 := &Cookbook{Name: "something"}
 	pos, neg := data1.Diff(data2)
 	if pos != nil {
 		t.Fatalf("Expected nil, got: %v", pos)
 	}
-	for _, i := range [][]string{
+	for _, i := range [][]interface{}{
 		{neg.Name, ""},
+		{len(neg.Versions), 1},
 		{neg.Versions["0.1.0"].LocationType, "opscode"},
 		{neg.Versions["0.1.0"].LocationPath, "https://example1.com"},
 	} {
 		if i[0] != i[1] {
 			t.Fatalf("Expected %v, got: %v", i[1], i[0])
 		}
-	}
-	if len(neg.Versions) != 1 {
-		t.Fatalf("Expected 1 versions, got: %v", len(neg.Versions))
 	}
 }

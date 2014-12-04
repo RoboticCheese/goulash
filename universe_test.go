@@ -83,40 +83,38 @@ func TestNewUniverseNoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
-	if len(u.Cookbooks) != 2 {
-		t.Fatalf("Expected 2 cookbooks, got: %v", len(u.Cookbooks))
-	}
-	for k, v := range map[string]string{
-		u.Endpoint:                                                              ts.URL + "/universe",
-		u.Cookbooks["chef"].Name:                                                "chef",
-		u.Cookbooks["chef"].Versions["0.12.0"].Version:                          "0.12.0",
-		u.Cookbooks["chef"].Versions["0.12.0"].LocationType:                     "opscode",
-		u.Cookbooks["chef"].Versions["0.12.0"].LocationPath:                     "https://supermarket.getchf.com/api/v1",
-		u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL:                      "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download",
-		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["runit"]:            ">= 0.0.0",
-		u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["couchdb"]:          ">= 0.0.0",
-		u.Cookbooks["chef"].Versions["0.20.0"].Version:                          "0.20.0",
-		u.Cookbooks["chef"].Versions["0.20.0"].LocationType:                     "opscode",
-		u.Cookbooks["chef"].Versions["0.20.0"].LocationPath:                     "https://supermarket.chef.io/api/v1",
-		u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL:                      "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.20.0/download",
-		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["zlib"]:             ">= 0.0.0",
-		u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["xml"]:              ">= 0.0.0",
-		u.Cookbooks["djbdns"].Name:                                              "djbdns",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].Version:                         "0.7.0",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationType:                    "opscode",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath:                    "https://supermarket.chef.io/api/v1",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL:                     "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.7.0/download",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["runit"]:           ">= 0.0.0",
-		u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["build-essential"]: ">= 0.0.0",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].Version:                         "0.8.2",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationType:                    "opscode",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath:                    "https://supermarket.chef.io/api/v1",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL:                     "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.8.2/download",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["runit"]:           ">= 0.0.0",
-		u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["build-essential"]: ">= 0.0.0",
+	for _, i := range [][]interface{}{
+		{len(u.Cookbooks), 2},
+		{u.Endpoint, ts.URL + "/universe"},
+		{u.Cookbooks["chef"].Name, "chef"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].Version, "0.12.0"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationType, "opscode"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].DownloadURL, "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.12.0/download"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["runit"], ">= 0.0.0"},
+		{u.Cookbooks["chef"].Versions["0.12.0"].Dependencies["couchdb"], ">= 0.0.0"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].Version, "0.20.0"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].LocationType, "opscode"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].DownloadURL, "https://supermarket.chef.io/api/v1/cookbooks/chef/versions/0.20.0/download"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["zlib"], ">= 0.0.0"},
+		{u.Cookbooks["chef"].Versions["0.20.0"].Dependencies["xml"], ">= 0.0.0"},
+		{u.Cookbooks["djbdns"].Name, "djbdns"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].Version, "0.7.0"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].LocationType, "opscode"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].DownloadURL, "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.7.0/download"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["runit"], ">= 0.0.0"},
+		{u.Cookbooks["djbdns"].Versions["0.7.0"].Dependencies["build-essential"], ">= 0.0.0"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].Version, "0.8.2"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].LocationType, "opscode"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].LocationPath, "https://supermarket.chef.io/api/v1"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].DownloadURL, "https://supermarket.chef.io/api/v1/cookbooks/djbdns/versions/0.8.2/download"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["runit"], ">= 0.0.0"},
+		{u.Cookbooks["djbdns"].Versions["0.8.2"].Dependencies["build-essential"], ">= 0.0.0"},
 	} {
-		if k != v {
-			t.Fatalf("Expected: %v, got: %v", v, k)
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
 		}
 	}
 }
@@ -152,16 +150,16 @@ func TestNewUniverseRealData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
-	for k, v := range map[string]string{
-		u.Cookbooks["chef-dk"].Name:                                  "chef-dk",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].Version:             "2.0.0",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationType:        "opscode",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationPath:        "https://supermarket.chef.io/api/v1",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].DownloadURL:         "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download",
-		u.Cookbooks["chef-dk"].Versions["2.0.0"].Dependencies["dmg"]: "~> 2.2",
+	for _, i := range [][]string{
+		{u.Cookbooks["chef-dk"].Name, "chef-dk"},
+		{u.Cookbooks["chef-dk"].Versions["2.0.0"].Version, "2.0.0"},
+		{u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationType, "opscode"},
+		{u.Cookbooks["chef-dk"].Versions["2.0.0"].LocationPath, "https://supermarket.chef.io/api/v1"},
+		{u.Cookbooks["chef-dk"].Versions["2.0.0"].DownloadURL, "https://supermarket.chef.io/api/v1/cookbooks/chef-dk/versions/2.0.0/download"},
+		{u.Cookbooks["chef-dk"].Versions["2.0.0"].Dependencies["dmg"], "~> 2.2"},
 	} {
-		if k != v {
-			t.Fatalf("Expected: %v, got: %v", v, k)
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
 		}
 	}
 }
@@ -373,30 +371,18 @@ func TestUniverseUpdateNewVersionReleased(t *testing.T) {
 	if neg != nil {
 		t.Fatalf("Expected nil, got: %v", neg)
 	}
-	if len(pos.Cookbooks) != 1 {
-		t.Fatalf("Expected 1 cookbook, got: %v", len(pos.Cookbooks))
-	}
-	chk := pos.Cookbooks["chef"].Versions["9.9.9"]
-	if chk == nil {
-		t.Fatalf("Expected non-nil, got: %v", chk)
-	}
-	if chk.LocationType != "opsplode" {
-		t.Fatalf("Expected 'opsplode', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
-	}
-	chk = u.Cookbooks["chef"].Versions["9.9.9"]
-	if chk == nil {
-		t.Fatalf("Expected non-nil, got: %v", chk)
-	}
-	if chk.LocationType != "opsplode" {
-		t.Fatalf("Expected 'opsplode', got: %v", chk.LocationType)
-	}
-	if chk.LocationPath != "https://example.com" {
-		t.Fatalf("Expected 'https://example.com', got: %v",
-			chk.LocationPath)
+	chkpos := pos.Cookbooks["chef"].Versions["9.9.9"]
+	chku := u.Cookbooks["chef"].Versions["9.9.9"]
+	for _, i := range [][]interface{}{
+		{len(pos.Cookbooks), 1},
+		{chkpos.LocationType, "opsplode"},
+		{chkpos.LocationPath, "https://example.com"},
+		{chku.LocationType, "opsplode"},
+		{chku.LocationPath, "https://example.com"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -527,15 +513,16 @@ func TestUniverseDiffAddedCookbook(t *testing.T) {
 		},
 	}
 	pos, neg := data1.Diff(data2)
-	if len(pos.Cookbooks) != 1 {
-		t.Fatalf("Expected 1 cookbook, got: %v", len(pos.Cookbooks))
-	}
-	if pos.Cookbooks["nginx"].Versions["0.1.0"].LocationType != "somewhere" {
-		t.Fatalf("Expected 'somewhere', got: %v",
-			pos.Cookbooks["nginx"].Versions["0.1.0"].LocationType)
-	}
 	if neg != nil {
 		t.Fatalf("Expected nil, got: %v", neg)
+	}
+	for _, i := range [][]interface{}{
+		{len(pos.Cookbooks), 1},
+		{pos.Cookbooks["nginx"].Versions["0.1.0"].LocationType, "somewhere"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -547,12 +534,13 @@ func TestUniverseDiffDeletedCookbook(t *testing.T) {
 	if pos != nil {
 		t.Fatalf("Expected nil, got: %v", pos)
 	}
-	if len(neg.Cookbooks) != 1 {
-		t.Fatalf("Expected 1 cookbook, got: %v", len(neg.Cookbooks))
-	}
-	if neg.Cookbooks["test1"].Versions["0.1.0"].LocationType != "opscode" {
-		t.Fatalf("Expected 'somewhere', got: %v",
-			neg.Cookbooks["test1"].Versions["0.1.0"].LocationType)
+	for _, i := range [][]interface{}{
+		{len(neg.Cookbooks), 1},
+		{neg.Cookbooks["test1"].Versions["0.1.0"].LocationType, "opscode"},
+	} {
+		if i[0] != i[1] {
+			t.Fatalf("Expected: %v, got: %v", i[1], i[0])
+		}
 	}
 }
 
@@ -561,14 +549,10 @@ func TestUniverseDiffUpdatedCookbook(t *testing.T) {
 	data2 := udata()
 	data2.Cookbooks["test1"].Versions["0.1.0"].LocationType = "elsewhere"
 	pos, neg := data1.Diff(data2)
-	if len(pos.Cookbooks) != 1 {
-		t.Fatalf("Expected 1 cookbook, got: %v", len(pos.Cookbooks))
-	}
-	if len(neg.Cookbooks) != 1 {
-		t.Fatalf("Expected 1 cookbook, got: %v", len(neg.Cookbooks))
-	}
-	for _, i := range [][]string{
+	for _, i := range [][]interface{}{
+		{len(pos.Cookbooks), 1},
 		{pos.Cookbooks["test1"].Versions["0.1.0"].LocationType, "elsewhere"},
+		{len(neg.Cookbooks), 1},
 		{neg.Cookbooks["test1"].Versions["0.1.0"].LocationType, "opscode"},
 	} {
 		if i[0] != i[1] {
